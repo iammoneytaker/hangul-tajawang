@@ -15,8 +15,10 @@ export class SupabaseService {
       provider: 'kakao',
       options: {
         scopes: SCOPES,
+        // 모바일에서 팝업이 바로 사라지는 버그 대응: 
+        // 1. redirectTo를 현재 페이지로 명시
+        // 2. prompt를 login으로 설정하여 세션 꼬임 방지
         redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
-        // 강제로 카카오 로그인 창(아이디/비번 입력)을 띄우고 싶을 때 추가
         queryParams: {
           prompt: 'login'
         }
@@ -30,7 +32,7 @@ export class SupabaseService {
     return data;
   }
 
-  // 앱(Flutter)과 동일한 토큰 방식 (필요시 사용)
+  // 앱(Flutter)과 동일한 토큰 방식
   static async signInWithKakaoToken(idToken: string, accessToken: string) {
     console.log("토큰 방식 로그인 시도...");
     const { data, error } = await supabase.auth.signInWithIdToken({
@@ -128,6 +130,27 @@ export class SupabaseService {
       await supabase.from('likes').delete().match({ user_id: user.id, content_id: contentId });
     } else {
       await supabase.from('likes').insert({ user_id: user.id, content_id: contentId });
+    }
+  }
+
+  // --- Results ---
+  static async saveResult(contentId: string, speed: number, accuracy: number, elapsedSeconds: number) {
+    const user = await this.getCurrentUser();
+    if (!user) {
+        console.warn("No user found, result not saved to DB.");
+        return;
+    }
+
+    const { error } = await supabase.from('typing_results').insert({
+      user_id: user.id,
+      content_id: contentId,
+      speed,
+      accuracy,
+      elapsed_seconds: elapsedSeconds,
+    });
+    
+    if (error) {
+        console.error("Error saving result:", error);
     }
   }
 
