@@ -8,19 +8,31 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export class SupabaseService {
   // --- Auth ---
   static async signInWithKakao() {
+    console.log("로그인 시도 시작: Supabase OAuth (Kakao)");
+    const SCOPES = 'account_email profile_nickname profile_image';
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        // 이메일만 받고 싶더라도 Supabase 내부 연동을 위해 닉네임 권한은 카카오 설정에서 허용되어야 합니다.
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined,
+        scopes: SCOPES,
+        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
+        // 강제로 카카오 로그인 창(아이디/비번 입력)을 띄우고 싶을 때 추가
+        queryParams: {
+          prompt: 'login'
+        }
       },
     });
-    if (error) throw error;
+
+    if (error) {
+      console.error("Supabase OAuth 에러 발생:", error);
+      throw error;
+    }
     return data;
   }
 
-  // 앱(Flutter) 연동을 위해 남겨둠
+  // 앱(Flutter)과 동일한 토큰 방식 (필요시 사용)
   static async signInWithKakaoToken(idToken: string, accessToken: string) {
+    console.log("토큰 방식 로그인 시도...");
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'kakao',
       token: idToken,
@@ -36,7 +48,8 @@ export class SupabaseService {
   }
 
   static async getCurrentUser() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) return null;
     return user;
   }
 
@@ -118,17 +131,12 @@ export class SupabaseService {
     }
   }
 
-  // --- Results ---
-  static async saveResult(contentId: string, speed: number, accuracy: number, elapsedSeconds: number) {
-    const user = await this.getCurrentUser();
-    if (!user) return;
-
-    await supabase.from('typing_results').insert({
-      user_id: user.id,
-      content_id: contentId,
-      speed,
-      accuracy,
-      elapsed_seconds: elapsedSeconds,
+  // --- Feedback ---
+  static async sendFeedback(email: string, message: string) {
+    const { error } = await supabase.from('feedbacks').insert({
+      email: email || '익명',
+      message: message,
     });
+    if (error) throw error;
   }
 }

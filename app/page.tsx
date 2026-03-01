@@ -9,7 +9,8 @@ import { LongPractice } from "@/components/long-practice/LongPractice";
 import { WordGame } from "@/components/game/WordGame";
 import { OpenChallenge } from "@/components/challenge/OpenChallenge";
 import { SpellingQuiz } from "@/components/quiz/SpellingQuiz";
-import { Layout, PenTool, Gamepad2, Users, ChevronRight, BookOpenCheck, Keyboard } from "lucide-react";
+import { BetaFeedback } from "@/components/BetaFeedback";
+import { Layout, PenTool, Gamepad2, Users, ChevronRight, BookOpenCheck, Keyboard, AlertTriangle } from "lucide-react";
 
 type Mode = "home" | "position" | "word" | "short" | "long" | "game" | "challenge" | "quiz";
 
@@ -36,18 +37,6 @@ export default function Home() {
       case "long":
         return (
           <div className="w-full py-8">
-            <div className="flex justify-between items-center max-w-5xl mx-auto mb-8 px-4">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <PenTool className="text-blue-600" /> 감성 필사
-              </h2>
-              <div className="flex gap-2">
-                <select className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-sm shadow-sm outline-hidden">
-                  <option>한지 질감</option>
-                  <option>크라프트지</option>
-                  <option>모눈종이</option>
-                </select>
-              </div>
-            </div>
             <div className="flex justify-center">
               <LongPractice />
             </div>
@@ -60,7 +49,19 @@ export default function Home() {
       case "challenge":
         return <OpenChallenge />;
       default:
-        return <HeroSection onStart={() => setMode("word")} />;
+        return (
+          <>
+            <div className="w-full bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-900/30 py-3">
+              <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-yellow-700 dark:text-yellow-400 text-sm font-bold">
+                <AlertTriangle size={16} />
+                <span>현재 오픈 베타 버전으로 일부 기능이 정상 작동하지 않을 수 있습니다.</span>
+              </div>
+            </div>
+            {/* 제안하기를 화면 상단으로 이동 */}
+            <BetaFeedback />
+            <HeroSection onStart={() => setMode("position")} />
+          </>
+        );
     }
   };
 
@@ -113,7 +114,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
         </span>
-        한글타자왕 웹 버전 정식 출시!
+        한글타자왕 웹 버전 오픈 베타 진행 중
       </div>
       
       <h1 className="text-5xl md:text-7xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 mb-8 leading-tight">
