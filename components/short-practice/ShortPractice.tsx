@@ -9,19 +9,16 @@ export const ShortPractice: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState("전체");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
-  const [totalKeystrokes, setTotalKeystrokes] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isFlying, setIsFlying] = useState(false);
   const [lastReport, setReport] = useState<TypingReport | null>(null);
   
-  // 셔플된 문장들을 관리하는 상태
   const [shuffledSentences, setShuffledSentences] = useState<string[]>([]);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 카테고리 변경 시 데이터 셔플 로직
   useEffect(() => {
     let baseData: string[] = [];
     if (activeCategory === "전체") {
@@ -31,7 +28,6 @@ export const ShortPractice: React.FC = () => {
       baseData = found ? [...found.sentences] : [...SHORT_TEXT_DB[0].sentences];
     }
     
-    // 무작위 셔플 (Fisher-Yates 알고리즘 스타일)
     const shuffled = baseData.sort(() => Math.random() - 0.5);
     setShuffledSentences(shuffled);
     resetState();
@@ -41,71 +37,77 @@ export const ShortPractice: React.FC = () => {
   const targetSentence = shuffledSentences[currentIndex] || "";
   const targetNorm = useMemo(() => TypingUtils.normalize(targetSentence), [targetSentence]);
 
+  // 실시간 타이머 및 타수 계산 (0.1초 단위)
   useEffect(() => {
     if (startTime && !isFlying) {
       timerRef.current = setInterval(() => {
-        setElapsedSeconds((Date.now() - startTime) / 1000);
+        const now = Date.now();
+        const diff = (now - startTime) / 1000;
+        setElapsedSeconds(diff);
+        
+        // 시간 흐름에 따른 타수 실시간 업데이트
+        if (diff > 0.2) {
+            const currentStrokes = TypingUtils.getStrokeCount(inputValue);
+            const liveKPM = Math.round((currentStrokes / diff) * 60);
+            const currentAccuracy = TypingUtils.calculateAccuracy(
+                TypingUtils.normalize(inputValue).split('').filter((char, i) => char === targetNorm[i]).length,
+                inputValue.length
+            );
+            
+            setReport(prev => ({
+                ...(prev || {}),
+                kpm: liveKPM,
+                accuracy: currentAccuracy,
+                elapsedSeconds: Math.round(diff)
+            } as any));
+        }
       }, 100);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [startTime, isFlying]);
+  }, [startTime, isFlying, inputValue, targetNorm]);
 
   const resetState = () => {
     setInputValue("");
-    setTotalKeystrokes(0);
     setStartTime(null);
     setElapsedSeconds(0);
     setIsFlying(false);
     setCurrentIndex(0);
+    setReport(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     if (isFlying || !targetSentence) return;
 
-    const diff = Math.abs(newValue.length - inputValue.length);
-    setTotalKeystrokes(prev => prev + diff);
-    
     if (!startTime && newValue.length > 0) {
       setStartTime(Date.now());
     }
 
     setInputValue(newValue);
 
-    const currentReport = TypingUtils.generateReport(
-        targetSentence,
-        newValue,
-        totalKeystrokes + diff,
-        elapsedSeconds || 0.1
-    );
+    // 즉시 지표 계산
+    const nowElapsed = startTime ? (Date.now() - startTime) / 1000 : 0.1;
+    const currentReport = TypingUtils.generateReport(targetSentence, newValue, 0, nowElapsed);
     setReport(currentReport);
 
     const typedNorm = TypingUtils.normalize(newValue);
     if (typedNorm.length >= targetNorm.length && 
         typedNorm.charAt(typedNorm.length - 1) === targetNorm.charAt(targetNorm.length - 1)) {
-      handleComplete(newValue, totalKeystrokes + diff);
+      handleComplete(newValue, nowElapsed);
     }
   };
 
-  const handleComplete = (finalValue: string, finalKeystrokes: number) => {
+  const handleComplete = (finalValue: string, finalElapsed: number) => {
     setIsFlying(true);
-    const finalElapsed = (Date.now() - (startTime || Date.now())) / 1000;
-    
-    const finalReport = TypingUtils.generateReport(
-      targetSentence,
-      finalValue,
-      finalKeystrokes,
-      finalElapsed
-    );
+    const finalReport = TypingUtils.generateReport(targetSentence, finalValue, 0, finalElapsed);
     setReport(finalReport);
 
     setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % shuffledSentences.length);
       setInputValue("");
       setStartTime(null);
-      setTotalKeystrokes(0);
       setElapsedSeconds(0);
       setIsFlying(false);
     }, 600);
@@ -135,11 +137,7 @@ export const ShortPractice: React.FC = () => {
         }
       }
 
-      return (
-        <span key={i} className={`${color} ${bg} ${deco} transition-colors duration-100`}>
-          {char}
-        </span>
-      );
+      return <span key={i} className={`${color} ${bg} ${deco} transition-colors duration-100`}>{char}</span>;
     });
   };
 
@@ -147,18 +145,12 @@ export const ShortPractice: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-[70vh] w-full max-w-4xl mx-auto p-4 overflow-hidden">
       <div className="flex flex-wrap justify-center gap-2 mb-12 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md p-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
         {SHORT_TEXT_CATEGORIES.map(cat => (
-            <button 
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-xl text-xs font-black transition-all ${activeCategory === cat ? 'bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 shadow-lg' : 'text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}
-            >
-                {cat}
-            </button>
+            <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-5 py-2 rounded-xl text-xs font-black transition-all ${activeCategory === cat ? 'bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 shadow-lg' : 'text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}>{cat}</button>
         ))}
       </div>
 
       <div className="mb-12 flex flex-wrap justify-center gap-6">
-        <MetricBadge icon={<Zap size={14}/>} label="현재 타수" value={lastReport?.grossSpeed || 0} unit="타" color="text-blue-600" />
+        <MetricBadge icon={<Zap size={14}/>} label="현재 타수" value={lastReport?.kpm || 0} unit="타" color="text-blue-600" />
         <MetricBadge icon={<Target size={14}/>} label="정확도" value={lastReport?.accuracy || 0} unit="%" color="text-green-600" />
         <MetricBadge icon={<Clock size={14}/>} label="진행" value={`${currentIndex + 1}/${shuffledSentences.length}`} unit="" color="text-purple-600" />
       </div>
@@ -166,9 +158,7 @@ export const ShortPractice: React.FC = () => {
       <div className={`relative w-full max-w-2xl transition-all duration-500 transform ${isFlying ? 'translate-x-[120%] -translate-y-32 rotate-12 opacity-0' : 'translate-x-0 opacity-100'}`}>
         <div className="w-full bg-[#fffceb] dark:bg-zinc-900 shadow-2xl p-10 md:p-16 flex flex-col justify-center items-center text-center rounded-sm border-l-[12px] border-[#fdf3b8] dark:border-blue-900/50 rotate-[-0.5deg] relative">
           <div className="absolute top-6 left-1/2 -translate-x-1/2 w-32 h-10 bg-black/5 rounded-full blur-xl"></div>
-          <div className="text-3xl md:text-4xl leading-relaxed font-serif select-none mb-4">
-            {renderHighlightedText()}
-          </div>
+          <div className="text-3xl md:text-4xl leading-relaxed font-serif select-none mb-4">{renderHighlightedText()}</div>
           <div className="h-1 w-24 bg-yellow-200/50 dark:bg-blue-900/20 rounded-full mt-8"></div>
         </div>
       </div>
@@ -191,15 +181,10 @@ export const ShortPractice: React.FC = () => {
                 ></div>
             </div>
         </div>
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-200 dark:text-zinc-700">
-            <Keyboard size={32} />
-        </div>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-200 dark:text-zinc-700"><Keyboard size={32} /></div>
       </div>
       
-      <div className="mt-24 text-zinc-400 text-sm font-bold flex items-center gap-3 animate-pulse">
-        <Keyboard size={18} />
-        <span>문장을 끝까지 입력하면 다음 카드로 넘어갑니다.</span>
-      </div>
+      <div className="mt-24 text-zinc-400 text-sm font-bold flex items-center gap-3 animate-pulse"><Keyboard size={18} /><span>문장을 끝까지 입력하면 다음 카드로 넘어갑니다.</span></div>
     </div>
   );
 };
