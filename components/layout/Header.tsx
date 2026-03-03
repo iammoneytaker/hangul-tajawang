@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { Volume2, VolumeX, Moon, Sun, User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Settings } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 
-export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onModeChange }) => {
+export const Header: React.FC = () => {
   const [asmr, setAsmr] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -58,18 +60,18 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
     <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
       <div className="container mx-auto max-w-7xl h-16 flex items-center justify-between px-4 lg:px-8">
         {/* Left: Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => onModeChange("home")}>
+        <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-xl">한</div>
           <span className="hidden sm:block text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">한글타자왕 <span className="text-blue-600">Web</span></span>
-        </div>
+        </Link>
 
         {/* Center: GNB */}
         <nav className="hidden md:flex items-center gap-1">
-          <NavButton icon={<Layout size={18} />} label="타자 연습장" onClick={() => onModeChange("position")} />
-          <NavButton icon={<PenTool size={18} />} label="긴 글 연습" onClick={() => onModeChange("long")} />
-          <NavButton icon={<Gamepad2 size={18} />} label="아케이드" onClick={() => onModeChange("game")} />
-          <NavButton icon={<BookOpenCheck size={18} />} label="맞춤법 퀴즈" onClick={() => onModeChange("quiz")} />
-          <NavButton icon={<Users size={18} />} label="오픈 챌린지" onClick={() => onModeChange("challenge")} />
+          <NavButton icon={<Layout size={18} />} label="타자 연습장" href="/practice" />
+          <NavButton icon={<PenTool size={18} />} label="긴 글 연습" href="/transcription" />
+          <NavButton icon={<Gamepad2 size={18} />} label="아케이드" href="/game" />
+          <NavButton icon={<BookOpenCheck size={18} />} label="맞춤법 퀴즈" href="/quiz" />
+          <NavButton icon={<Users size={18} />} label="오픈 챌린지" href="/challenge" />
         </nav>
 
         {/* Right: Actions */}
@@ -83,19 +85,25 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
           
           {user ? (
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => onModeChange("mypage")}
+              <Link 
+                href="/mypage"
                 className="flex items-center gap-2 p-1 pr-4 bg-zinc-100 dark:bg-zinc-800 rounded-full hover:bg-zinc-200 transition-all group"
               >
                 {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover border border-white dark:border-zinc-700 shadow-sm" />
+                    <Image 
+                        src={profile.avatar_url} 
+                        alt="프로필 이미지" 
+                        width={32} 
+                        height={32} 
+                        className="w-8 h-8 rounded-full object-cover aspect-square border border-white dark:border-zinc-700 shadow-sm" 
+                    />
                 ) : (
                     <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs border border-white dark:border-zinc-700">
                         {profile?.nickname?.[0] || 'U'}
                     </div>
                 )}
                 <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 transition-colors">마이페이지</span>
-              </button>
+              </Link>
               
               <button onClick={handleLogout} className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="로그아웃">
                 <LogOut size={20} />
@@ -119,11 +127,11 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
   );
 };
 
-function NavButton({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function NavButton({ icon, label, href }: { icon: React.ReactNode; label: string; href: string }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg font-medium transition-all">
+    <Link href={href} className="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg font-medium transition-all">
       {icon}
       <span>{label}</span>
-    </button>
+    </Link>
   );
 }

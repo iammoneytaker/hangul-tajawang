@@ -38,6 +38,12 @@ export class SupabaseService {
     return data;
   }
 
+  static async getAuthorProfile(authorId: string) {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', authorId).single();
+    if (error) throw error;
+    return data;
+  }
+
   static async updateProfile(updates: { nickname?: string; avatar_url?: string }) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인이 필요합니다.');
@@ -48,36 +54,34 @@ export class SupabaseService {
     }).eq('id', user.id);
     if (error) throw error;
   }
-// --- Results ---
-static async saveResult(contentId: string, speed: number, accuracy: number, elapsedSeconds: number) {
-  const user = await this.getCurrentUser();
-  if (!user) return;
 
-  try {
-    // 1. 결과 저장
-    await supabase.from('typing_results').insert({
-      user_id: user.id,
-      content_id: contentId,
-      speed: speed,
-      accuracy: accuracy,
-      elapsed_seconds: elapsedSeconds,
-    });
+  // --- Results ---
+  static async saveResult(contentId: string, speed: number, accuracy: number, elapsedSeconds: number) {
+    const user = await this.getCurrentUser();
+    if (!user) return;
 
-    // 2. 최고 기록 갱신 (명시적 비교 및 업데이트)
-    const { data: profile } = await supabase.from('profiles').select('best_speed').eq('id', user.id).single();
-    const currentBest = profile?.best_speed || 0;
+    try {
+      await supabase.from('typing_results').insert({
+        user_id: user.id,
+        content_id: contentId,
+        speed: speed,
+        accuracy: accuracy,
+        elapsed_seconds: elapsedSeconds,
+      });
 
-    if (speed > currentBest) {
-      await supabase.from('profiles').update({
-        best_speed: speed,
-        updated_at: new Date().toISOString()
-      }).eq('id', user.id);
-      console.log(`최고 타수 갱신 완료: ${currentBest} -> ${speed}`);
+      const { data: profile } = await supabase.from('profiles').select('best_speed').eq('id', user.id).single();
+      const currentBest = profile?.best_speed || 0;
+
+      if (speed > currentBest) {
+        await supabase.from('profiles').update({
+          best_speed: speed,
+          updated_at: new Date().toISOString()
+        }).eq('id', user.id);
+      }
+    } catch (error) {
+      console.error("기록 저장 중 오류:", error);
     }
-  } catch (error) {
-    console.error("기록 저장 중 오류:", error);
   }
-}
 
   static async getMyResults() {
     const user = await this.getCurrentUser();
@@ -130,13 +134,11 @@ static async saveResult(contentId: string, speed: number, accuracy: number, elap
     return processed.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
-  static async getMyContents() {
-    const user = await this.getCurrentUser();
-    if (!user) return [];
+  static async getAuthorContents(authorId: string) {
     const { data, error } = await supabase
       .from('typing_contents')
       .select('*, typing_results(user_id), typing_comments(id)')
-      .eq('author_id', user.id)
+      .eq('author_id', authorId)
       .order('created_at', { ascending: false });
     if (error) throw error;
     
@@ -145,6 +147,12 @@ static async saveResult(contentId: string, speed: number, accuracy: number, elap
       unique_complete_count: new Set(item.typing_results?.map((r: any) => r.user_id)).size,
       comment_count: item.typing_comments?.length || 0
     }));
+  }
+
+  static async getMyContents() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+    return this.getAuthorContents(user.id);
   }
 
   static async getLikedContents() {
@@ -192,8 +200,6 @@ static async saveResult(contentId: string, speed: number, accuracy: number, elap
   static async deleteContent(contentId: string) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인이 필요합니다.');
-    // Cascade delete should handle likes/comments/results if configured, 
-    // but manually deleting for safety if needed.
     const { error } = await supabase.from('typing_contents').delete().eq('id', contentId).eq('author_id', user.id);
     if (error) throw error;
   }
@@ -251,7 +257,6 @@ static async saveResult(contentId: string, speed: number, accuracy: number, elap
   }
 
   static async reportContent(contentId: string) {
-    // RPC increment_counter usage matches DB definition
     await supabase.rpc('increment_counter', {
       t_name: 'typing_contents',
       c_name: 'report_count',

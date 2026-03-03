@@ -1,130 +1,17 @@
-"use client";
-
-import React, { useState } from "react";
-import Link from "next/link";
-import { Header } from "@/components/layout/Header";
-import { WordPractice } from "@/components/word-practice/WordPractice";
-import { ShortPractice } from "@/components/short-practice/ShortPractice";
-import { PositionPractice } from "@/components/word-practice/PositionPractice";
-import { LongPractice } from "@/components/long-practice/LongPractice";
-import { WordGame } from "@/components/game/WordGame";
-import { OpenChallenge } from "@/components/challenge/OpenChallenge";
-import { SpellingQuiz } from "@/components/quiz/SpellingQuiz";
-import { MyPage } from "@/components/layout/MyPage";
 import { BetaFeedback } from "@/components/BetaFeedback";
-import { Layout, PenTool, Gamepad2, Users, ChevronRight, BookOpenCheck, Keyboard, AlertTriangle } from "lucide-react";
-
-type Mode = "home" | "position" | "word" | "short" | "long" | "game" | "challenge" | "quiz" | "mypage";
+import { Layout, PenTool, Gamepad2, Users, ChevronRight, BookOpenCheck } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
-  const [mode, setMode] = useState<Mode>("home");
-  const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
-
-  const handleModeChange = (newMode: Mode) => {
-    setMode(newMode);
-    // 헤더에서 직접 'long'을 누를 때만 선택된 챌린지를 초기화 (기본글로 연습하게 함)
-    if (newMode === 'long') {
-      setSelectedChallenge(null);
-    }
-  };
-
-  const handleStartChallenge = (content: any) => {
-    setSelectedChallenge(content);
-    setMode("long");
-  };
-
-  const renderContent = () => {
-    switch (mode) {
-      case "position":
-      case "word":
-      case "short":
-        return (
-          <div className="w-full max-w-5xl mx-auto py-8">
-            <div className="flex flex-wrap justify-center gap-2 mb-16 bg-white dark:bg-zinc-900 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-fit mx-auto shadow-sm">
-              <TabButton active={mode === "position"} icon={<Keyboard size={16}/>} label="자리 연습" onClick={() => { setMode("position"); setSelectedChallenge(null); }} />
-              <TabButton active={mode === "word"} icon={<Layout size={16}/>} label="낱말 연습" onClick={() => { setMode("word"); setSelectedChallenge(null); }} />
-              <TabButton active={mode === "short"} icon={<PenTool size={16}/>} label="짧은 글 연습" onClick={() => { setMode("short"); setSelectedChallenge(null); }} />
-            </div>
-            {mode === "position" && <PositionPractice />}
-            {mode === "word" && <WordPractice />}
-            {mode === "short" && <ShortPractice />}
-          </div>
-        );
-      case "long":
-        return (
-          <div className="w-full py-8">
-            <div className="flex justify-center">
-              <LongPractice externalContent={selectedChallenge} />
-            </div>
-          </div>
-        );
-      case "game":
-        return <div className="py-8 flex flex-col items-center"><WordGame /></div>;
-      case "quiz":
-        return <SpellingQuiz />;
-      case "challenge":
-        return <OpenChallenge onStartChallenge={handleStartChallenge} />;
-      case "mypage":
-        return <MyPage onStartChallenge={handleStartChallenge} />;
-      default:
-        return (
-          <>
-            <div className="w-full bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-900/30 py-3">
-              <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-yellow-700 dark:text-yellow-400 text-xs font-bold">
-                <AlertTriangle size={16} />
-                <span>현재 오픈 베타 버전으로 일부 기능이 정상 작동하지 않을 수 있습니다.</span>
-              </div>
-            </div>
-            {/* 제안하기를 화면 상단으로 이동 */}
-            <BetaFeedback />
-            <HeroSection onStart={() => setMode("position")} />
-          </>
-        );
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#f8f9fa] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans selection:bg-blue-100 selection:text-blue-700">
-      <Header onModeChange={handleModeChange} />
-      
-      <main className="min-h-[calc(100-4rem)]">
-        {renderContent()}
-      </main>
-      
-      <footer className="py-12 text-sm text-zinc-400 w-full text-center border-t border-zinc-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 mt-24">
-        <div className="container mx-auto max-w-7xl px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-zinc-200 dark:bg-zinc-800 rounded flex items-center justify-center text-xs font-bold text-zinc-500">한</div>
-            <span>© 2026 한글타자왕 Web Edition.</span>
-          </div>
-          <div className="flex gap-6">
-            <Link href="/terms" className="hover:text-zinc-600 transition-colors">이용약관</Link>
-            <Link href="/privacy" className="hover:text-zinc-600 transition-colors">개인정보처리방침</Link>
-            <Link href="/contact" className="hover:text-zinc-600 transition-colors">문의하기</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    <>
+      <HeroSection />
+      <BetaFeedback />
+    </>
   );
 }
 
-function TabButton({ active, label, icon, onClick }: { active: boolean; label: string; icon?: React.ReactNode; onClick: () => void }) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 ${
-        active 
-          ? "bg-blue-600 text-white shadow-lg shadow-blue-200" 
-          : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-function HeroSection({ onStart }: { onStart: () => void }) {
+function HeroSection() {
   return (
     <div className="container mx-auto max-w-7xl px-4 lg:px-8 py-24 flex flex-col items-center text-center">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-bold mb-8 animate-fade-in">
@@ -147,15 +34,15 @@ function HeroSection({ onStart }: { onStart: () => void }) {
       
       <div className="flex flex-col items-center gap-6">
         <div className="flex flex-col sm:flex-row gap-4">
-          <button 
-            onClick={onStart}
+          <Link 
+            href="/practice"
             className="group px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-black rounded-2xl shadow-xl shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
           >
             시작하기 <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button className="px-10 py-5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-xl font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
+          </Link>
+          <Link href="/challenge" className="px-10 py-5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-xl font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-center justify-center">
             모드 둘러보기
-          </button>
+          </Link>
         </div>
         <p className="text-sm text-zinc-400 font-medium">
           로그인하면 나의 <span className="text-blue-500 font-bold">최고 타수</span>와 <span className="text-blue-500 font-bold">연습 기록</span>을 관리할 수 있습니다.

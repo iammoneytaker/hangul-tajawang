@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { User, Keyboard, Trophy, Clock, Heart, BookOpen, Trash2, Edit3, Loader2, ChevronRight, Settings, MessageSquare, Play, X, Save } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 
@@ -133,8 +134,15 @@ export const MyPage: React.FC<{ onStartChallenge: (content: any) => void }> = ({
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div className="relative group">
                 {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="avatar" className="w-32 h-32 rounded-[2rem] object-cover shadow-2xl border-4 border-white dark:border-zinc-800" />
+                    <Image 
+                        src={profile.avatar_url} 
+                        alt="프로필 아바타" 
+                        width={128} 
+                        height={128} 
+                        className="w-32 h-32 rounded-[2rem] object-cover aspect-square shadow-2xl border-4 border-white dark:border-zinc-800" 
+                    />
                 ) : (
+
                     <div className="w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] flex items-center justify-center border-4 border-white dark:border-zinc-800 shadow-2xl">
                         <User size={64} className="text-blue-200" />
                     </div>

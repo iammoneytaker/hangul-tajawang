@@ -1,0 +1,217 @@
+class LongTextData {
+  final String id;
+  final String title;
+  final String content;
+  final String category; // 동화, 시, 수필, 칼럼, 소설
+  final String difficulty; // 초급, 중급, 고급
+  final int wordCount;
+  final String author;
+  final String source; // 새로 추가된 출처 필드
+  final bool isPremium;
+
+  LongTextData({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.category,
+    required this.difficulty,
+    required this.wordCount,
+    required this.author,
+    required this.source,
+    this.isPremium = false,
+  });
+}
+
+class LongTextDatabase {
+  static final List<LongTextData> texts = [
+    // 1. 저작권 만료 원문 문학 (시) - 100% 안전
+    LongTextData(
+      id: 'poem_1',
+      title: '별 헤는 밤',
+      content: '''계절이 지나가는 하늘에는
+가을로 가득 차 있습니다.
+
+나는 아무 걱정도 없이
+가을 속의 별들을 다 헤일 듯합니다.
+
+가슴 속에 하나 둘 새겨지는 별을
+이제 다 못 헤는 것은
+쉬이 아침이 오는 까닭이요,
+내일 밤이 남은 까닭이요,
+아직 나의 청춘이 다하지 않은 까닭입니다.''',
+      category: '시',
+      difficulty: '초급',
+      wordCount: 52,
+      author: '윤동주',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+    
+    LongTextData(
+      id: 'poem_2', 
+      title: '진달래꽃',
+      content: '''나 보기가 역겨워
+가실 때에는
+말없이 고이 보내드리리다
+
+영변에 약산
+진달래꽃
+아름 따다 가실 길에 뿌리우리다
+
+가시는 걸음걸음
+놓인 그 꽃을
+사뿐히 즈려밟고 가시옵소서''',
+      category: '시',
+      difficulty: '초급', 
+      wordCount: 33,
+      author: '김소월',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    LongTextData(
+      id: 'poem_3',
+      title: '향수',
+      content: '''넓은 벌 동쪽 끝으로
+옛이야기 지줄대는 실개천이 회돌아 나가고,
+얼룩백이 황소가
+해설피 금빛 게으른 울음을 우는 곳,
+— 그곳이 차마 꿈엔들 잊힐 리야.
+
+질화로에 재가 식어지면
+뷔인 밭에 밤바람 소리 말을 달리고,
+엷은 졸음에 겨운 늙으신 아버지가
+짚베개를 돋아 고이시는 곳,
+— 그곳이 차마 꿈엔들 잊힐 리야.''',
+      category: '시',
+      difficulty: '중급',
+      wordCount: 55,
+      author: '정지용',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    LongTextData(
+      id: 'poem_4',
+      title: '서시',
+      content: '''죽는 날까지 하늘을 우러러
+한 점 부끄럼이 없기를,
+잎새에 이는 바람에도
+나는 괴로워했다.
+
+별을 노래하는 마음으로
+모든 죽어가는 것을 사랑해야지.
+그리고 나한테 주어진 길을
+걸어가야겠다.
+
+오늘 밤에도 별이 바람에 스치운다.''',
+      category: '시',
+      difficulty: '초급',
+      wordCount: 38,
+      author: '윤동주',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    LongTextData(
+      id: 'poem_5',
+      title: '빼앗긴 들에도 봄은 오는가',
+      content: '''지금은 남의 땅 — 빼앗긴 들에도 봄은 오는가?
+
+나는 온몸에 햇살을 받고
+푸른 하늘 푸른 들이 맞붙은 곳으로
+가르마 같은 논길을 따라 꿈 속을 가듯 걸어만 간다.
+
+입술을 다문 하늘아, 들아,
+내 맘에는 내 혼자 온 것 같지를 않구나!
+네가 끌었느냐, 누가 부르더냐. 답답워라, 말을 해 다오.''',
+      category: '시',
+      difficulty: '고급',
+      wordCount: 56,
+      author: '이상화',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    // 2. 저작권 만료 원문 문학 (소설) - 100% 안전
+    LongTextData(
+      id: 'novel_1',
+      title: '메밀꽃 필 무렵 중에서',
+      content: '''길은 지금 긴 산허리에 걸려 있다.
+밤중을 지난 무렵인지 죽은 듯이 고요한 속에서 짐승 같은 달의 숨소리가 손에 잡힐 듯이 들리며,
+콩포기와 옥수수 닢이 한층 달에 푸르게 젖었다.
+
+산허리는 온통 메밀밭이어서
+피기 시작한 꽃이 소금을 뿌린 듯이 흐뭇한 달빛에 숨이 막힐 지경이다.
+붉은 대궁이 향기 같이 애잔하고 당나귀들의 걸음도 시원하다.''',
+      category: '소설',
+      difficulty: '고급',
+      wordCount: 58,
+      author: '이효석',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    LongTextData(
+      id: 'novel_2',
+      title: '동백꽃 중에서',
+      content: '''오늘도 또 우리 수탉이 막 쫓기었다.
+내가 점심을 먹고 나무를 하러 갈 양으로 나올 때이었다.
+산으로 올라서려니까 등뒤에서 푸드덕 푸드덕 하고 닭의 횃소리가 야단이다.
+
+깜짝 놀라며 고개를 돌려보니 아니나 다르랴 두 놈이 또 얼리었다.
+점순이네 수탉은 대강이가 크고 똑 오소리같이 실팍하게 생긴 놈이
+덩저리 작은 우리 수탉을 함부로 해내는 것이다.''',
+      category: '소설',
+      difficulty: '중급',
+      wordCount: 57,
+      author: '김유정',
+      source: '한국저작권위원회 공유마당 ',
+    ),
+
+    // 3. 전래동화 (재구성) - 저작권 없음
+    LongTextData(
+      id: 'tale_1',
+      title: '해와 달이 된 오누이',
+      content: '''옛날 어느 마을에 착한 오누이가 살고 있었습니다.
+어머니는 부잣집에 일을 하러 가셨습니다.
+저녁이 되어도 어머니가 오지 않았습니다.
+
+그때 호랑이가 나타나 어머니를 잡아먹었습니다.
+호랑이는 어머니 옷을 입고 집으로 갔습니다.
+얘들아, 엄마 왔다. 문 열어라.
+
+하지만 오누이는 목소리가 다르다고 생각했습니다.
+엄마 목소리가 아니에요. 안 열어줄래요.
+호랑이는 계속 문을 두드렸습니다.
+
+오누이는 뒷문으로 도망쳐 큰 나무에 올라갔습니다.
+호랑이가 따라와서 나무를 오르려 했습니다.
+그때 하늘에서 동아줄이 내려왔습니다.''',
+      category: '동화',
+      difficulty: '초급',
+      wordCount: 68,
+      author: '전래동화',
+      source: '자체 재구성 ',
+    ),
+
+    // 4. 일반 수필/명언 (자체 창작 더미데이터) - 저작권 없음
+    LongTextData(
+      id: 'essay_1',
+      title: '시간과 현재에 대하여',
+      content: '''시간은 강물과 같아서 한 번 흘러가면 다시 돌아오지 않는다.
+우리는 모두 시간의 강 위를 떠다니는 나뭇잎과 같은 존재이다.
+
+과거는 이미 지나갔고, 미래는 아직 오지 않았다.
+우리에게 진정으로 주어진 것은 현재뿐이다.
+하지만 사람들은 과거를 후회하고 미래를 걱정하며
+정작 현재를 놓치고 있다.
+
+행복한 사람은 현재에 집중할 줄 아는 사람이다.
+지금 이 순간을 소중히 여기고, 감사할 줄 아는 사람이다.
+시간은 우리가 만들어가는 것이다.''',
+      category: '수필',
+      difficulty: '중급',
+      wordCount: 65,
+      author: '작자미상',
+      source: '자체 창작물 ',
+    ),
+  ];
+
+  static List<String> get categories => ['전체', '동화', '시', '수필', '명언', '소설', '칼럼'];
+  static List<String> get difficulties => ['전체', '초급', '중급', '고급'];
+}
