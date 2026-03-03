@@ -17,13 +17,15 @@ const jua = Jua({ variable: "--font-jua", weight: "400", subsets: ["latin"] });
 const gowunBatang = Gowun_Batang({ variable: "--font-gowun-batang", weight: ["400", "700"], subsets: ["latin"] });
 const gowunDodum = Gowun_Dodum({ variable: "--font-gowun-dodum", weight: "400", subsets: ["latin"] });
 const gamjaFlower = Gamja_Flower({ variable: "--font-gamja-flower", weight: "400", subsets: ["latin"] });
-const singleDay = Single_Day({ variable: "--font-single-day", weight: "400", subsets: ["latin"] });
-const stylish = Stylish({ variable: "--font-stylish", weight: "400", subsets: ["latin"] });
-const yeonSung = Yeon_Sung({ variable: "--font-yeon-sung", weight: "400", subsets: ["latin"] });
-const nanumBrush = Nanum_Brush_Script({ variable: "--font-nanum-brush", weight: "400", subsets: ["latin"] });
-const gaegu = Gaegu({ variable: "--font-gaegu", weight: "400", subsets: ["latin"] });
-const poorStory = Poor_Story({ variable: "--font-poor-story", weight: "400", subsets: ["latin"] });
-const dokdo = East_Sea_Dokdo({ variable: "--font-dokdo", weight: "400", subsets: ["latin"] });
+
+// subsets 미지원 폰트들 수정
+const singleDay = Single_Day({ variable: "--font-single-day", weight: "400" });
+const stylish = Stylish({ variable: "--font-stylish", weight: "400" });
+const yeonSung = Yeon_Sung({ variable: "--font-yeon-sung", weight: "400" });
+const nanumBrush = Nanum_Brush_Script({ variable: "--font-nanum-brush", weight: "400" });
+const gaegu = Gaegu({ variable: "--font-gaegu", weight: "400" });
+const poorStory = Poor_Story({ variable: "--font-poor-story", weight: "400" });
+const dokdo = East_Sea_Dokdo({ variable: "--font-dokdo", weight: "400" });
 
 export const metadata: Metadata = {
   title: "한글타자왕 - 아날로그 감성 한글 타자 연습",
