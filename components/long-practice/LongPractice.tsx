@@ -16,7 +16,6 @@ interface Progress {
 }
 
 type PaperType = 'white' | 'hanji' | 'kraft';
-// 타입 에러 해결을 위해 모든 폰트 명시
 type FontType = 
   | 'font-noto' | 'font-myeongjo' | 'font-pen' | 'font-jua' 
   | 'font-batang' | 'font-dodum' | 'font-gamja' | 'font-single' 
@@ -118,11 +117,9 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
     const finalReport = TypingUtils.generateReport(currentText.content, finalValue, totalKeystrokes, elapsedSeconds);
     setReport(finalReport);
     localStorage.removeItem(`progress_${selectedTextId}`);
-    
     if (user) {
         await SupabaseService.saveResult(currentText.id, finalReport.netSpeed, finalReport.accuracy, elapsedSeconds);
     }
-    
     try {
         const topRankings = await SupabaseService.getRankings(currentText.id);
         setRankings(topRankings);
@@ -145,7 +142,7 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
     const typedNorm = TypingUtils.normalize(inputValue);
     return chars.map((char: string, i: number) => {
       const normChar = TypingUtils.normalize(char);
-      let color = "text-zinc-400";
+      let color = "text-zinc-400"; 
       let bg = "";
       let deco = "";
 
@@ -153,7 +150,6 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
         color = "text-blue-600 font-black";
         bg = "bg-blue-500/10 ring-2 ring-blue-500/20 rounded-sm";
       } else if (i < inputValue.length) {
-        // charAt을 사용해 undefined 체크 및 타입 에러 방지
         const tChar = typedNorm.charAt(i);
         if (tChar === normChar) {
             color = "text-zinc-900 dark:text-zinc-50 font-bold";
@@ -172,14 +168,25 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
 
   const progress = Math.min(100, (inputValue.length / currentText.content.length) * 100);
 
+  // 인위적인 배경색을 제거하고 이미지만 활용
   const paperAssets = {
-    white: { bg: "bg-white", img: "/images/paper/basic.jpg", overlay: "opacity-[0.1] mix-blend-multiply" },
-    hanji: { bg: "bg-[#f4f1ea]", img: "https://www.transparenttextures.com/patterns/natural-paper.png", overlay: "opacity-[0.3] mix-blend-multiply" },
-    kraft: { bg: "bg-[#d2b48c]", img: "/images/paper/craft.jpg", overlay: "opacity-[0.35] mix-blend-multiply" }
+    white: {
+        img: "/images/paper/basic.jpg",
+        overlay: "opacity-100" // 이미지 그대로 사용
+    },
+    hanji: {
+        img: "https://www.transparenttextures.com/patterns/natural-paper.png",
+        overlay: "opacity-100 bg-[#fdfcf8]" // 패턴 이미지를 위해 최소한의 밝은 배경만 유지
+    },
+    kraft: {
+        img: "/images/paper/craft.jpg",
+        overlay: "opacity-100" // 이미지 그대로 사용
+    }
   };
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 relative">
+      {/* Dust/Analog Particle Effect */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
           <div className="absolute inset-[-10%] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-pulse" />
       </div>
@@ -226,10 +233,10 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
                 <option value="font-batang">고운바탕</option>
                 <option value="font-dodum">고운돋움</option>
                 <option value="font-pen" className="font-pen">나눔펜 (필기체)</option>
-                <option value="font-brush" className="font-brush">나눔브러쉬 (필기체)</option>
-                <option value="font-gaegu" className="font-gaegu">개구체 (귀여움)</option>
-                <option value="font-poor" className="font-poor">푸어스토리체</option>
-                <option value="font-dokdo" className="font-dokdo">독도체 (개성)</option>
+                <option value="font-brush" className="font-brush">나눔브러쉬</option>
+                <option value="font-gaegu" className="font-gaegu">개구체</option>
+                <option value="font-poor" className="font-poor">푸어스토리</option>
+                <option value="font-dokdo" className="font-dokdo">독도체</option>
                 <option value="font-gamja" className="font-gamja">감자꽃</option>
                 <option value="font-single" className="font-single">싱글데이</option>
                 <option value="font-yeon" className="font-yeon">연성체</option>
@@ -254,10 +261,14 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
         </div>
       </div>
 
-      <div className={`w-full h-[70vh] shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border-4 border-zinc-200 dark:border-zinc-800 transition-all duration-500 z-10 relative ${paperAssets[paperType].bg}`}>
+      <div className={`w-full h-[70vh] bg-white dark:bg-zinc-950 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border-4 border-zinc-200 dark:border-zinc-800 transition-all duration-500 z-10 relative`}>
+        {/* Paper Texture Overlay (인위적 색상 제거 버전) */}
         <div 
             className={`absolute inset-0 pointer-events-none z-0 ${paperAssets[paperType].overlay}`}
-            style={{ backgroundImage: `url(${paperAssets[paperType].img})`, backgroundSize: paperType === 'hanji' ? 'auto' : 'cover' }}
+            style={{ 
+                backgroundImage: `url(${paperAssets[paperType].img})`, 
+                backgroundSize: paperType === 'hanji' ? 'auto' : 'cover'
+            }}
         />
 
         <div ref={scrollRef} className={`flex-1 p-10 overflow-y-auto relative scroll-smooth border-r border-zinc-200/20 z-10 ${fontFamily}`} style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}>
