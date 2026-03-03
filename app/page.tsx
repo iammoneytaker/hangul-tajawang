@@ -10,13 +10,28 @@ import { LongPractice } from "@/components/long-practice/LongPractice";
 import { WordGame } from "@/components/game/WordGame";
 import { OpenChallenge } from "@/components/challenge/OpenChallenge";
 import { SpellingQuiz } from "@/components/quiz/SpellingQuiz";
+import { MyPage } from "@/components/layout/MyPage";
 import { BetaFeedback } from "@/components/BetaFeedback";
 import { Layout, PenTool, Gamepad2, Users, ChevronRight, BookOpenCheck, Keyboard, AlertTriangle } from "lucide-react";
 
-type Mode = "home" | "position" | "word" | "short" | "long" | "game" | "challenge" | "quiz";
+type Mode = "home" | "position" | "word" | "short" | "long" | "game" | "challenge" | "quiz" | "mypage";
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("home");
+  const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
+
+  const handleModeChange = (newMode: Mode) => {
+    setMode(newMode);
+    // 헤더에서 직접 'long'을 누를 때만 선택된 챌린지를 초기화 (기본글로 연습하게 함)
+    if (newMode === 'long') {
+      setSelectedChallenge(null);
+    }
+  };
+
+  const handleStartChallenge = (content: any) => {
+    setSelectedChallenge(content);
+    setMode("long");
+  };
 
   const renderContent = () => {
     switch (mode) {
@@ -26,9 +41,9 @@ export default function Home() {
         return (
           <div className="w-full max-w-5xl mx-auto py-8">
             <div className="flex flex-wrap justify-center gap-2 mb-16 bg-white dark:bg-zinc-900 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-fit mx-auto shadow-sm">
-              <TabButton active={mode === "position"} icon={<Keyboard size={16}/>} label="자리 연습" onClick={() => setMode("position")} />
-              <TabButton active={mode === "word"} icon={<Layout size={16}/>} label="낱말 연습" onClick={() => setMode("word")} />
-              <TabButton active={mode === "short"} icon={<PenTool size={16}/>} label="짧은 글 연습" onClick={() => setMode("short")} />
+              <TabButton active={mode === "position"} icon={<Keyboard size={16}/>} label="자리 연습" onClick={() => { setMode("position"); setSelectedChallenge(null); }} />
+              <TabButton active={mode === "word"} icon={<Layout size={16}/>} label="낱말 연습" onClick={() => { setMode("word"); setSelectedChallenge(null); }} />
+              <TabButton active={mode === "short"} icon={<PenTool size={16}/>} label="짧은 글 연습" onClick={() => { setMode("short"); setSelectedChallenge(null); }} />
             </div>
             {mode === "position" && <PositionPractice />}
             {mode === "word" && <WordPractice />}
@@ -39,7 +54,7 @@ export default function Home() {
         return (
           <div className="w-full py-8">
             <div className="flex justify-center">
-              <LongPractice />
+              <LongPractice externalContent={selectedChallenge} />
             </div>
           </div>
         );
@@ -48,12 +63,14 @@ export default function Home() {
       case "quiz":
         return <SpellingQuiz />;
       case "challenge":
-        return <OpenChallenge />;
+        return <OpenChallenge onStartChallenge={handleStartChallenge} />;
+      case "mypage":
+        return <MyPage onStartChallenge={handleStartChallenge} />;
       default:
         return (
           <>
             <div className="w-full bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-900/30 py-3">
-              <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-yellow-700 dark:text-yellow-400 text-sm font-bold">
+              <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-yellow-700 dark:text-yellow-400 text-xs font-bold">
                 <AlertTriangle size={16} />
                 <span>현재 오픈 베타 버전으로 일부 기능이 정상 작동하지 않을 수 있습니다.</span>
               </div>
@@ -68,7 +85,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans selection:bg-blue-100 selection:text-blue-700">
-      <Header onModeChange={setMode} />
+      <Header onModeChange={handleModeChange} />
       
       <main className="min-h-[calc(100-4rem)]">
         {renderContent()}
@@ -81,9 +98,9 @@ export default function Home() {
             <span>© 2026 한글타자왕 Web Edition.</span>
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-zinc-600 transition-colors">이용약관</a>
+            <Link href="/terms" className="hover:text-zinc-600 transition-colors">이용약관</Link>
             <Link href="/privacy" className="hover:text-zinc-600 transition-colors">개인정보처리방침</Link>
-            <a href="mailto:withanalog@gmail.com" className="hover:text-zinc-600 transition-colors">문의하기</a>
+            <Link href="/contact" className="hover:text-zinc-600 transition-colors">문의하기</Link>
           </div>
         </div>
       </footer>
@@ -153,7 +170,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
         />
         <FeatureCard 
           icon={<PenTool className="text-indigo-600" />}
-          title="감성적인 필사"
+          title="긴 글 연습"
           description="책장 속 노트를 펼친 듯한 <br/>환경에서 윤동주 시 필사"
         />
         <FeatureCard 

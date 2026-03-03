@@ -10,7 +10,31 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --font-noto: var(--font-noto-sans);
+  --font-myeongjo: var(--font-nanum-myeongjo);
+  --font-pen: var(--font-nanum-pen);
+  --font-jua: var(--font-jua);
+  --font-batang: var(--font-gowun-batang);
+  --font-dodum: var(--font-gowun-dodum);
+  --font-gamja: var(--font-gamja-flower);
+  --font-single: var(--font-single-day);
+  --font-stylish: var(--font-stylish);
+  --font-yeon: var(--font-yeon-sung);
+  --font-brush: var(--font-nanum-brush);
 }
+
+.font-noto { font-family: var(--font-noto-sans), sans-serif; }
+.font-myeongjo { font-family: var(--font-nanum-myeongjo), serif; }
+.font-pen { font-family: var(--font-nanum-pen), cursive; }
+.font-jua { font-family: var(--font-jua), sans-serif; }
+.font-batang { font-family: var(--font-gowun-batang), serif; }
+.font-dodum { font-family: var(--font-gowun-dodum), sans-serif; }
+.font-gamja { font-family: var(--font-gamja-flower), cursive; }
+.font-single { font-family: var(--font-single-day), cursive; }
+.font-stylish { font-family: var(--font-stylish), sans-serif; }
+.font-yeon { font-family: var(--font-yeon-sung), serif; }
+.font-brush { font-family: var(--font-nanum-brush), cursive; }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -18,8 +42,21 @@
   75% { transform: translateX(5px); }
 }
 
+@keyframes crawl {
+  0% { transform: rotate(0deg) translateY(0); }
+  20% { transform: rotate(-10deg) translateY(-4px); }
+  40% { transform: rotate(0deg) translateY(0); }
+  60% { transform: rotate(10deg) translateY(-4px); }
+  80% { transform: rotate(0deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
 .animate-shake {
   animation: shake 0.2s ease-in-out infinite;
+}
+
+.animate-crawl {
+  animation: crawl 2s ease-in-out infinite;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,59 +1,56 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Volume2, VolumeX, Moon, Sun, User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2 } from "lucide-react";
+import { Volume2, VolumeX, Moon, Sun, User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Settings } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 
 export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onModeChange }) => {
   const [asmr, setAsmr] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // 1. 초기 사용자 확인
     const checkUser = async () => {
-      console.log("Checking current session...");
       const currentUser = await SupabaseService.getCurrentUser();
       if (currentUser) {
-        console.log("User session found:", currentUser.email);
         setUser(currentUser);
-      } else {
-        console.log("No active session found.");
+        const p = await SupabaseService.getMyProfile();
+        setProfile(p);
       }
     };
     checkUser();
 
-    // 2. 인증 상태 변경 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth State Changed:", event, session?.user?.email);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
-      if (session?.user) setLoading(false);
+      if (session?.user) {
+        const p = await SupabaseService.getMyProfile();
+        setProfile(p);
+        setLoading(false);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const handleLogin = async () => {
-    console.log("카카오 로그인 버튼 클릭");
     setLoading(true);
     try {
-      // Supabase OAuth 로그인 호출
       await SupabaseService.signInWithKakao();
     } catch (error: any) {
-      console.error("로그인 프로세스 오류:", error.message);
-      alert("로그인 요청 중 오류가 발생했습니다. 콘솔 로그를 확인해주세요.");
+      console.error("Login failed:", error);
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    console.log("로그아웃 시도");
     try {
       await SupabaseService.signOut();
-      console.log("로그아웃 성공");
     } catch (error) {
-      console.error("로그아웃 실패:", error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -69,7 +66,7 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
         {/* Center: GNB */}
         <nav className="hidden md:flex items-center gap-1">
           <NavButton icon={<Layout size={18} />} label="타자 연습장" onClick={() => onModeChange("position")} />
-          <NavButton icon={<PenTool size={18} />} label="감성 필사" onClick={() => onModeChange("long")} />
+          <NavButton icon={<PenTool size={18} />} label="긴 글 연습" onClick={() => onModeChange("long")} />
           <NavButton icon={<Gamepad2 size={18} />} label="아케이드" onClick={() => onModeChange("game")} />
           <NavButton icon={<BookOpenCheck size={18} />} label="맞춤법 퀴즈" onClick={() => onModeChange("quiz")} />
           <NavButton icon={<Users size={18} />} label="오픈 챌린지" onClick={() => onModeChange("challenge")} />
@@ -85,13 +82,25 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
           </button>
           
           {user ? (
-            <button 
-              onClick={handleLogout}
-              className="ml-2 flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-full text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <LogOut size={16} />
-              <span className="hidden sm:inline">로그아웃</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => onModeChange("mypage")}
+                className="flex items-center gap-2 p-1 pr-4 bg-zinc-100 dark:bg-zinc-800 rounded-full hover:bg-zinc-200 transition-all group"
+              >
+                {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="avatar" className="w-8 h-8 rounded-full object-cover border border-white dark:border-zinc-700 shadow-sm" />
+                ) : (
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs border border-white dark:border-zinc-700">
+                        {profile?.nickname?.[0] || 'U'}
+                    </div>
+                )}
+                <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 transition-colors">마이페이지</span>
+              </button>
+              
+              <button onClick={handleLogout} className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="로그아웃">
+                <LogOut size={20} />
+              </button>
+            </div>
           ) : (
             <button 
               onClick={handleLogin}
@@ -104,7 +113,6 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
               <span className="hidden sm:inline">로그인 / 회원가입</span>
             </button>
           )}
-
         </div>
       </div>
     </header>
