@@ -96,14 +96,15 @@ export const Header: React.FC<{ onModeChange: (mode: any) => void }> = ({ onMode
             <button 
               onClick={handleLogin}
               disabled={loading}
-              className="ml-2 flex items-center gap-2 px-4 py-2 bg-[#FEE500] text-black rounded-full text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="ml-2 flex items-center gap-2 px-4 py-2 bg-[#FEE500] text-black rounded-full text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : (
                 <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 3c-5.5 0-10 3.5-10 7.8 0 2.8 1.8 5.3 4.5 6.6l-1.1 4.1c-.1.5.4.8.8.6l4.8-3.2c.3 0 .7.1 1 .1 5.5 0 10-3.5 10-7.8S17.5 3 12 3" /></svg>
               )}
-              <span className="hidden sm:inline">카카오 로그인</span>
+              <span className="hidden sm:inline">로그인 / 회원가입</span>
             </button>
           )}
+
         </div>
       </div>
     </header>

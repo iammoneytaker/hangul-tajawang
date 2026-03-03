@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { WordPractice } from "@/components/word-practice/WordPractice";
 import { ShortPractice } from "@/components/short-practice/ShortPractice";
@@ -81,8 +82,8 @@ export default function Home() {
           </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-zinc-600 transition-colors">이용약관</a>
-            <a href="#" className="hover:text-zinc-600 transition-colors">개인정보처리방침</a>
-            <a href="#" className="hover:text-zinc-600 transition-colors">문의하기</a>
+            <Link href="/privacy" className="hover:text-zinc-600 transition-colors">개인정보처리방침</Link>
+            <a href="mailto:withanalog@gmail.com" className="hover:text-zinc-600 transition-colors">문의하기</a>
           </div>
         </div>
       </footer>
@@ -127,16 +128,21 @@ function HeroSection({ onStart }: { onStart: () => void }) {
         낱말 연습부터 감성 필사까지, 당신만의 타자 시간을 즐겨보세요.
       </p>
       
-      <div className="flex flex-col sm:flex-row gap-4">
-        <button 
-          onClick={onStart}
-          className="group px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-black rounded-2xl shadow-xl shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-        >
-          시작하기 <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-        </button>
-        <button className="px-10 py-5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-xl font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
-          모드 둘러보기
-        </button>
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button 
+            onClick={onStart}
+            className="group px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-black rounded-2xl shadow-xl shadow-blue-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+          >
+            시작하기 <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+          </button>
+          <button className="px-10 py-5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 text-xl font-bold rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
+            모드 둘러보기
+          </button>
+        </div>
+        <p className="text-sm text-zinc-400 font-medium">
+          로그인하면 나의 <span className="text-blue-500 font-bold">최고 타수</span>와 <span className="text-blue-500 font-bold">연습 기록</span>을 관리할 수 있습니다.
+        </p>
       </div>
       
       <div className="mt-32 w-full grid grid-cols-1 md:grid-cols-4 gap-6">
