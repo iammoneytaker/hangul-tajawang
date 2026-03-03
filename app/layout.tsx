@@ -29,6 +29,11 @@ export const metadata: Metadata = {
   title: "한글타자왕 - 아날로그 감성 한글 타자 연습",
   description: "한글타자왕 웹 버전에서 낱말 연습, 짧은 글 연습, 긴 글 연습, 아케이드 게임을 즐겨보세요.",
   icons: { icon: "/favicon.png" },
+  verification: {
+    other: {
+      "naver-site-verification": "a2b9690769181edc8ee83bbbe17c9e693b18a21c",
+    },
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
