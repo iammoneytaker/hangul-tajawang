@@ -16,8 +16,12 @@ interface Progress {
 }
 
 type PaperType = 'white' | 'hanji' | 'kraft';
-// CSS 유틸리티 클래스 명칭으로 통일
-type FontType = 'font-noto' | 'font-myeongjo' | 'font-pen' | 'font-jua' | 'font-batang' | 'font-dodum' | 'font-gamja';
+// 타입 에러 해결을 위해 모든 폰트 명시
+type FontType = 
+  | 'font-noto' | 'font-myeongjo' | 'font-pen' | 'font-jua' 
+  | 'font-batang' | 'font-dodum' | 'font-gamja' | 'font-single' 
+  | 'font-stylish' | 'font-yeon' | 'font-brush' | 'font-gaegu' 
+  | 'font-poor' | 'font-dokdo';
 
 export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalContent }) => {
   const [user, setUser] = useState<any>(null);
@@ -104,7 +108,7 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
 
     const typedNorm = TypingUtils.normalize(newValue);
     if (typedNorm.length >= originalNorm.length && 
-        typedNorm[typedNorm.length - 1] === originalNorm[originalNorm.length - 1]) {
+        typedNorm.charAt(typedNorm.length - 1) === originalNorm.charAt(originalNorm.length - 1)) {
       finishTyping(newValue);
     }
   };
@@ -127,26 +131,19 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
 
   const handleShare = async () => {
     if (!report) return;
-    const shareText = `✍️ 한글타자왕 필사 완료!\n\n📜 글 제목: ${currentText.title}\n⚡ 타수: ${report.netSpeed}타\n🎯 정확도: ${report.accuracy}%\n⏱️ 시간: ${report.elapsedSeconds}초\n\n한글타자왕에서 긴 글 연습을 즐겨보세요!`;
-    
+    const shareText = `✍️ 한글타자왕 필사 완료!\n\n📜 글 제목: ${currentText.title}\n⚡ 타수: ${report.netSpeed}타\n🎯 정확도: ${report.accuracy}%\n⏱️ 시간: ${report.elapsedSeconds}초\n\n한글타자왕에서 연습해보세요!`;
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: '한글타자왕 필사 결과',
-          text: shareText,
-          url: window.location.href
-        });
-      } catch (e) { console.log('Share failed'); }
+      try { await navigator.share({ title: '한글타자왕', text: shareText, url: window.location.href }); } catch (e) { console.log('Share failed'); }
     } else {
       await navigator.clipboard.writeText(shareText);
-      alert('결과가 클립보드에 복사되었습니다!');
+      alert('복사되었습니다!');
     }
   };
 
   const renderHighlightedText = () => {
     const chars = currentText.content.split("");
     const typedNorm = TypingUtils.normalize(inputValue);
-    return chars.map((char, i) => {
+    return chars.map((char: string, i: number) => {
       const normChar = TypingUtils.normalize(char);
       let color = "text-zinc-400";
       let bg = "";
@@ -156,7 +153,9 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
         color = "text-blue-600 font-black";
         bg = "bg-blue-500/10 ring-2 ring-blue-500/20 rounded-sm";
       } else if (i < inputValue.length) {
-        if (typedNorm[i] === normChar) {
+        // charAt을 사용해 undefined 체크 및 타입 에러 방지
+        const tChar = typedNorm.charAt(i);
+        if (tChar === normChar) {
             color = "text-zinc-900 dark:text-zinc-50 font-bold";
         } else {
             color = "text-red-500";
@@ -174,19 +173,17 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
   const progress = Math.min(100, (inputValue.length / currentText.content.length) * 100);
 
   const paperAssets = {
-    white: { img: "/images/paper/basic.jpg", overlay: "opacity-[0.08] mix-blend-multiply dark:opacity-0" },
-    hanji: { img: "https://www.transparenttextures.com/patterns/natural-paper.png", overlay: "opacity-[0.15] mix-blend-multiply" },
-    kraft: { img: "/images/paper/craft.jpg", overlay: "opacity-[0.12] mix-blend-multiply" }
+    white: { bg: "bg-white", img: "/images/paper/basic.jpg", overlay: "opacity-[0.1] mix-blend-multiply" },
+    hanji: { bg: "bg-[#f4f1ea]", img: "https://www.transparenttextures.com/patterns/natural-paper.png", overlay: "opacity-[0.3] mix-blend-multiply" },
+    kraft: { bg: "bg-[#d2b48c]", img: "/images/paper/craft.jpg", overlay: "opacity-[0.35] mix-blend-multiply" }
   };
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 relative">
-      {/* Dust/Analog Particle Effect */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
           <div className="absolute inset-[-10%] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-pulse" />
       </div>
 
-      {/* Completion Modal */}
       {report && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white dark:bg-zinc-900 rounded-3xl p-10 max-w-2xl w-full shadow-2xl my-auto animate-in zoom-in duration-300">
@@ -211,7 +208,6 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
         </div>
       )}
 
-      {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10">
         <h2 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2">
           <PenTool className="text-blue-600" /> {externalContent ? "챌린지 필사" : "긴 글 연습"}
@@ -225,12 +221,19 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
                 onChange={(e) => setFontFamily(e.target.value as FontType)} 
                 className="bg-transparent text-xs font-bold outline-hidden cursor-pointer"
             >
-                <option value="font-noto" className="font-noto">본고딕 (기본)</option>
-                <option value="font-myeongjo" className="font-myeongjo">나눔명조</option>
-                <option value="font-batang" className="font-batang">고운바탕</option>
-                <option value="font-dodum" className="font-dodum">고운돋움</option>
+                <option value="font-noto">본고딕 (기본)</option>
+                <option value="font-myeongjo">나눔명조</option>
+                <option value="font-batang">고운바탕</option>
+                <option value="font-dodum">고운돋움</option>
                 <option value="font-pen" className="font-pen">나눔펜 (필기체)</option>
-                <option value="font-gamja" className="font-gamja">감자꽃 (손글씨)</option>
+                <option value="font-brush" className="font-brush">나눔브러쉬 (필기체)</option>
+                <option value="font-gaegu" className="font-gaegu">개구체 (귀여움)</option>
+                <option value="font-poor" className="font-poor">푸어스토리체</option>
+                <option value="font-dokdo" className="font-dokdo">독도체 (개성)</option>
+                <option value="font-gamja" className="font-gamja">감자꽃</option>
+                <option value="font-single" className="font-single">싱글데이</option>
+                <option value="font-yeon" className="font-yeon">연성체</option>
+                <option value="font-stylish" className="font-stylish">스타일리시</option>
                 <option value="font-jua" className="font-jua">배민 주아</option>
             </select>
             <input type="range" min="16" max="40" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} className="w-16 accent-blue-600" />
@@ -251,8 +254,7 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
         </div>
       </div>
 
-      {/* Main UI */}
-      <div className={`w-full h-[70vh] bg-white dark:bg-zinc-950 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border-4 border-zinc-200 dark:border-zinc-800 transition-all duration-500 z-10 relative`}>
+      <div className={`w-full h-[70vh] shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border-4 border-zinc-200 dark:border-zinc-800 transition-all duration-500 z-10 relative ${paperAssets[paperType].bg}`}>
         <div 
             className={`absolute inset-0 pointer-events-none z-0 ${paperAssets[paperType].overlay}`}
             style={{ backgroundImage: `url(${paperAssets[paperType].img})`, backgroundSize: paperType === 'hanji' ? 'auto' : 'cover' }}
@@ -262,7 +264,7 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
           <div className="max-w-none text-left tracking-wide whitespace-pre-wrap select-none text-zinc-900 dark:text-zinc-100">{renderHighlightedText()}</div>
         </div>
 
-        <div className={`flex-1 p-10 relative flex flex-col bg-zinc-50/30 dark:bg-white/5 z-10 ${fontFamily}`}>
+        <div className={`flex-1 p-10 relative flex flex-col bg-black/5 dark:bg-white/5 z-10 ${fontFamily}`}>
           <div className="flex justify-between items-center mb-6">
             <span className="px-3 py-1 bg-blue-600 text-white text-[10px] font-black rounded-full uppercase">Typing</span>
             <div className="flex gap-4 text-sm font-black text-zinc-500">
@@ -270,7 +272,6 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
                 <span className="flex items-center gap-1"><Clock size={14}/> {Math.floor(elapsedSeconds/60)}:{String(elapsedSeconds%60).padStart(2,'0')}</span>
             </div>
           </div>
-          
           <textarea ref={textareaRef} value={inputValue} onChange={handleInputChange} className="flex-1 w-full bg-transparent resize-none outline-hidden leading-relaxed z-10 py-0 text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400/20" style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }} placeholder="이곳에 필사를 시작하세요..." />
           
           <div className="mt-10 relative h-12 w-full flex items-end">

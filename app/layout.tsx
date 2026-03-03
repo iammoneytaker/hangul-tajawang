@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { 
   Geist, Geist_Mono, Noto_Sans_KR, Nanum_Myeongjo, Nanum_Pen_Script, 
   Jua, Gowun_Batang, Gowun_Dodum, Gamja_Flower, Single_Day, Stylish, 
-  Yeon_Sung, Nanum_Brush_Script 
+  Yeon_Sung, Nanum_Brush_Script, Gaegu, Poor_Story, East_Sea_Dokdo
 } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -10,7 +10,6 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono" });
 
-// 한글 폰트 정의
 const notoSans = Noto_Sans_KR({ variable: "--font-noto-sans", subsets: ["latin"] });
 const nanumMyeongjo = Nanum_Myeongjo({ variable: "--font-nanum-myeongjo", weight: ["400", "700", "800"], subsets: ["latin"] });
 const nanumPen = Nanum_Pen_Script({ variable: "--font-nanum-pen", weight: "400", subsets: ["latin"] });
@@ -22,6 +21,9 @@ const singleDay = Single_Day({ variable: "--font-single-day", weight: "400", sub
 const stylish = Stylish({ variable: "--font-stylish", weight: "400", subsets: ["latin"] });
 const yeonSung = Yeon_Sung({ variable: "--font-yeon-sung", weight: "400", subsets: ["latin"] });
 const nanumBrush = Nanum_Brush_Script({ variable: "--font-nanum-brush", weight: "400", subsets: ["latin"] });
+const gaegu = Gaegu({ variable: "--font-gaegu", weight: "400", subsets: ["latin"] });
+const poorStory = Poor_Story({ variable: "--font-poor-story", weight: "400", subsets: ["latin"] });
+const dokdo = East_Sea_Dokdo({ variable: "--font-dokdo", weight: "400", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "한글타자왕 - 아날로그 감성 한글 타자 연습",
@@ -42,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         ${nanumMyeongjo.variable} ${nanumPen.variable} ${jua.variable} 
         ${gowunBatang.variable} ${gowunDodum.variable} ${gamjaFlower.variable}
         ${singleDay.variable} ${stylish.variable} ${yeonSung.variable} ${nanumBrush.variable}
+        ${gaegu.variable} ${poorStory.variable} ${dokdo.variable}
         antialiased
       `}>
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NCVLQG83" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} /></noscript>

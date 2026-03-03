@@ -22,6 +22,9 @@
   --font-stylish: var(--font-stylish);
   --font-yeon: var(--font-yeon-sung);
   --font-brush: var(--font-nanum-brush);
+  --font-gaegu: var(--font-gaegu);
+  --font-poor: var(--font-poor-story);
+  --font-dokdo: var(--font-dokdo);
 }
 
 .font-noto { font-family: var(--font-noto-sans), sans-serif; }
@@ -35,6 +38,9 @@
 .font-stylish { font-family: var(--font-stylish), sans-serif; }
 .font-yeon { font-family: var(--font-yeon-sung), serif; }
 .font-brush { font-family: var(--font-nanum-brush), cursive; }
+.font-gaegu { font-family: var(--font-gaegu), cursive; }
+.font-poor { font-family: var(--font-poor-story), cursive; }
+.font-dokdo { font-family: var(--font-dokdo), cursive; }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
