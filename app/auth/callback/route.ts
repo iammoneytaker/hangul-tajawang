@@ -3,10 +3,9 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
-  // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get('next') ?? '/'
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+  const next = requestUrl.searchParams.get('next') ?? '/'
 
   if (code) {
     const cookieStore = await cookies()
@@ -15,30 +14,36 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: CookieOptions) {
-            cookieStore.delete({ name, ...options })
+          getAll() { return cookieStore.getAll() },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch (error) {}
           },
         },
       }
     )
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
-    }
 
-    // [핵심 추가] 에러가 났더라도 이미 세션이 있다면(중복 호출 시) 성공으로 간주하고 홈으로 보냄
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      return NextResponse.redirect(`${origin}${next}`)
+    // 코드 교환 시도 및 상세 에러 로그 기록
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (!error) {
+      console.log('✅ Auth Success: Redirecting to', next);
+      return NextResponse.redirect(`${requestUrl.origin}${next}`)
+    } else {
+      console.error('❌ Auth Exchange Error:', error.name, error.message);
+      
+      // 이미 세션이 있는지 최종 확인
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        console.log('✅ Session already exists, bypassing error.');
+        return NextResponse.redirect(`${requestUrl.origin}${next}`)
+      }
     }
   }
 
-  // 진짜로 세션이 없을 때만 에러 페이지로 이동
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+  console.log('⚠️ Redirecting to error page due to auth failure');
+  return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`)
 }
