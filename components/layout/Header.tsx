@@ -15,25 +15,31 @@ export const Header: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // 1. 초기 로드 시 세션 및 프로필 확인
     const checkUser = async () => {
-      const currentUser = await SupabaseService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
         const p = await SupabaseService.getMyProfile();
         setProfile(p);
       }
     };
     checkUser();
 
+    // 2. 세션 상태 변화 감지 (로그인/로그아웃/새로고침 등)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
+      console.log("Auth Event:", event);
+      
       if (session?.user) {
+        setUser(session.user);
+        // 캐시 문제를 피하기 위해 즉시 프로필 재요청
         const p = await SupabaseService.getMyProfile();
         setProfile(p);
-        setLoading(false);
       } else {
+        setUser(null);
         setProfile(null);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
