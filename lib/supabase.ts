@@ -23,13 +23,10 @@ export class SupabaseService {
   // --- Auth ---
   static async signInWithKakao() {
     const SCOPES = 'account_email profile_nickname profile_image';
-
-    // 현재 접속한 도메인 정보를 가장 정확하게 가져옴 (끝에 슬래시 제거)
-    const siteUrl = typeof window !== 'undefined' 
-      ? window.location.origin.replace(/\/$/, '') 
-      : 'https://www.hangul-tajawang.com';
-
-    const redirectUrl = `${siteUrl}/auth/callback`;
+    
+    // 현재 접속한 도메인을 기반으로 콜백 주소 생성
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.hangul-tajawang.com';
+    const redirectUrl = `${origin.replace(/\/$/, '')}/auth/callback`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
@@ -41,7 +38,6 @@ export class SupabaseService {
     });
     if (error) throw error;
     return data;
-  }
   }
 
   static async signOut() {
@@ -191,14 +187,14 @@ export class SupabaseService {
   static async deleteContent(contentId: string) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인 필요');
-    const { error = null } = await supabase.from('typing_contents').delete().eq('id', contentId).eq('author_id', user.id);
+    const { error } = await supabase.from('typing_contents').delete().eq('id', contentId).eq('author_id', user.id);
     if (error) throw error;
   }
 
   static async getLikedContents() {
     const user = await this.getCurrentUser();
     if (!user) return [];
-    const { data, error } = await supabase.from('likes').select('typing_contents(*, profiles!typing_contents_author_id_fkey(nickname, avatar_url))').eq('user_id', user.id);
+    const { data, error } = await supabase.from('likes').select('typing_contents(*)').eq('user_id', user.id);
     if (error) throw error;
     return (data || []).map((item: any) => item.typing_contents);
   }
