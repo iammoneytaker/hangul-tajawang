@@ -31,8 +31,14 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+
+    // [핵심 추가] 에러가 났더라도 이미 세션이 있다면(중복 호출 시) 성공으로 간주하고 홈으로 보냄
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      return NextResponse.redirect(`${origin}${next}`)
+    }
   }
 
-  // return the user to an error page with instructions
+  // 진짜로 세션이 없을 때만 에러 페이지로 이동
   return NextResponse.redirect(`${origin}/auth/auth-code-error`)
 }
