@@ -4,23 +4,18 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // SSR 대응을 위해 브라우저용 클라이언트를 사용합니다. (쿠키 자동 관리)
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    flowType: 'pkce',
-    persistSession: true,
-    detectSessionInUrl: true,
-    autoRefreshToken: true,
-    storageKey: 'sb-auth-token',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // 로컬 스토리지를 보조 저장소로 활용
-  },
-  cookieOptions: {
-    name: 'sb-auth-token',
-    lifetime: 60 * 60 * 24 * 7, // 7일
-    domain: typeof window !== 'undefined' ? window.location.hostname.replace('www.', '') : undefined,
-    path: '/',
-    sameSite: 'lax',
+export const supabase = createBrowserClient(
+  supabaseUrl, 
+  supabaseAnonKey,
+  {
+    auth: {
+      flowType: 'pkce',
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    }
   }
-});
+);
 
 export type SortType = '최신순' | '인기순' | '댓글순' | '도전순';
 
@@ -204,6 +199,7 @@ export class SupabaseService {
     return (data || []).map((item: any) => item.typing_contents);
   }
 
+  // --- 소셜 (Likes, Comments, Activities) ---
   static async toggleLike(contentId: string, isCurrentlyLiked: boolean, authorId: string) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인 필요');
