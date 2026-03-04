@@ -15,7 +15,8 @@ export class SupabaseService {
       provider: 'kakao',
       options: {
         scopes: SCOPES,
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
+        // 서버 사이드 콜백 라우트를 반드시 거치도록 수정
+        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined,
         queryParams: { prompt: 'login' }
       },
     });
