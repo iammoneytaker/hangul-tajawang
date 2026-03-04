@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { LONG_TEXT_DB, LONG_TEXT_CATEGORIES } from "@/lib/long-text-data";
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
-import { Trophy, Clock, Target, Zap, RotateCcw, Layout, ChevronLeft, ChevronRight, Settings, Image as ImageIcon, Save, Share2, Star, ArrowRight, Heart, Flame, X, Type, BookOpen, ScrollText, Keyboard, Award, Sparkles, User, Eye, Send, MessageSquare, Trash2 } from "lucide-react";
+import { Trophy, Clock, Target, Zap, RotateCcw, Layout, ChevronLeft, ChevronRight, Settings, Image as ImageIcon, Save, Share2, Star, ArrowRight, Heart, Flame, X, Type, BookOpen, ScrollText, Keyboard, Award, Sparkles, User, Eye, Send, MessageSquare, Trash2, Users } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
@@ -247,15 +247,19 @@ export const LongPractice: React.FC<Props> = ({ externalContent }) => {
                 <div className="flex-1 text-center md:text-left">
                     <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-2 block">Original Author</span>
                     <h3 className="text-4xl font-black mb-6 text-zinc-900 dark:text-zinc-100">{externalContent.profiles?.nickname || '익명 작가'}</h3>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-8">
-                        <div className="flex flex-col"><span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">최고 타수</span><span className="text-2xl font-black">{Math.round(externalContent.profiles?.best_speed || 0)}타</span></div>
-                        <div className="flex flex-col"><span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">총 필사 수</span><span className="text-2xl font-black">{externalContent.complete_count || 0}회</span></div>
-                        <button onClick={handleToggleLike} className="flex flex-col text-left group">
-                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">좋아요</span>
-                            <span className={`text-2xl font-black flex items-center gap-2 transition-colors ${isLiked ? 'text-red-500' : 'group-hover:text-red-400'}`}>
-                                <Heart size={24} className={isLiked ? "fill-red-500" : ""} /> {likeCount}
+                    <div className="flex flex-wrap justify-center md:justify-start gap-12">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">이 글의 좋아요</span>
+                            <span className={`text-3xl font-black flex items-center gap-3 transition-colors ${isLiked ? 'text-red-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                <Heart size={24} className={isLiked ? "fill-red-500 text-red-500" : ""} /> {likeCount}
                             </span>
-                        </button>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">필사 참여 인원</span>
+                            <span className="text-3xl font-black text-blue-600 flex items-center gap-3">
+                                <Users size={24} /> {externalContent.complete_count || 0}명
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <Link href={`/challenge?authorId=${externalContent.author_id}`} className="px-10 py-5 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-black rounded-3xl hover:scale-105 transition-all shadow-xl">작가의 글 더보기</Link>
