@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = 'https://hangul-tajawang.com'; // 실제 도메인으로 변경 권장
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/mypage', '/auth/*'], // 개인정보가 있는 마이페이지와 인증 라우트는 검색엔진 수집 거부
+      disallow: ['/auth/', '/mypage/'], // 민감한 정보가 있는 페이지는 제외
     },
-    sitemap: 'https://hangul-tajawang.com/sitemap.xml',
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

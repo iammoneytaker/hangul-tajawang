@@ -61,6 +61,14 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words" }> = (
     }
   }, []);
 
+  const resetProgress = useCallback(() => {
+    setCurrentIndex(0);
+    setInputValue("");
+    setCorrectCount(0);
+    setCombo(0);
+    setStartTime(null);
+  }, []);
+
   useEffect(() => {
     if (initialPhase && phase === "select") {
       startStep(BASIC_PRACTICE_STEPS[0], initialPhase);

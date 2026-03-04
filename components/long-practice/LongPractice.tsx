@@ -28,7 +28,7 @@ export const LongPractice: React.FC<Props> = ({ externalContent }) => {
   // 소셜 및 추천 상태
   const [user, setUser] = useState<any>(null);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(externalContent?.like_count || 0);
+  const [likeCount, setLikeCount] = useState<number>(externalContent?.like_count || 0);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
