@@ -6,9 +6,19 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 // SSR 대응을 위해 브라우저용 클라이언트를 사용합니다. (쿠키 자동 관리)
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    flowType: 'pkce',
     persistSession: true,
+    detectSessionInUrl: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    storageKey: 'sb-auth-token',
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // 로컬 스토리지를 보조 저장소로 활용
+  },
+  cookieOptions: {
+    name: 'sb-auth-token',
+    lifetime: 60 * 60 * 24 * 7, // 7일
+    domain: typeof window !== 'undefined' ? window.location.hostname.replace('www.', '') : undefined,
+    path: '/',
+    sameSite: 'lax',
   }
 });
 
