@@ -23,7 +23,7 @@ export async function GET(request: Request) {
                 cookieStore.set(name, value, options)
               )
             } catch (error) {
-              // Server Component 대응
+              // 무시
             }
           },
         },
@@ -35,8 +35,13 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${requestUrl.origin}${next}`)
     }
+
+    // 중복 호출 방지
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      return NextResponse.redirect(`${requestUrl.origin}${next}`)
+    }
   }
 
-  // 실패 시 에러 페이지
   return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`)
 }

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono" });
 
 const notoSans = Noto_Sans_KR({ variable: "--font-noto-sans", subsets: ["latin"] });
 const nanumMyeongjo = Nanum_Myeongjo({ variable: "--font-nanum-myeongjo", weight: ["400", "700", "800"], subsets: ["latin"] });
-const nanumPen = Nanum_Pen_Script({ variable: "--font-nanum-pen", weight: "400", subsets: ["latin"] });
+const nanumPen = Nanum_Pen_Script({ variable: "--font-nanum-pen", weight: "400", subsets: ["latin"], preload: false });
 const jua = Jua({ variable: "--font-jua", weight: "400", subsets: ["latin"] });
 const gowunBatang = Gowun_Batang({ variable: "--font-gowun-batang", weight: ["400", "700"], subsets: ["latin"] });
 const gowunDodum = Gowun_Dodum({ variable: "--font-gowun-dodum", weight: "400", subsets: ["latin"] });
