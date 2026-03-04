@@ -23,10 +23,13 @@ export class SupabaseService {
   // --- Auth ---
   static async signInWithKakao() {
     const SCOPES = 'account_email profile_nickname profile_image';
-    
-    // 현재 접속한 도메인 기반으로 콜백 주소 생성
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.hangul-tajawang.com';
-    const redirectUrl = `${origin.replace(/\/$/, '')}/auth/callback`;
+
+    // 현재 접속한 도메인 정보를 가장 정확하게 가져옴 (끝에 슬래시 제거)
+    const siteUrl = typeof window !== 'undefined' 
+      ? window.location.origin.replace(/\/$/, '') 
+      : 'https://www.hangul-tajawang.com';
+
+    const redirectUrl = `${siteUrl}/auth/callback`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
@@ -38,6 +41,7 @@ export class SupabaseService {
     });
     if (error) throw error;
     return data;
+  }
   }
 
   static async signOut() {

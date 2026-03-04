@@ -22,9 +22,7 @@ export async function GET(request: Request) {
               cookiesToSet.forEach(({ name, value, options }) =>
                 cookieStore.set(name, value, options)
               )
-            } catch (error) {
-              // 무시
-            }
+            } catch (error) {}
           },
         },
       }
@@ -33,15 +31,12 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
-      return NextResponse.redirect(`${requestUrl.origin}${next}`)
-    }
-
-    // 중복 호출 방지
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
+      // [핵심] 현재 요청이 들어온 도메인(origin)을 그대로 사용하여 리다이렉트
+      // 이렇게 해야 www 도메인에서 온 사람은 www로, 아닌 사람은 아닌 곳으로 정확히 돌아갑니다.
       return NextResponse.redirect(`${requestUrl.origin}${next}`)
     }
   }
 
+  // 진짜 실패한 경우
   return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`)
 }
