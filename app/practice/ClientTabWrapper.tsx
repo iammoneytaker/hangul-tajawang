@@ -7,20 +7,18 @@ import { ShortPractice } from "@/components/short-practice/ShortPractice";
 import { Keyboard, Layout, PenTool } from "lucide-react";
 
 export default function ClientTabWrapper() {
-  const [mode, setMode] = useState<"position" | "word" | "short">("position");
+  const [mode, setMode] = useState<"position" | "short">("position");
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex flex-wrap justify-center gap-2 mb-16 bg-white dark:bg-zinc-900 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-fit mx-auto shadow-sm z-10">
-        <TabButton active={mode === "position"} icon={<Keyboard size={16}/>} label="자리 연습" onClick={() => setMode("position")} />
-        <TabButton active={mode === "word"} icon={<Layout size={16}/>} label="낱말 연습" onClick={() => setMode("word")} />
+        <TabButton active={mode === "position"} icon={<Keyboard size={16}/>} label="기초 연습 (자리/낱말)" onClick={() => setMode("position")} />
         <TabButton active={mode === "short"} icon={<PenTool size={16}/>} label="짧은 글 연습" onClick={() => setMode("short")} />
       </div>
       
       {/* key를 부여하여 모드 변경 시 컴포넌트를 완전히 새로 렌더링 (상태 꼬임 방지) */}
       <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
         {mode === "position" && <PositionPractice key="pos" />}
-        {mode === "word" && <WordPractice key="word" />}
         {mode === "short" && <ShortPractice key="short" />}
       </div>
     </div>

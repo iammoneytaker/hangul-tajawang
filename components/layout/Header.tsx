@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Volume2, VolumeX, Moon, Sun, User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Settings } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
+import { NotificationDrawer } from "./NotificationDrawer";
 
 export const Header: React.FC = () => {
   const [asmr, setAsmr] = useState(false);
@@ -84,7 +85,9 @@ export const Header: React.FC = () => {
           </button>
           
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <NotificationDrawer />
+              
               <Link 
                 href="/mypage"
                 className="flex items-center gap-2 p-1 pr-4 bg-zinc-100 dark:bg-zinc-800 rounded-full hover:bg-zinc-200 transition-all group"
