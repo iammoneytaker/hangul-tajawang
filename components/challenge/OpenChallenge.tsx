@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus, MessageSquare, Heart, Share2, Loader2, Send, X, Play, Filter, MoreVertical, Trash2, Edit3, ShieldAlert, ArrowRight, User, SortDesc, Zap } from "lucide-react";
 import { SupabaseService, supabase, SortType } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
 
-const CATEGORIES = ["전체", "시", "명언", "소설", "수필", "UGC"];
-const SORT_OPTIONS: SortType[] = ["최신순", "인기순", "도전순", "댓글순"];
+// 검색 파라미터를 사용하는 부분을 별도 컴포넌트로 분리 (Next.js Suspense 요구사항 대응)
+const ChallengeList = () => {
+  const searchParams = useSearchParams();
+  const filterAuthorId = searchParams.get("authorId");
 
-export const OpenChallenge: React.FC = () => {
   const [challenges, setChallenges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -36,7 +38,11 @@ export const OpenChallenge: React.FC = () => {
     setLoading(true);
     try {
       const [data, currentUser] = await Promise.all([
-        SupabaseService.getContents(activeCategory === '전체' ? undefined : activeCategory, activeSort),
+        SupabaseService.getContents(
+            activeCategory === '전체' ? undefined : activeCategory, 
+            activeSort, 
+            filterAuthorId || undefined
+        ),
         SupabaseService.getCurrentUser()
       ]);
       setChallenges(data);
@@ -51,7 +57,7 @@ export const OpenChallenge: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, activeSort]);
+  }, [activeCategory, activeSort, filterAuthorId]);
 
   useEffect(() => {
     fetchData();
@@ -99,7 +105,7 @@ export const OpenChallenge: React.FC = () => {
           <h2 className="text-2xl font-black mb-8">{editingContentId ? "챌린지 수정하기" : "새로운 챌린지 만들기"}</h2>
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
-                {CATEGORIES.slice(1).map(cat => (
+                {["시", "명언", "소설", "수필", "UGC"].map(cat => (
                     <button key={cat} onClick={() => setNewCategory(cat)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${newCategory === cat ? 'bg-blue-600 text-white shadow-lg' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'}`}>{cat}</button>
                 ))}
             </div>
@@ -110,8 +116,8 @@ export const OpenChallenge: React.FC = () => {
             <button onClick={() => setIsWriting(false)} className="px-8 py-4 font-bold text-zinc-500">취소</button>
             <button onClick={async () => {
                 setLoading(true);
-                if (editingContentId) await SupabaseService.updateContent(editingContentId, newTitle, newContent, newCategory);
-                else await SupabaseService.createContent(newTitle, newContent, newCategory);
+                if (editingContentId) await SupabaseService.updateContent({ contentId: editingContentId, title: newTitle, content: newContent, category: newCategory });
+                else await SupabaseService.createContent({ title: newTitle, content: newContent, category: newCategory });
                 setIsWriting(false); setEditingContentId(null); setNewTitle(""); setNewContent(""); fetchData();
             }} disabled={loading} className="px-10 py-4 font-black bg-blue-600 text-white rounded-2xl shadow-xl">{loading ? <Loader2 className="animate-spin" /> : "등록하기"}</button>
           </div>
@@ -122,17 +128,31 @@ export const OpenChallenge: React.FC = () => {
 
   return (
     <div className="w-full max-w-5xl mx-auto py-8 px-4 relative min-h-[80vh]">
+      {/* 상단 타이틀 (필터 시 노출) */}
+      {filterAuthorId && challenges.length > 0 && (
+        <div className="mb-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] border border-blue-100 dark:border-blue-900/30 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm"><User size={24}/></div>
+                <div>
+                    <h2 className="text-xl font-black">{challenges[0].profiles?.nickname} 작가의 글 모음</h2>
+                    <p className="text-xs text-zinc-500 font-medium">작가가 직접 창작하고 공유한 소중한 글들입니다.</p>
+                </div>
+            </div>
+            <Link href="/challenge" className="px-4 py-2 bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-xl text-xs font-black shadow-sm hover:bg-zinc-50 transition-all">전체 목록 보기</Link>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
             <div className="flex items-center gap-2 mr-2 text-zinc-400 font-bold shrink-0"><Filter size={18} /> <span className="text-sm">분류</span></div>
-            {CATEGORIES.map(cat => (
+            {["전체", "시", "명언", "소설", "수필", "UGC"].map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-5 py-2 rounded-full text-xs font-black whitespace-nowrap transition-all ${activeCategory === cat ? 'bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 shadow-md' : 'bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800'}`}>{cat}</button>
             ))}
           </div>
           <div className="flex items-center gap-2 self-end md:self-auto">
               <div className="flex bg-white dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                  {SORT_OPTIONS.map(opt => (
-                      <button key={opt} onClick={() => setActiveSort(opt)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${activeSort === opt ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-400'}`}>{opt}</button>
+                  {["최신순", "인기순", "도전순", "댓글순"].map(opt => (
+                      <button key={opt} onClick={() => setActiveSort(opt as SortType)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${activeSort === opt ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-400'}`}>{opt}</button>
                   ))}
               </div>
           </div>
@@ -154,7 +174,7 @@ export const OpenChallenge: React.FC = () => {
                       </div>
                       <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleOpenAuthor(item.author_id); }} className="flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1 pr-3 rounded-full transition-all">
                           <div className="text-right hidden sm:block"><p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-none">{item.profiles?.nickname || '익명'}</p></div>
-                          {item.profiles?.avatar_url ? <Image src={item.profiles.avatar_url} alt="avatar" width={32} height={32} className="w-8 h-8 rounded-full object-cover" /> : <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-bold text-zinc-400">{item.profiles?.nickname?.[0] || '?'}</div>}
+                          {item.profiles?.avatar_url ? <Image src={item.profiles.avatar_url} alt="avatar" width={32} height={32} className="w-8 h-8 rounded-full object-cover aspect-square" /> : <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-bold text-zinc-400 aspect-square">{item.profiles?.nickname?.[0] || '?'}</div>}
                       </div>
                   </div>
                   <h3 className="text-xl font-black mb-3 group-hover:text-blue-600 transition-colors line-clamp-1 text-zinc-900 dark:text-zinc-100">{item.title}</h3>
@@ -182,19 +202,26 @@ export const OpenChallenge: React.FC = () => {
         </div>
       )}
 
-      {/* Profile Sidebar & Comment Drawer (기존과 동일하되 스타일 유지) */}
+      {/* 작가 프로필 사이드바 */}
       {selectedAuthorProfile && (
         <div className="fixed inset-0 z-[10000] flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setSelectedAuthorProfile(null)} />
           <div className="relative w-full max-w-lg bg-white dark:bg-zinc-950 h-full shadow-2xl flex flex-col animate-in slide-in-from-right">
-            <div className="p-8 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-start">
+            <div className="p-8 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex justify-between items-start">
                 <div className="flex items-center gap-6">
-                    {selectedAuthorProfile.avatar_url ? <Image src={selectedAuthorProfile.avatar_url} alt="author" width={80} height={80} className="w-20 h-20 rounded-3xl object-cover" /> : <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-3xl flex items-center justify-center"><User size={40} className="text-blue-200" /></div>}
-                    <div><h3 className="text-3xl font-black text-zinc-900 dark:text-zinc-100">{selectedAuthorProfile.nickname || '익명 작가'}</h3><p className="text-xs font-bold text-zinc-400 mt-2">최고 타수: <span className="text-zinc-900 dark:text-white">{Math.round(selectedAuthorProfile.best_speed || 0)}타</span></p></div>
+                    {selectedAuthorProfile.avatar_url ? <Image src={selectedAuthorProfile.avatar_url} alt="author" width={80} height={80} className="w-20 h-20 rounded-3xl object-cover aspect-square" /> : <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-3xl flex items-center justify-center aspect-square"><User size={40} className="text-blue-200" /></div>}
+                    <div>
+                        <h3 className="text-3xl font-black text-zinc-900 dark:text-zinc-100">{selectedAuthorProfile.nickname || '익명 작가'}</h3>
+                        <p className="text-xs font-bold text-zinc-400 mt-2">최고 타수: <span className="text-zinc-900 dark:text-white">{Math.round(selectedAuthorProfile.best_speed || 0)}타</span></p>
+                    </div>
                 </div>
                 <button onClick={() => setSelectedAuthorProfile(null)} className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"><X size={24}/></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">작가의 다른 글</h4>
+                    <Link href={`/challenge?authorId=${selectedAuthorProfile.id}`} onClick={() => setSelectedAuthorProfile(null)} className="text-[10px] font-black text-blue-600 hover:underline">전체보기</Link>
+                </div>
                 {authorContents.map((post) => (
                     <Link key={post.id} href={`/challenge/${post.id}`} onClick={() => setSelectedAuthorProfile(null)} className="block bg-zinc-50 dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-100 dark:border-zinc-800 hover:border-blue-500 transition-all group">
                         <h5 className="font-black text-lg mb-2 group-hover:text-blue-600 text-zinc-900 dark:text-zinc-100">{post.title}</h5>
@@ -209,6 +236,7 @@ export const OpenChallenge: React.FC = () => {
         </div>
       )}
 
+      {/* 댓글 드로어 */}
       {selectedContent && (
         <div className="fixed inset-0 z-[10000] flex justify-end">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedContent(null)} />
@@ -221,7 +249,7 @@ export const OpenChallenge: React.FC = () => {
                 {commentLoading ? <div className="flex justify-center py-10"><Loader2 className="animate-spin text-blue-600"/></div> : 
                  comments.length > 0 ? comments.map((c, i) => (
                     <div key={i} className="flex gap-4 group/comment">
-                        {c.profiles?.avatar_url ? <Image src={c.profiles.avatar_url} alt="avatar" width={40} height={40} className="w-10 h-10 rounded-xl object-cover" /> : <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-zinc-400">{c.profiles?.nickname?.[0] || '?'}</div>}
+                        {c.profiles?.avatar_url ? <Image src={c.profiles.avatar_url} alt="avatar" width={40} height={40} className="w-10 h-10 rounded-xl object-cover aspect-square" /> : <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-zinc-400 aspect-square">{c.profiles?.nickname?.[0] || '?'}</div>}
                         <div className="flex-1">
                             <div className="flex justify-between items-center mb-1"><span className="font-black text-sm text-zinc-900 dark:text-zinc-100">{c.profiles?.nickname || '익명'}</span><span className="text-[10px] text-zinc-400 font-bold">{new Date(c.created_at).toLocaleDateString()}</span></div>
                             <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">{c.comment}</p>
@@ -245,4 +273,12 @@ export const OpenChallenge: React.FC = () => {
       </button>
     </div>
   );
+};
+
+export const OpenChallenge = () => {
+    return (
+        <Suspense fallback={<div className="flex justify-center py-32"><Loader2 className="w-12 h-12 animate-spin text-blue-600" /></div>}>
+            <ChallengeList />
+        </Suspense>
+    );
 };

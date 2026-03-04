@@ -57,6 +57,32 @@ export class SupabaseService {
     if (error) throw error;
   }
 
+  static async uploadAvatar(file: File) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('로그인이 필요합니다.');
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    // 1. Storage에 업로드
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // 2. 공개 URL 가져오기
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // 3. 프로필 정보 업데이트
+    await this.updateProfile({ avatar_url: publicUrl });
+    
+    return publicUrl;
+  }
+
   static async updatePrivacyConsent() {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인이 필요합니다.');
@@ -75,7 +101,6 @@ export class SupabaseService {
     if (!user) return;
 
     try {
-      // 1. 결과 기록 저장 (도전 내역)
       await supabase.from('typing_results').insert({
         user_id: user.id,
         content_id: contentId,
@@ -84,14 +109,12 @@ export class SupabaseService {
         elapsed_seconds: elapsedSeconds,
       });
 
-      // 2. 해당 콘텐츠의 도전 횟수(complete_count) 증가 (RPC 호출)
       await supabase.rpc('increment_counter', {
         t_name: 'typing_contents',
         c_name: 'complete_count',
         row_id: contentId
       });
 
-      // 3. 내 프로필의 최고 타수 업데이트
       const { data: profile } = await supabase.from('profiles').select('best_speed').eq('id', user.id).single();
       const currentBest = profile?.best_speed || 0;
 
@@ -127,7 +150,7 @@ export class SupabaseService {
   }
 
   // --- UGC Contents ---
-  static async getContents(category?: string, sortBy: SortType = '최신순') {
+  static async getContents(category?: string, sortBy: SortType = '최신순', authorId?: string) {
     let query = supabase.from('typing_contents').select(`
       *,
       profiles!typing_contents_author_id_fkey(nickname, avatar_url),
@@ -137,6 +160,10 @@ export class SupabaseService {
 
     if (category && category !== '전체') {
       query = query.eq('category', category);
+    }
+
+    if (authorId) {
+      query = query.eq('author_id', authorId);
     }
 
     const { data, error } = await query;
@@ -183,7 +210,13 @@ export class SupabaseService {
     });
   }
 
-  static async getAuthorContents(authorId: string, limit: number = 10) {
+  static async getMyContents() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+    return this.getAuthorContents(user.id);
+  }
+
+  static async getAuthorContents(authorId: string, limit: number = 30) {
     const { data, error } = await supabase
       .from('typing_contents')
       .select('*, typing_results(user_id), typing_comments(id)')
@@ -199,7 +232,6 @@ export class SupabaseService {
   }
 
   static async getRelatedContents(authorId: string, currentContentId: string) {
-    // 1. 같은 작가의 다른 글 3개
     const { data: authorOther } = await supabase
       .from('typing_contents')
       .select('id, title, category, complete_count, like_count')
@@ -208,7 +240,6 @@ export class SupabaseService {
       .order('created_at', { ascending: false })
       .limit(3);
 
-    // 2. 전체 인기 글 3개
     const { data: popular } = await supabase
       .from('typing_contents')
       .select('id, title, category, complete_count, like_count')
@@ -219,6 +250,47 @@ export class SupabaseService {
     return { authorOther: authorOther || [], popular: popular || [] };
   }
 
+  static async createContent({ title, content, category }: { title: string; content: string; category: string }) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('로그인이 필요합니다.');
+    const { error } = await supabase.from('typing_contents').insert({
+      author_id: user.id,
+      title,
+      content,
+      category,
+    });
+    if (error) throw error;
+  }
+
+  static async updateContent({ contentId, title, content, category }: { contentId: string; title: string; content: string; category: string }) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('로그인이 필요합니다.');
+    const { error } = await supabase.from('typing_contents')
+      .update({ title, content, category })
+      .eq('id', contentId)
+      .eq('author_id', user.id);
+    if (error) throw error;
+  }
+
+  static async deleteContent(contentId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('로그인이 필요합니다.');
+    const { error } = await supabase.from('typing_contents').delete().eq('id', contentId).eq('author_id', user.id);
+    if (error) throw error;
+  }
+
+  static async getLikedContents() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+    const { data, error } = await supabase
+      .from('likes')
+      .select('typing_contents(*, profiles!typing_contents_author_id_fkey(nickname, avatar_url))')
+      .eq('user_id', user.id);
+    if (error) throw error;
+    
+    return data.map((item: any) => item.typing_contents);
+  }
+
   // --- Likes ---
   static async toggleLike(contentId: string, isCurrentlyLiked: boolean, authorId: string) {
     const user = await this.getCurrentUser();
@@ -226,25 +298,11 @@ export class SupabaseService {
 
     try {
       if (isCurrentlyLiked) {
-        // 1. 좋아요 테이블에서 삭제
         await supabase.from('likes').delete().match({ user_id: user.id, content_id: contentId });
-        
-        // 2. 카운트 감소 (-1)
-        await supabase.rpc('sync_like_count', {
-          content_id: contentId,
-          delta: -1
-        });
+        await supabase.rpc('sync_like_count', { content_id: contentId, delta: -1 });
       } else {
-        // 1. 좋아요 테이블에 추가
         await supabase.from('likes').insert({ user_id: user.id, content_id: contentId });
-        
-        // 2. 카운트 증가 (+1)
-        await supabase.rpc('sync_like_count', {
-          content_id: contentId,
-          delta: 1
-        });
-
-        // 3. 알림(Activity) 생성 (본인 글이 아닐 때만)
+        await supabase.rpc('sync_like_count', { content_id: contentId, delta: 1 });
         if (user.id !== authorId) {
           await supabase.from('typing_activities').insert({
             receiver_id: authorId,
@@ -265,7 +323,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('로그인이 필요합니다.');
     
-    // 1. 댓글 추가
     const { error } = await supabase.from('typing_comments').insert({
       content_id: contentId,
       user_id: user.id,
@@ -273,7 +330,6 @@ export class SupabaseService {
     });
     if (error) throw error;
 
-    // 2. 알림 생성
     if (user.id !== authorId) {
       await supabase.from('typing_activities').insert({
         receiver_id: authorId,

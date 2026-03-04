@@ -1,164 +1,149 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { LONG_TEXT_DB, LONG_TEXT_CATEGORIES } from "@/lib/long-text-data";
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
-import { Trophy, Clock, Target, Keyboard, RotateCcw, CheckCircle2, X, Type, ScrollText, Share2, Info, ArrowRight, Zap, Award, Sparkles, Filter, BookOpen } from "lucide-react";
-import { SupabaseService } from "@/lib/supabase";
+import { Trophy, Clock, Target, Zap, RotateCcw, Layout, ChevronLeft, ChevronRight, Settings, Image as ImageIcon, Save, Share2, Star, ArrowRight, Heart, Flame, X, Type, BookOpen, ScrollText, Keyboard, Award, Sparkles, User, Eye, Send, MessageSquare, Trash2 } from "lucide-react";
+import { SupabaseService, supabase } from "@/lib/supabase";
+import Link from "next/link";
+import Image from "next/image";
 
-interface Progress {
-  textId: string;
-  typedText: string;
-  elapsedSeconds: number;
-  lastSaved: number;
+interface Props {
+  externalContent?: any;
 }
 
-type PaperType = 'white' | 'hanji' | 'kraft';
-type FontType = 'font-noto' | 'font-myeongjo' | 'font-pen' | 'font-jua' | 'font-batang' | 'font-dodum' | 'font-gamja' | 'font-single' | 'font-stylish' | 'font-yeon' | 'font-brush' | 'font-gaegu' | 'font-poor' | 'font-dokdo';
+type FontType = "font-noto" | "font-myeongjo" | "font-batang" | "font-dodum" | "font-pen" | "font-brush" | "font-gaegu" | "font-poor" | "font-dokdo" | "font-gamja" | "font-single" | "font-yeon" | "font-stylish" | "font-jua";
 
-export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalContent }) => {
-  const [user, setUser] = useState<any>(null);
-  const [selectedTextId, setSelectedTextId] = useState(externalContent?.id || LONG_TEXT_DB[0].id);
+export const LongPractice: React.FC<Props> = ({ externalContent }) => {
+  const [selectedTextId, setSelectedTextId] = useState(LONG_TEXT_DB[0].id);
   const [activeCategory, setActiveCategory] = useState("전체");
   const [inputValue, setInputValue] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [showResumeModal, setShowResumeModal] = useState(false);
   const [report, setReport] = useState<TypingReport | null>(null);
-  const [rankings, setRankings] = useState<any[]>([]);
-  
-  const [liveKPM, setLiveKPM] = useState(0);
-  const [liveAccuracy, setLiveAccuracy] = useState(100);
-
   const [fontSize, setFontSize] = useState(24);
-  const [paperType, setPaperType] = useState<PaperType>('hanji');
-  const [fontFamily, setFontFamily] = useState<FontType>('font-myeongjo');
+  const [fontFamily, setFontFamily] = useState<FontType>("font-myeongjo");
+  const [paperType, setPaperType] = useState<"white" | "hanji" | "kraft">("white");
+  
+  // 소셜 및 추천 상태
+  const [user, setUser] = useState<any>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(externalContent?.like_count || 0);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [related, setRelated] = useState<{ authorOther: any[], popular: any[] }>({ authorOther: [], popular: [] });
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    SupabaseService.getCurrentUser().then(setUser);
-  }, []);
+  const currentText = useMemo(() => 
+    externalContent || LONG_TEXT_DB.find(t => t.id === selectedTextId) || LONG_TEXT_DB[0],
+  [externalContent, selectedTextId]);
 
-  const filteredTexts = useMemo(() => {
-    if (activeCategory === "전체") return LONG_TEXT_DB;
-    return LONG_TEXT_DB.filter(t => t.category === activeCategory);
-  }, [activeCategory]);
+  const lines = useMemo(() => currentText.content.split("\n") || [], [currentText]);
 
-  const currentText = useMemo(() => {
-    if (externalContent) return externalContent;
-    const found = filteredTexts.find(t => t.id === selectedTextId);
-    return found || filteredTexts[0] || LONG_TEXT_DB[0];
-  }, [selectedTextId, externalContent, filteredTexts]);
+  // 데이터 로딩 및 초기화
+  const fetchSocialData = useCallback(async () => {
+    if (!externalContent) return;
+    
+    const currentUser = await SupabaseService.getCurrentUser();
+    setUser(currentUser);
 
-  const originalNorm = useMemo(() => TypingUtils.normalize(currentText.content), [currentText]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(`progress_${selectedTextId}`);
-    if (saved) setShowResumeModal(true);
-    else resetState();
-  }, [selectedTextId]);
-
-  useEffect(() => {
-    if (isActive && startTime && !report) {
-      timerRef.current = setInterval(() => {
-        const now = Date.now();
-        const diff = (now - startTime) / 1000;
-        setElapsedSeconds(diff);
-        const currentStrokes = TypingUtils.getStrokeCount(inputValue);
-        if (diff > 0.5) setLiveKPM(Math.round((currentStrokes / diff) * 60));
-      }, 100);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
+    // 좋아요 여부 확인
+    if (currentUser) {
+        const { data: like } = await supabase.from('likes').select().match({ user_id: currentUser.id, content_id: externalContent.id }).maybeSingle();
+        setIsLiked(!!like);
     }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isActive, report, inputValue, startTime]);
 
-  const resetState = () => {
-    setInputValue("");
-    setStartTime(null);
-    setElapsedSeconds(0);
-    setLiveKPM(0);
-    setLiveAccuracy(100);
-    setIsActive(false);
-    setReport(null);
-    setRankings([]);
-  };
+    // 댓글 및 추천 글 가져오기
+    const [cData, relData] = await Promise.all([
+        supabase.from('typing_comments').select('*, profiles(nickname, avatar_url)').eq('content_id', externalContent.id).order('created_at', { ascending: false }),
+        SupabaseService.getRelatedContents(externalContent.author_id, externalContent.id)
+    ]);
+    
+    setComments(cData.data || []);
+    setRelated(relData);
+  }, [externalContent]);
 
-  const handleResume = () => {
-    const saved = localStorage.getItem(`progress_${selectedTextId}`);
-    if (saved) {
-      const data: Progress = JSON.parse(saved);
-      setInputValue(data.typedText);
-      setElapsedSeconds(data.elapsedSeconds || 0);
-      setStartTime(Date.now() - (data.elapsedSeconds * 1000));
-      setIsActive(true);
+  useEffect(() => {
+    fetchSocialData();
+  }, [fetchSocialData]);
+
+  useEffect(() => {
+    let timer: any;
+    if (startTime && !report) {
+      timer = setInterval(() => setElapsedSeconds((Date.now() - startTime) / 1000), 100);
     }
-    setShowResumeModal(false);
-    textareaRef.current?.focus();
-  };
+    return () => clearInterval(timer);
+  }, [startTime, report]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (report) return;
-    const newValue = e.target.value;
-    let currentStartTime = startTime;
-    if (!isActive && newValue.length > 0) {
-        setIsActive(true);
-        currentStartTime = Date.now();
-        setStartTime(currentStartTime);
-    }
-    setInputValue(newValue);
-    const nowElapsed = currentStartTime ? (Date.now() - currentStartTime) / 1000 : 0.1;
-    const currentStrokes = TypingUtils.getStrokeCount(newValue);
-    setLiveKPM(Math.round((currentStrokes / (nowElapsed || 0.1)) * 60));
-    const currentReport = TypingUtils.generateReport(currentText.content, newValue, 0, nowElapsed);
-    setLiveAccuracy(currentReport.accuracy);
-    const typedNorm = TypingUtils.normalize(newValue);
-    if (typedNorm.length >= originalNorm.length && typedNorm.charAt(typedNorm.length - 1) === originalNorm.charAt(originalNorm.length - 1)) {
-      finishTyping(newValue, nowElapsed);
+    const val = e.target.value;
+    if (!startTime && val.length > 0) setStartTime(Date.now());
+    setInputValue(val);
+
+    if (val.length >= currentText.content.length) {
+      const finalReport = TypingUtils.generateReport(currentText.content, val, 0, elapsedSeconds);
+      setReport(finalReport);
+      if (externalContent) {
+        SupabaseService.saveResult(externalContent.id, finalReport.kpm, finalReport.accuracy, Math.round(elapsedSeconds));
+      }
     }
   };
 
-  const finishTyping = async (finalValue: string, finalElapsed: number) => {
-    setIsActive(false);
-    const finalReport = TypingUtils.generateReport(currentText.content, finalValue, 0, finalElapsed);
-    setReport(finalReport);
-    localStorage.removeItem(`progress_${selectedTextId}`);
-    if (user) {
-        await SupabaseService.saveResult(currentText.id, finalReport.kpm, finalReport.accuracy, finalElapsed);
-    }
+  // 소셜 핸들러
+  const handleToggleLike = async () => {
+    if (!user) return alert("로그인 후 이용 가능합니다.");
     try {
-        const topRankings = await SupabaseService.getRankings(currentText.id);
-        setRankings(topRankings);
-    } catch (e) { console.error("Ranking fetch failed:", e); }
+      await SupabaseService.toggleLike(externalContent.id, isLiked, externalContent.author_id);
+      setIsLiked(!isLiked);
+      setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+    } catch (e) { alert("처리 실패"); }
   };
 
-  const handleShare = async () => {
-    if (!report) return;
-    const shareText = `✍️ 한글타자왕 필사 완료!\n\n📜 글 제목: ${currentText.title}\n⚡ 타수: ${report.kpm}타\n🎯 정확도: ${report.accuracy}%\n⏱️ 시간: ${report.elapsedSeconds}초\n\n한글타자왕에서 연습해보세요!`;
-    if (navigator.share) {
-      try { await navigator.share({ title: '한글타자왕', text: shareText, url: window.location.href }); } catch (e) { console.log('Share failed'); }
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      alert('복사되었습니다!');
-    }
+  const handleAddComment = async () => {
+    if (!user || !newComment.trim()) return;
+    setCommentLoading(true);
+    try {
+      await SupabaseService.addComment(externalContent.id, newComment.trim(), externalContent.author_id);
+      setNewComment("");
+      // 목록 갱신
+      const { data } = await supabase.from('typing_comments').select('*, profiles(nickname, avatar_url)').eq('content_id', externalContent.id).order('created_at', { ascending: false });
+      setComments(data || []);
+    } finally { setCommentLoading(false); }
   };
+
+  const handleDeleteComment = async (id: string) => {
+    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+    await SupabaseService.deleteComment(id);
+    setComments(prev => prev.filter(c => c.id !== id));
+  };
+
+  const resetState = () => { setInputValue(""); setStartTime(null); setElapsedSeconds(0); setReport(null); };
+
+  const liveKPM = useMemo(() => {
+    if (!startTime || elapsedSeconds < 0.5) return 0;
+    return Math.round((TypingUtils.getStrokeCount(inputValue) / elapsedSeconds) * 60);
+  }, [inputValue, elapsedSeconds, startTime]);
+
+  const liveAccuracy = useMemo(() => {
+    if (inputValue.length === 0) return 100;
+    const typedNorm = TypingUtils.normalize(inputValue);
+    const targetNorm = TypingUtils.normalize(currentText.content.substring(0, inputValue.length));
+    let correct = 0;
+    for(let i=0; i<typedNorm.length; i++) if(typedNorm[i] === targetNorm[i]) correct++;
+    return Math.round((correct / Math.max(1, typedNorm.length)) * 100);
+  }, [inputValue, currentText.content]);
 
   const renderHighlightedText = () => {
     const chars = currentText.content.split("");
     const typedNorm = TypingUtils.normalize(inputValue);
     return chars.map((char: string, i: number) => {
       const normChar = TypingUtils.normalize(char);
-      let color = "text-zinc-400"; 
-      let bg = "";
-      let deco = "";
-      if (i === inputValue.length) {
-        color = "text-blue-600 font-black";
-        bg = "bg-blue-500/10 ring-2 ring-blue-500/20 rounded-sm";
-      } else if (i < inputValue.length) {
+      let color = "text-zinc-400"; let bg = ""; let deco = "";
+      if (i === inputValue.length) { color = "text-blue-600 font-black"; bg = "bg-blue-500/10 ring-2 ring-blue-500/20 rounded-sm"; }
+      else if (i < inputValue.length) {
         const tChar = typedNorm.charAt(i);
         if (tChar === normChar) color = "text-zinc-900 dark:text-zinc-50 font-bold";
         else { color = "text-red-500"; deco = "line-through opacity-80"; }
@@ -177,18 +162,6 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 relative">
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
-          <div className="absolute inset-[-10%] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-pulse" />
-      </div>
-
-      {!externalContent && (
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
-            {LONG_TEXT_CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${activeCategory === cat ? 'bg-zinc-900 text-white shadow-lg' : 'bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800 hover:border-blue-400'}`}>{cat}</button>
-            ))}
-        </div>
-      )}
-
       <div className="flex justify-center gap-6 mb-2">
         <MetricItem icon={<Zap size={16}/>} label="현재 타수" value={liveKPM} unit="타" color="text-blue-600" />
         <MetricItem icon={<Target size={16}/>} label="정확도" value={liveAccuracy} unit="%" color="text-green-600" />
@@ -202,7 +175,6 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
                 <div className={`absolute inset-0 pointer-events-none z-0 ${paperAssets[paperType].overlay}`} style={{ backgroundImage: `url(${paperAssets[paperType].img})`, backgroundSize: paperType === 'hanji' ? 'auto' : 'cover' }} />
                 <div className="relative z-10 text-zinc-900">
                     <div className="flex justify-center mb-6"><div className="bg-yellow-400 text-white p-4 rounded-full shadow-xl"><Award size={48} /></div></div>
-                    <h3 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Completion Certificate</h3>
                     <h2 className={`text-4xl font-black mb-2 ${fontFamily}`}>{currentText.title}</h2>
                     <p className="text-zinc-500 text-xs font-bold mb-12">By {currentText.author} / 출처: {currentText.source || '한글타자왕'}</p>
                     <div className="grid grid-cols-3 gap-4 my-12">
@@ -210,23 +182,23 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
                         <ResultItem label="Accuracy" value={report.accuracy} unit="%" />
                         <ResultItem label="Time" value={report.elapsedSeconds} unit="s" />
                     </div>
-                    <div className="flex items-center justify-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-widest"><Sparkles size={14} className="text-yellow-400" /> 한글타자왕 Web Edition <Sparkles size={14} className="text-yellow-400" /></div>
                 </div>
             </div>
             <div className="mt-8 flex gap-4">
-                <button onClick={resetState} className="flex-1 py-5 bg-white/10 text-white font-black rounded-2xl backdrop-blur-md transition-all">연습 종료</button>
-                <button onClick={handleShare} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all"><Share2 size={24} /> 결과 카드 공유</button>
+                <button onClick={resetState} className="flex-1 py-5 bg-white/10 text-white font-black rounded-2xl">연습 종료</button>
+                <button onClick={() => window.location.reload()} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl">다시 연습하기</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* 헤더 및 컨트롤 */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10">
-        <div className="flex flex-col gap-1">
+        <div>
             <h2 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2"><PenTool size={28} className="text-blue-600" /> {externalContent ? "챌린지 필사" : "긴 글 연습"}</h2>
             <p className="text-xs text-zinc-400 font-medium flex items-center gap-1"><BookOpen size={12}/> {currentText.author} · {currentText.source}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-2 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-3 bg-white/90 dark:bg-zinc-900/90 p-2 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-2 px-3 border-r border-zinc-100 dark:border-zinc-800">
             <Type size={16} className="text-zinc-400" />
             <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value as FontType)} className="bg-transparent text-xs font-bold outline-hidden cursor-pointer">
@@ -234,16 +206,15 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
             </select>
             <input type="range" min="16" max="40" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} className="w-16 accent-blue-600" />
           </div>
-          <div className="flex items-center gap-1 px-3 border-r border-zinc-100 dark:border-zinc-800">
-            <ScrollText size={16} className="text-zinc-400 mr-1" />
+          <div className="flex items-center gap-1 px-2">
             <PaperBtn active={paperType==='white'} label="기본" onClick={()=>setPaperType('white')} />
             <PaperBtn active={paperType==='hanji'} label="한지" onClick={()=>setPaperType('hanji')} />
             <PaperBtn active={paperType==='kraft'} label="크라프트" onClick={()=>setPaperType('kraft')} />
           </div>
-          {!externalContent && <select value={selectedTextId} onChange={(e) => setSelectedTextId(e.target.value)} className="bg-transparent text-sm font-bold outline-hidden cursor-pointer px-2 max-w-[150px]">{filteredTexts.map(text => <option key={text.id} value={text.id}>{text.title}</option>)}</select>}
         </div>
       </div>
 
+      {/* 원고지 메인 뷰어 */}
       <div className={`w-full h-[70vh] bg-white dark:bg-zinc-950 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border-4 border-zinc-200 dark:border-zinc-800 transition-all duration-500 z-10 relative`}>
         <div className={`absolute inset-0 pointer-events-none z-0 ${paperAssets[paperType].overlay}`} style={{ backgroundImage: `url(${paperAssets[paperType].img})`, backgroundSize: paperType === 'hanji' ? 'auto' : 'cover' }} />
         <div ref={scrollRef} className={`flex-1 p-10 overflow-y-auto relative scroll-smooth border-r border-zinc-200/20 z-10 ${fontFamily}`} style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}><div className="max-w-none text-left tracking-wide whitespace-pre-wrap select-none text-zinc-900 dark:text-zinc-100">{renderHighlightedText()}</div></div>
@@ -260,18 +231,122 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
               <div className="absolute w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full mb-1" />
               <div className="absolute h-1 bg-blue-500 rounded-full transition-all duration-300 mb-1" style={{ width: `${progressValue}%` }} />
               <div className="absolute transition-all duration-700 ease-in-out flex flex-col items-center" style={{ left: `${progressValue}%`, transform: 'translateX(-50%)', bottom: '4px' }}><div className="text-4xl animate-crawl">🐢</div><div className="text-[10px] font-black text-blue-600 dark:text-blue-400 mt-1">{Math.round(progressValue)}%</div></div>
-              <div className="absolute right-0 bottom-4 text-2xl opacity-30">🏁</div>
           </div>
         </div>
       </div>
 
-      {!externalContent && (
-        <div className="mt-4 p-6 bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600 font-bold text-xl">✍️</div>
-                <div><h4 className="font-black text-zinc-900 dark:text-zinc-100">더 많은 글을 찾으시나요?</h4><p className="text-sm text-zinc-500 font-medium">유저들이 창작한 오픈 챌린지에서 다양한 문장으로 필사 연습을 즐겨보세요!</p></div>
+      {/* 하단 작가 정보 및 댓글 섹션 */}
+      {externalContent && (
+        <div className="mt-20 space-y-24 z-10 animate-in fade-in duration-1000">
+            <section className="bg-white dark:bg-zinc-900 p-10 rounded-[3.5rem] border border-zinc-100 dark:border-zinc-800 shadow-2xl flex flex-col md:flex-row items-center gap-10">
+                {externalContent.profiles?.avatar_url ? (
+                    <Image src={externalContent.profiles.avatar_url} alt="작가" width={140} height={140} className="w-32 h-32 md:w-40 md:h-40 rounded-[3rem] object-cover border-4 border-white dark:border-zinc-800 shadow-2xl" />
+                ) : (
+                    <div className="w-32 h-32 md:w-40 md:h-40 bg-blue-50 dark:bg-blue-900/20 rounded-[3rem] flex items-center justify-center text-blue-300 border-4 border-white dark:border-zinc-800 shadow-2xl"><User size={60} /></div>
+                )}
+                <div className="flex-1 text-center md:text-left">
+                    <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.4em] mb-2 block">Original Author</span>
+                    <h3 className="text-4xl font-black mb-6 text-zinc-900 dark:text-zinc-100">{externalContent.profiles?.nickname || '익명 작가'}</h3>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-8">
+                        <div className="flex flex-col"><span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">최고 타수</span><span className="text-2xl font-black">{Math.round(externalContent.profiles?.best_speed || 0)}타</span></div>
+                        <div className="flex flex-col"><span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">총 필사 수</span><span className="text-2xl font-black">{externalContent.complete_count || 0}회</span></div>
+                        <button onClick={handleToggleLike} className="flex flex-col text-left group">
+                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">좋아요</span>
+                            <span className={`text-2xl font-black flex items-center gap-2 transition-colors ${isLiked ? 'text-red-500' : 'group-hover:text-red-400'}`}>
+                                <Heart size={24} className={isLiked ? "fill-red-500" : ""} /> {likeCount}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <Link href={`/challenge?authorId=${externalContent.author_id}`} className="px-10 py-5 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-black rounded-3xl hover:scale-105 transition-all shadow-xl">작가의 글 더보기</Link>
+            </section>
+
+            {/* 댓글 시스템 */}
+            <section className="bg-white dark:bg-zinc-900 p-10 rounded-[3.5rem] border border-zinc-100 dark:border-zinc-800 shadow-xl">
+                <div className="flex items-center gap-3 mb-10">
+                    <MessageSquare className="text-blue-600" size={24} />
+                    <h3 className="text-2xl font-black">댓글 <span className="text-blue-600">{comments.length}</span></h3>
+                </div>
+
+                <div className="relative mb-12">
+                    <input 
+                        type="text" 
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                        placeholder={user ? "작가님께 따뜻한 응원의 한마디를 남겨주세요" : "로그인 후 댓글을 남길 수 있습니다"}
+                        disabled={!user || commentLoading}
+                        className="w-full p-6 bg-zinc-50 dark:bg-zinc-800 border-none rounded-[2rem] outline-hidden focus:ring-4 focus:ring-blue-500/20 text-lg font-medium pr-20"
+                    />
+                    <button 
+                        onClick={handleAddComment}
+                        disabled={!user || !newComment.trim() || commentLoading}
+                        className="absolute right-3 top-3 bottom-3 px-6 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center shadow-lg"
+                    >
+                        {commentLoading ? <X className="animate-spin" size={20} /> : <Send size={20} />}
+                    </button>
+                </div>
+
+                <div className="space-y-8 max-h-[50vh] overflow-y-auto pr-4 custom-scrollbar">
+                    {comments.length > 0 ? comments.map((c) => (
+                        <div key={c.id} className="flex gap-6 group/comment">
+                            {c.profiles?.avatar_url ? (
+                                <Image src={c.profiles.avatar_url} alt="avatar" width={48} height={48} className="w-12 h-12 rounded-2xl object-cover" />
+                            ) : (
+                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center font-black text-zinc-400">{c.profiles?.nickname?.[0] || '?'}</div>
+                            )}
+                            <div className="flex-1">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-black text-zinc-900 dark:text-zinc-100">{c.profiles?.nickname || '익명'}</span>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-bold text-zinc-400">{new Date(c.created_at).toLocaleDateString()}</span>
+                                        {user?.id === c.user_id && (
+                                            <button onClick={() => handleDeleteComment(c.id)} className="text-red-400 opacity-0 group-hover/comment:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{c.comment}</p>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="text-center py-20 text-zinc-400 font-medium">아직 작성된 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</div>
+                    )}
+                </div>
+            </section>
+
+            {/* 추천 챌린지 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {related.authorOther.length > 0 && (
+                    <section>
+                        <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8 ml-4 flex items-center gap-2"><Star size={12} className="text-yellow-400 fill-yellow-400" /> 이 작가의 다른 명문</h4>
+                        <div className="space-y-4">
+                            {related.authorOther.map(post => (
+                                <Link key={post.id} href={`/challenge/${post.id}`} className="block p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-100 dark:border-zinc-800 hover:border-blue-500 transition-all group shadow-sm">
+                                    <h5 className="font-black text-lg mb-3 group-hover:text-blue-600 line-clamp-1">{post.title}</h5>
+                                    <div className="flex items-center gap-4 text-[10px] font-black text-zinc-400">
+                                        <span className="flex items-center gap-1.5"><Zap size={12} fill="currentColor" /> {post.complete_count}회 완료</span>
+                                        <span className="flex items-center gap-1.5"><Heart size={12} fill="currentColor" /> {post.like_count}</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+                <section>
+                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8 ml-4 flex items-center gap-2"><Flame size={12} className="text-orange-500 fill-orange-500" /> 지금 가장 핫한 글</h4>
+                    <div className="space-y-4">
+                        {related.popular.map(post => (
+                            <Link key={post.id} href={`/challenge/${post.id}`} className="block p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-100 dark:border-zinc-800 hover:border-blue-500 transition-all group shadow-sm">
+                                <h5 className="font-black text-lg mb-3 group-hover:text-blue-600 line-clamp-1">{post.title}</h5>
+                                <div className="flex items-center justify-between">
+                                    <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg text-[9px] uppercase font-black">{post.category}</span>
+                                    <span className="text-[10px] font-black text-zinc-400 flex items-center gap-1.5"><Zap size={12} fill="currentColor" /> {post.complete_count}명이 도전함</span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
             </div>
-            <button onClick={() => window.location.href = '/challenge'} className="px-6 py-3 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-xl font-bold text-sm flex items-center gap-2 hover:scale-105 transition-all text-center">오픈 챌린지 구경하기 <ArrowRight size={16} /></button>
         </div>
       )}
     </div>
@@ -280,7 +355,7 @@ export const LongPractice: React.FC<{ externalContent?: any }> = ({ externalCont
 
 function MetricItem({ icon, label, value, unit, color }: { icon: any, label: string, value: number, unit?: string, color: string }) {
     return (
-        <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-100 dark:border-zinc-800 shadow-sm transition-all hover:scale-105">
+        <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:scale-105">
             <div className={color}>{icon}</div>
             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">{label}</span>
             <span className={`text-lg font-black ${color}`}>{value}{unit}</span>
@@ -299,19 +374,9 @@ function ResultItem({ label, value, unit }: { label: string, value: number, unit
 
 function PaperBtn({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
     return (
-        <button onClick={onClick} className={`px-2 py-1 rounded-md text-[10px] font-black transition-all ${active ? 'bg-blue-600 text-white shadow-md' : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+        <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${active ? 'bg-blue-600 text-white shadow-md' : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
             {label}
         </button>
-    );
-}
-
-function ResultCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-    return (
-        <div className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded-2xl flex flex-col items-center gap-1 border border-zinc-200 dark:border-zinc-700">
-            {icon}
-            <span className="text-zinc-400 text-[10px] font-bold uppercase">{label}</span>
-            <span className="text-lg font-black">{value}</span>
-        </div>
     );
 }
 
