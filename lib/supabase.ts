@@ -101,6 +101,14 @@ export class SupabaseService {
     if (!user) return;
 
     try {
+      // 1. 이미 이 콘텐츠를 필사한 적이 있는지 확인 (중복 참여 방지)
+      const { data: existingResult } = await supabase
+        .from('typing_results')
+        .select('id')
+        .match({ user_id: user.id, content_id: contentId })
+        .maybeSingle();
+
+      // 2. 결과 기록 저장 (도전 내역은 매번 저장)
       await supabase.from('typing_results').insert({
         user_id: user.id,
         content_id: contentId,
@@ -109,11 +117,14 @@ export class SupabaseService {
         elapsed_seconds: elapsedSeconds,
       });
 
-      await supabase.rpc('increment_counter', {
-        t_name: 'typing_contents',
-        c_name: 'complete_count',
-        row_id: contentId
-      });
+      // 3. 처음 필사하는 경우에만 해당 콘텐츠의 도전 횟수(complete_count) 증가
+      if (!existingResult) {
+        await supabase.rpc('increment_counter', {
+          t_name: 'typing_contents',
+          c_name: 'complete_count',
+          row_id: contentId
+        });
+      }
 
       const { data: profile } = await supabase.from('profiles').select('best_speed').eq('id', user.id).single();
       const currentBest = profile?.best_speed || 0;

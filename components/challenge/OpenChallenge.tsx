@@ -170,7 +170,7 @@ const ChallengeList = () => {
                   <div className="flex justify-between items-start mb-6">
                       <div className="flex flex-wrap gap-2">
                         <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-black rounded-lg uppercase">{item.category}</span>
-                        <div className="px-3 py-1 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-lg flex items-center gap-1.5"><Zap size={10} className="fill-zinc-400" /> {item.complete_count || 0}회 완료</div>
+                        <div className="px-3 py-1 bg-zinc-50 dark:bg-zinc-800 text-zinc-400 text-[10px] font-black rounded-lg flex items-center gap-1.5"><Zap size={10} className="fill-zinc-400" /> {item.complete_count || 0}명 참여</div>
                       </div>
                       <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleOpenAuthor(item.author_id); }} className="flex items-center gap-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1 pr-3 rounded-full transition-all">
                           <div className="text-right hidden sm:block"><p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-none">{item.profiles?.nickname || '익명'}</p></div>
@@ -212,7 +212,10 @@ const ChallengeList = () => {
                     {selectedAuthorProfile.avatar_url ? <Image src={selectedAuthorProfile.avatar_url} alt="author" width={80} height={80} className="w-20 h-20 rounded-3xl object-cover aspect-square" /> : <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-3xl flex items-center justify-center aspect-square"><User size={40} className="text-blue-200" /></div>}
                     <div>
                         <h3 className="text-3xl font-black text-zinc-900 dark:text-zinc-100">{selectedAuthorProfile.nickname || '익명 작가'}</h3>
-                        <p className="text-xs font-bold text-zinc-400 mt-2">최고 타수: <span className="text-zinc-900 dark:text-white">{Math.round(selectedAuthorProfile.best_speed || 0)}타</span></p>
+                        <div className="flex gap-4 mt-2">
+                            <span className="text-xs font-bold text-zinc-400">작성한 글: <span className="text-zinc-900 dark:text-white">{authorContents.length}개</span></span>
+                            <span className="text-xs font-bold text-zinc-400">받은 좋아요: <span className="text-zinc-900 dark:text-white text-red-500">{authorContents.reduce((acc, curr) => acc + (curr.like_count || 0), 0)}개</span></span>
+                        </div>
                     </div>
                 </div>
                 <button onClick={() => setSelectedAuthorProfile(null)} className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"><X size={24}/></button>
@@ -226,7 +229,7 @@ const ChallengeList = () => {
                     <Link key={post.id} href={`/challenge/${post.id}`} onClick={() => setSelectedAuthorProfile(null)} className="block bg-zinc-50 dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-100 dark:border-zinc-800 hover:border-blue-500 transition-all group">
                         <h5 className="font-black text-lg mb-2 group-hover:text-blue-600 text-zinc-900 dark:text-zinc-100">{post.title}</h5>
                         <div className="flex items-center justify-between mt-6">
-                            <div className="flex gap-3 text-zinc-400 text-[10px] font-black"><span><Zap size={12} fill="currentColor" className="inline mr-1" /> {post.complete_count || 0}</span><span><Heart size={12} className="inline mr-1" /> {post.like_count || 0}</span></div>
+                            <div className="flex gap-3 text-zinc-400 text-[10px] font-black"><span><Zap size={12} fill="currentColor" className="inline mr-1" /> {post.complete_count || 0}명</span><span><Heart size={12} className="inline mr-1" /> {post.like_count || 0}</span></div>
                             <div className="text-blue-600 font-black text-[10px]">도전하기 <ArrowRight size={10} className="inline ml-1" /></div>
                         </div>
                     </Link>
