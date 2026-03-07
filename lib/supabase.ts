@@ -257,4 +257,37 @@ export class SupabaseService {
     if (!user) return;
     await supabase.from('typing_activities').update({ is_read: true }).eq('receiver_id', user.id).eq('is_read', false);
   }
+
+  // --- Game Scores ---
+  static async saveGameScore(gameType: string, score: number, level: number, maxCombo: number = 0) {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+
+    const { error } = await supabase.from('game_scores').insert({
+      user_id: user.id,
+      game_type: gameType,
+      score: score,
+      level: level,
+      max_combo: maxCombo
+    });
+    if (error) throw error;
+  }
+
+  static async getGameRankings(gameType: string, limit: number = 10) {
+    const { data, error } = await supabase
+      .from('game_scores')
+      .select(`
+        score,
+        level,
+        max_combo,
+        created_at,
+        profiles!game_scores_user_id_fkey(nickname, avatar_url)
+      `)
+      .eq('game_type', gameType)
+      .order('score', { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return data;
+  }
 }
