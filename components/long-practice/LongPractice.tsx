@@ -353,6 +353,26 @@ export const LongPractice: React.FC<Props> = ({ externalContent }) => {
             </div>
         </div>
       )}
+      {!externalContent && (
+        <div className="mt-24 w-full max-w-4xl p-12 bg-linear-to-br from-zinc-900 to-zinc-800 rounded-[3.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden shadow-2xl z-10">
+            <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
+                <Sparkles size={180} />
+            </div>
+            <div className="relative z-10 text-center md:text-left">
+                <div className="inline-flex px-4 py-1 bg-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">Join the Community</div>
+                <h2 className="text-3xl md:text-4xl font-black mb-4 flex items-center justify-center md:justify-start gap-3">
+                    <Star size={32} className="text-yellow-400 fill-yellow-400" /> 유저들이 만든 글은 어때요?
+                </h2>
+                <p className="text-zinc-400 font-medium text-lg leading-relaxed">매일 새로운 감성 명문이 올라오는 <br className="hidden sm:block" />필사 챌린지에서 다른 유저들과 소통하며 연습해 보세요.</p>
+            </div>
+            <Link 
+                href="/challenge" 
+                className="px-10 py-6 bg-white text-zinc-900 font-black rounded-2xl hover:scale-105 transition-all flex items-center gap-3 whitespace-nowrap shadow-xl group"
+            >
+                필사 챌린지 참여하기 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+        </div>
+      )}
     </div>
   );
 };
