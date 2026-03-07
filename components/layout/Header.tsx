@@ -78,7 +78,7 @@ export const Header: React.FC = () => {
           <NavButton icon={<PenTool size={18} />} label="긴 글 연습" href="/transcription" />
           <NavButton icon={<Gamepad2 size={18} />} label="아케이드" href="/game" />
           <NavButton icon={<BookOpenCheck size={18} />} label="맞춤법 퀴즈" href="/quiz" />
-          <NavButton icon={<Users size={18} />} label="오픈 챌린지" href="/challenge" />
+          <NavButton icon={<Users size={18} />} label="필사 챌린지" href="/challenge" />
         </nav>
 
         {/* Right: Actions */}
