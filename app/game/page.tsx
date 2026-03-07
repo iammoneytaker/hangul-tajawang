@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { Gamepad2, ChevronRight, Sparkles, CloudRain, ShieldAlert, Trophy } from "lucide-react";
+import { Gamepad2, ChevronRight, Sparkles, CloudRain, ShieldAlert, Trophy, Brain } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "한글 게임 모음 - 재미있는 타자 연습 게임",
@@ -29,6 +29,15 @@ export default function GameHubPage() {
           description="하늘에서 떨어지는 단어들을 <br/>바닥에 닿기 전에 입력하세요!"
           difficulty="Medium"
           color="blue"
+        />
+
+        <GameCard 
+          href="/game/card-flip"
+          icon={<Brain size={40} className="text-purple-500" />}
+          title="기억력 타자"
+          description="카드의 뒷면을 타자로 뒤집어 <br/>똑같은 짝을 찾아 맞춰보세요!"
+          difficulty="Hard"
+          color="purple"
         />
         
         {/* 향후 추가될 게임들을 위한 Placeholder */}
@@ -64,6 +73,7 @@ export default function GameHubPage() {
 function GameCard({ href, icon, title, description, difficulty, color }: any) {
   const colorMap: any = {
     blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
+    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600",
   };
 
   return (
