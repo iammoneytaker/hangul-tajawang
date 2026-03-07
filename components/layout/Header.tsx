@@ -3,38 +3,52 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Volume2, VolumeX, Moon, Sun, User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Settings } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 import { NotificationDrawer } from "./NotificationDrawer";
 
 export const Header: React.FC = () => {
+  const router = useRouter();
   const [asmr, setAsmr] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // 1. 초기 로드 시 세션 및 프로필 확인
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        const p = await SupabaseService.getMyProfile();
-        setProfile(p);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          const p = await SupabaseService.getMyProfile();
+          setProfile(p);
+        }
+      } catch (error) {
+        console.error("초기 유저 정보 확인 실패:", error);
+      } finally {
+        setLoading(false);
       }
     };
     checkUser();
 
-    // 2. 세션 상태 변화 감지 (로그인/로그아웃/새로고침 등)
+    // 2. 세션 상태 변화 감지
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth Event:", event);
-      
       if (session?.user) {
         setUser(session.user);
-        // 캐시 문제를 피하기 위해 즉시 프로필 재요청
-        const p = await SupabaseService.getMyProfile();
-        setProfile(p);
+        try {
+          const p = await SupabaseService.getMyProfile();
+          setProfile(p);
+          
+          // 로그인 성공 이벤트 시 서버 캐시 갱신 (강력 새로고침 효과)
+          if (event === 'SIGNED_IN') {
+            router.refresh();
+          }
+        } catch (err) {
+          console.error("프로필 정보 로드 실패:", err);
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -43,7 +57,7 @@ export const Header: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -58,6 +72,7 @@ export const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       await SupabaseService.signOut();
+      router.refresh(); // 로그아웃 시에도 캐시 갱신
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -90,7 +105,11 @@ export const Header: React.FC = () => {
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           
-          {user ? (
+          {loading ? (
+            <div className="w-10 h-10 flex items-center justify-center">
+                <Loader2 className="animate-spin text-zinc-300" size={20} />
+            </div>
+          ) : user ? (
             <div className="flex items-center gap-2">
               <NotificationDrawer />
               
@@ -124,9 +143,7 @@ export const Header: React.FC = () => {
               disabled={loading}
               className="ml-2 flex items-center gap-2 px-4 py-2 bg-[#FEE500] text-black rounded-full text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : (
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 3c-5.5 0-10 3.5-10 7.8 0 2.8 1.8 5.3 4.5 6.6l-1.1 4.1c-.1.5.4.8.8.6l4.8-3.2c.3 0 .7.1 1 .1 5.5 0 10-3.5 10-7.8S17.5 3 12 3" /></svg>
-              )}
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 3c-5.5 0-10 3.5-10 7.8 0 2.8 1.8 5.3 4.5 6.6l-1.1 4.1c-.1.5.4.8.8.6l4.8-3.2c.3 0 .7.1 1 .1 5.5 0 10-3.5 10-7.8S17.5 3 12 3" /></svg>
               <span className="hidden sm:inline">로그인 / 회원가입</span>
             </button>
           )}

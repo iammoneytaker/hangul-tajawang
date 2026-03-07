@@ -53,7 +53,17 @@ export class SupabaseService {
   static async getMyProfile() {
     const user = await this.getCurrentUser();
     if (!user) return null;
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Profile fetch error:", error);
+      return null;
+    }
     return data;
   }
 
