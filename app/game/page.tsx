@@ -24,7 +24,7 @@ export default function GameHubPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <GameCard 
           href="/game/acid-rain"
-          icon={<CloudRain className="text-blue-500" />}
+          icon={<CloudRain size={40} />}
           title="산성비 게임"
           description="하늘에서 떨어지는 단어들을 <br/>바닥에 닿기 전에 입력하세요!"
           difficulty="Medium"
@@ -72,7 +72,7 @@ function GameCard({ href, icon, title, description, difficulty, color }: any) {
       className="group bg-white dark:bg-zinc-900 p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 hover:border-blue-500 hover:shadow-2xl transition-all flex flex-col items-center text-center"
     >
       <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-8 shadow-xl ${colorMap[color]}`}>
-        {React.cloneElement(icon as React.ReactElement, { size: 40 })}
+        {icon}
       </div>
       <div className="inline-flex px-2.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 text-[9px] font-black rounded uppercase mb-4 tracking-widest">Difficulty: {difficulty}</div>
       <h3 className="text-2xl font-black mb-4 group-hover:text-blue-600 transition-colors">{title}</h3>
