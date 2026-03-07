@@ -155,6 +155,9 @@ export default function AcidRainPage() {
               </p>
             </div>
           </div>
+          <p className="text-[10px] text-zinc-400 font-bold mt-4 text-center italic">
+            * 로그인을 하시면 나만의 소중한 기록을 실시간 랭킹에 남길 수 있습니다.
+          </p>
         </section>
 
         {/* 4. 타자 연습 효과 */}
