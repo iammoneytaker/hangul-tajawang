@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { User, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Menu, X, ChevronRight, Zap } from "lucide-react";
+import { User as UserIcon, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Menu, X, ChevronRight, Zap } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 import { NotificationDrawer } from "./NotificationDrawer";
 
@@ -41,7 +41,7 @@ export const Header: React.FC = () => {
       const currentUser = session?.user || null;
       
       // 유저 상태가 변경되었을 때만 상태 업데이트
-      setUser(prevUser => {
+      setUser((prevUser: any) => {
         if (prevUser?.id !== currentUser?.id) {
           return currentUser;
         }
@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
       if (currentUser) {
         try {
           const p = await SupabaseService.getMyProfile();
-          setProfile(prevProfile => {
+          setProfile((prevProfile: any) => {
             if (JSON.stringify(prevProfile) !== JSON.stringify(p)) {
               return p;
             }
