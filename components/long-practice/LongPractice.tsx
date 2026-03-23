@@ -5,6 +5,7 @@ import { LONG_TEXT_DB } from "@/lib/long-text-data";
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
 import { Clock, Target, Zap, RotateCcw, BookOpen, ScrollText, Keyboard, Award, Sparkles, User, Send, MessageSquare, Trash2, Users, Heart, ArrowRight, Type, Star, Flame, ChevronRight } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
+import { KeyboardRecommendationBanner } from "../layout/KeyboardRecommendationBanner";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -170,6 +171,9 @@ export const LongPractice: React.FC<Props> = ({ externalContent }) => {
                         <ResultItem label="Keystrokes" value={report.kpm} unit="타" />
                         <ResultItem label="Accuracy" value={report.accuracy} unit="%" />
                         <ResultItem label="Time" value={report.elapsedSeconds} unit="s" />
+                    </div>
+                    <div className="relative z-10">
+                        <KeyboardRecommendationBanner variant="light" className="!mt-0 !rounded-[2.5rem]" />
                     </div>
                 </div>
             </div>

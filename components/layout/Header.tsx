@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { User as UserIcon, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Menu, X, ChevronRight, Zap } from "lucide-react";
+import { User as UserIcon, Layout, PenTool, Gamepad2, Users, BookOpenCheck, LogOut, Loader2, Menu, X, ChevronRight, Zap, Keyboard } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
 import { NotificationDrawer } from "./NotificationDrawer";
 
@@ -19,57 +19,45 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     setMounted(true);
-    let isInitialMount = true;
-    let authCheckTimeout: NodeJS.Timeout;
+    let isMounted = true;
 
-    // Fail-safe to prevent infinite loading if Supabase auth hangs
-    authCheckTimeout = setTimeout(() => {
-      setLoading(false);
-    }, 3000); 
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (authCheckTimeout) clearTimeout(authCheckTimeout);
-      
-      const currentUser = session?.user || null;
-      
-      setUser((prevUser: any) => {
-        if (prevUser?.id !== currentUser?.id) {
-          return currentUser;
+    // 1. 초기 렌더링 시 무조건 현재 세션을 정확히 한 번 가져옵니다.
+    const initAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && isMounted) {
+          setUser(user);
+          const p = await SupabaseService.getMyProfile(user.id);
+          if (isMounted) setProfile(p);
         }
-        return prevUser;
-      });
-
-      if (currentUser) {
-        try {
-          // If we have a user, we can already stop the main loading state
-          // the profile will load in the background
-          setLoading(false); 
-          
-          const p = await SupabaseService.getMyProfile(currentUser.id);
-          setProfile((prevProfile: any) => {
-            if (JSON.stringify(prevProfile) !== JSON.stringify(p)) {
-              return p;
-            }
-            return prevProfile;
-          });
-          
-          if (event === 'SIGNED_IN' && !isInitialMount) {
-            router.refresh();
-          }
-        } catch (err) { 
-          console.error("프로필 로드 실패:", err); 
-          setLoading(false);
-        }
-      } else {
-        setProfile(null);
-        setLoading(false);
+      } catch (error) {
+        console.error("인증 초기화 에러:", error);
+      } finally {
+        if (isMounted) setLoading(false); // 데이터를 다 가져온 후 로딩 종료
       }
-      
-      isInitialMount = false;
+    };
+
+    initAuth();
+
+    // 2. 이후의 로그인/로그아웃 이벤트만 감지합니다.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        if (isMounted) setLoading(false);
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        const currentUser = session?.user || null;
+        if (currentUser && isMounted) {
+          setUser(currentUser);
+          const p = await SupabaseService.getMyProfile(currentUser.id);
+          if (isMounted) setProfile(p);
+          router.refresh(); // 서버 데이터 동기화를 위해 refresh
+        }
+      }
     });
 
     return () => {
-      if (authCheckTimeout) clearTimeout(authCheckTimeout);
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [router]);
@@ -106,6 +94,7 @@ export const Header: React.FC = () => {
                 <MobileNavItem href="/game" icon={<Gamepad2 size={20} />} label="한글 게임" onClick={() => setIsMobileMenuOpen(false)} />
                 <MobileNavItem href="/quiz" icon={<BookOpenCheck size={20} />} label="맞춤법 퀴즈" onClick={() => setIsMobileMenuOpen(false)} />
                 <MobileNavItem href="/challenge" icon={<Users size={20} />} label="필사 챌린지" onClick={() => setIsMobileMenuOpen(false)} />
+                <MobileNavItem href="/recommend" icon={<Keyboard size={20} />} label="키보드 추천" onClick={() => setIsMobileMenuOpen(false)} />
             </div>
 
             <div className="p-6 bg-surface-low">
@@ -155,6 +144,7 @@ export const Header: React.FC = () => {
                 <NavButton icon={<Gamepad2 size={18} />} label="한글 게임" href="/game" />
                 <NavButton icon={<BookOpenCheck size={18} />} label="맞춤법 퀴즈" href="/quiz" />
                 <NavButton icon={<Users size={18} />} label="필사 챌린지" href="/challenge" />
+                <NavButton icon={<Keyboard size={18} />} label="키보드 추천" href="/recommend" />
             </nav>
 
             <div className="flex items-center gap-2">
