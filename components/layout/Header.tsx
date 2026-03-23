@@ -22,54 +22,69 @@ export const Header: React.FC = () => {
     let isMounted = true;
 
     const initAuth = async () => {
+      console.log("[Auth] initAuth 시작 (배포 환경 최적화)");
+      
+      // 2초 후에는 무조건 로딩을 해제하는 안전장치
+      const timeoutId = setTimeout(() => {
+        if (isMounted) {
+          console.log("[Auth] 초기화 타임아웃 발생 - 로딩 강제 해제");
+          setLoading(false);
+        }
+      }, 2000);
+
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // 1. getUser보다 빠른 getSession으로 세션 유무 먼저 파악
+        const { data: { session } } = await supabase.auth.getSession();
+        const initialUser = session?.user || null;
         
-        if (user && isMounted) {
-          setUser(user);
+        if (initialUser && isMounted) {
+          console.log("[Auth] 세션 발견:", initialUser.id);
+          setUser(initialUser);
           
-          let p = await SupabaseService.getMyProfile(user.id);
-          // 프로필이 아직 생성되지 않았다면 0.5초 대기 후 재시도
-          if (!p) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            p = await SupabaseService.getMyProfile(user.id);
+          // 프로필 조회 (재시도 로직 포함)
+          let p = await SupabaseService.getMyProfile(initialUser.id);
+          if (!p && isMounted) {
+            console.log("[Auth] 프로필 재시도 (800ms)");
+            await new Promise(resolve => setTimeout(resolve, 800));
+            p = await SupabaseService.getMyProfile(initialUser.id);
           }
-          
           if (isMounted) setProfile(p);
+        } else {
+          console.log("[Auth] 초기 세션 없음");
         }
       } catch (error) {
-        console.error("인증 초기화 에러:", error);
+        console.error("[Auth] 초기화 에러:", error);
       } finally {
-        if (isMounted) setLoading(false);
+        clearTimeout(timeoutId);
+        if (isMounted) {
+          console.log("[Auth] 초기화 완료 - 로딩 해제");
+          setLoading(false);
+        }
       }
     };
 
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProfile(null);
-        if (isMounted) setLoading(false);
-        router.refresh(); // 로그아웃 시에는 화면을 갱신합니다.
-      } else if (event === 'SIGNED_IN') {
-        // [수정됨] SIGNED_IN 이벤트에서만 프로필을 가져오고 화면을 갱신합니다.
+      console.log("[Auth] 이벤트 발생:", event, "User:", session?.user?.id || "None");
+      
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const currentUser = session?.user || null;
         if (currentUser && isMounted) {
           setUser(currentUser);
-          
-          let p = await SupabaseService.getMyProfile(currentUser.id);
-          if (!p) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            p = await SupabaseService.getMyProfile(currentUser.id);
-          }
-          
+          const p = await SupabaseService.getMyProfile(currentUser.id);
           if (isMounted) setProfile(p);
-          router.refresh(); 
+          
+          if (event === 'SIGNED_IN') {
+            router.refresh(); 
+          }
         }
-      } else if (event === 'TOKEN_REFRESHED') {
-        // [핵심 해결] 백그라운드 토큰 갱신 시에는 무한 루프 방지를 위해 아무 작업도 하지 않고 조용히 넘어갑니다.
-        console.log('세션 토큰이 백그라운드에서 갱신되었습니다.');
+        if (isMounted) setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        if (isMounted) setLoading(false);
+        router.refresh(); 
       }
     });
 
