@@ -10,6 +10,7 @@ import { SupabaseService, supabase } from "@/lib/supabase";
 import { NotificationDrawer } from "./NotificationDrawer";
 
 export const Header: React.FC = () => {
+  console.log("🚀 [Header] Rendering...");
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -18,12 +19,13 @@ export const Header: React.FC = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    console.log("🛠️ [Header] useEffect mounted");
     setMounted(true);
     let isMounted = true;
 
     const initAuth = async () => {
-      console.log("[Auth] initAuth 시작 (배포 환경 최적화)");
-      
+      console.log("🔍 [Auth] initAuth 시작");
+...
       // 2초 후에는 무조건 로딩을 해제하는 안전장치
       const timeoutId = setTimeout(() => {
         if (isMounted) {
