@@ -18,6 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/game/acid-rain',    // 산성비 게임
     '/game/card-flip',    // 기억력 타자 게임
     '/quiz',              // 맞춤법 퀴즈
+    '/recommend',         // 키보드 추천 (장비의 미학)
+    '/recommend/abko-mk108', // ABKO MK108 리뷰
     '/guide',             // 이용 가이드
     '/privacy',           // 개인정보처리방침
     '/terms',             // 이용약관

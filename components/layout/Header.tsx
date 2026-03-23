@@ -51,13 +51,14 @@ export const Header: React.FC = () => {
         setUser(null);
         setProfile(null);
         if (isMounted) setLoading(false);
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        router.refresh(); // 로그아웃 시에는 화면을 갱신합니다.
+      } else if (event === 'SIGNED_IN') {
+        // [수정됨] SIGNED_IN 이벤트에서만 프로필을 가져오고 화면을 갱신합니다.
         const currentUser = session?.user || null;
         if (currentUser && isMounted) {
           setUser(currentUser);
           
           let p = await SupabaseService.getMyProfile(currentUser.id);
-          // onAuthStateChange에서도 동일하게 재시도 로직 적용
           if (!p) {
             await new Promise(resolve => setTimeout(resolve, 500));
             p = await SupabaseService.getMyProfile(currentUser.id);
@@ -66,6 +67,9 @@ export const Header: React.FC = () => {
           if (isMounted) setProfile(p);
           router.refresh(); 
         }
+      } else if (event === 'TOKEN_REFRESHED') {
+        // [핵심 해결] 백그라운드 토큰 갱신 시에는 무한 루프 방지를 위해 아무 작업도 하지 않고 조용히 넘어갑니다.
+        console.log('세션 토큰이 백그라운드에서 갱신되었습니다.');
       }
     });
 
