@@ -19,49 +19,48 @@ export const Header: React.FC = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    console.log("🛠️ [Header] useEffect mounted");
     setMounted(true);
     let isMounted = true;
 
     const initAuth = async () => {
-      console.log("🔍 [Auth] initAuth 시작");
+      console.log("[Auth] initAuth 시작");
       
-      // 2초 후에는 무조건 로딩을 해제하는 안전장치
       const timeoutId = setTimeout(() => {
         if (isMounted) {
-          console.log("[Auth] 초기화 타임아웃 발생 - 로딩 강제 해제");
+          console.log("[Auth] 초기화 타임아웃 강제 해제");
           setLoading(false);
         }
       }, 2000);
 
       try {
-        // 1. getUser보다 빠른 getSession으로 세션 유무 먼저 파악
         const { data: { session } } = await supabase.auth.getSession();
         const initialUser = session?.user || null;
         
         if (initialUser && isMounted) {
-          console.log("[Auth] 세션 발견:", initialUser.id);
+          console.log("[Auth] 세션 발견, 유저 ID 설정:", initialUser.id);
           setUser(initialUser);
           
-          // 프로필 조회 (재시도 로직 포함)
-          let p = await SupabaseService.getMyProfile(initialUser.id);
-          if (!p && isMounted) {
-            console.log("[Auth] 프로필 재시도 (800ms)");
-            await new Promise(resolve => setTimeout(resolve, 800));
-            p = await SupabaseService.getMyProfile(initialUser.id);
-          }
-          if (isMounted) setProfile(p);
+          // 핵심: 세션만 확인되면 로딩을 먼저 풉니다!
+          setLoading(false); 
+          
+          // 프로필 로딩은 비동기로 따로 돌립니다.
+          (async () => {
+            let p = await SupabaseService.getMyProfile(initialUser.id);
+            if (!p && isMounted) {
+              await new Promise(r => setTimeout(r, 800));
+              p = await SupabaseService.getMyProfile(initialUser.id);
+            }
+            if (isMounted) setProfile(p);
+          })();
         } else {
           console.log("[Auth] 초기 세션 없음");
+          setLoading(false);
         }
       } catch (error) {
         console.error("[Auth] 초기화 에러:", error);
+        setLoading(false);
       } finally {
         clearTimeout(timeoutId);
-        if (isMounted) {
-          console.log("[Auth] 초기화 완료 - 로딩 해제");
-          setLoading(false);
-        }
       }
     };
 
@@ -74,18 +73,24 @@ export const Header: React.FC = () => {
         const currentUser = session?.user || null;
         if (currentUser && isMounted) {
           setUser(currentUser);
-          const p = await SupabaseService.getMyProfile(currentUser.id);
-          if (isMounted) setProfile(p);
           
-          if (event === 'SIGNED_IN') {
-            router.refresh(); 
-          }
+          // 세션 확인 시 즉시 로딩 해제
+          setLoading(false); 
+
+          (async () => {
+            const p = await SupabaseService.getMyProfile(currentUser.id);
+            if (isMounted) setProfile(p);
+            if (event === 'SIGNED_IN') {
+              router.refresh(); 
+            }
+          })();
+        } else {
+          setLoading(false);
         }
-        if (isMounted) setLoading(false);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
-        if (isMounted) setLoading(false);
+        setLoading(false);
         router.refresh(); 
       }
     });

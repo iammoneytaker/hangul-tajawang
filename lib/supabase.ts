@@ -44,23 +44,33 @@ export class SupabaseService {
   // --- Profiles ---
   static async getMyProfile(userId?: string) {
     let id = userId;
+    console.log(`[DB Query] getMyProfile 시작: ${id || 'No ID'}`);
     if (!id) {
       const user = await this.getCurrentUser();
-      if (!user) return null;
+      if (!user) {
+        console.log("[DB Query] 유저 없음, 프로필 조회 중단");
+        return null;
+      }
       id = user.id;
     }
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Profile fetch error:", error);
+      if (error) {
+        console.error("[DB Query] 프로필 fetch 에러:", error);
+        return null;
+      }
+      console.log("[DB Query] 프로필 fetch 성공:", data ? "데이터 있음" : "데이터 없음");
+      return data;
+    } catch (e) {
+      console.error("[DB Query] 프로필 조회 예외 발생:", e);
       return null;
     }
-    return data;
   }
 
   static async getAuthorProfile(authorId: string) {
