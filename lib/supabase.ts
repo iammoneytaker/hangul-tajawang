@@ -50,14 +50,18 @@ export class SupabaseService {
   }
 
   // --- Profiles ---
-  static async getMyProfile() {
-    const user = await this.getCurrentUser();
-    if (!user) return null;
+  static async getMyProfile(userId?: string) {
+    let id = userId;
+    if (!id) {
+      const user = await this.getCurrentUser();
+      if (!user) return null;
+      id = user.id;
+    }
     
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', id)
       .maybeSingle();
 
     if (error) {

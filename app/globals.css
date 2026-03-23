@@ -1,46 +1,94 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surface Hierarchy */
+  --surface: #f9f9ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f1f4ff;
+  --surface-container-high: #e2e7f3;
+  --surface-container-highest: #dce2f3;
+
+  /* Brand Colors */
+  --primary: #004ac6;
+  --primary-container: #2563eb;
+  --on-primary: #ffffff;
+  --secondary: #4a5f8c;
+  --secondary-container: #d6e3ff;
+  --on-secondary-container: #001b3e;
+  --tertiary: #784b00;
+  --on-surface: #151c27;
+  --outline-variant: rgba(195, 198, 215, 0.15);
+
+  --background: var(--surface);
+  --foreground: var(--on-surface);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   
-  --font-noto: var(--font-noto-sans);
-  --font-myeongjo: var(--font-nanum-myeongjo);
-  --font-pen: var(--font-nanum-pen);
-  --font-jua: var(--font-jua);
-  --font-batang: var(--font-gowun-batang);
-  --font-dodum: var(--font-gowun-dodum);
-  --font-gamja: var(--font-gamja-flower);
-  --font-single: var(--font-single-day);
-  --font-stylish: var(--font-stylish);
-  --font-yeon: var(--font-yeon-sung);
-  --font-brush: var(--font-nanum-brush);
-  --font-gaegu: var(--font-gaegu);
-  --font-poor: var(--font-poor-story);
-  --font-dokdo: var(--font-dokdo);
+  --color-surface: var(--surface);
+  --color-surface-lowest: var(--surface-container-lowest);
+  --color-surface-low: var(--surface-container-low);
+  --color-surface-high: var(--surface-container-high);
+  --color-surface-highest: var(--surface-container-highest);
+
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-surface: var(--on-surface);
+  --color-outline-variant: var(--outline-variant);
+
+  --font-plus-jakarta: var(--font-plus-jakarta);
+  --font-inter: var(--font-inter);
 }
 
-.font-noto { font-family: var(--font-noto-sans), sans-serif; }
-.font-myeongjo { font-family: var(--font-nanum-myeongjo), serif; }
-.font-pen { font-family: var(--font-nanum-pen), cursive; }
-.font-jua { font-family: var(--font-jua), sans-serif; }
-.font-batang { font-family: var(--font-gowun-batang), serif; }
-.font-dodum { font-family: var(--font-gowun-dodum), sans-serif; }
-.font-gamja { font-family: var(--font-gamja-flower), cursive; }
-.font-single { font-family: var(--font-single-day), cursive; }
-.font-stylish { font-family: var(--font-stylish), sans-serif; }
-.font-yeon { font-family: var(--font-yeon-sung), serif; }
-.font-brush { font-family: var(--font-nanum-brush), cursive; }
-.font-gaegu { font-family: var(--font-gaegu), cursive; }
-.font-poor { font-family: var(--font-poor-story), cursive; }
-.font-dokdo { font-family: var(--font-dokdo), cursive; }
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .editorial-heading {
+    @apply font-plus-jakarta font-bold tracking-tight text-on-surface;
+  }
+  
+  .glass-card {
+    @apply bg-surface-lowest/70 backdrop-blur-md border border-outline-variant rounded-[2rem] md:rounded-[3rem] shadow-[0_20px_40px_rgba(21,28,39,0.06)];
+  }
+
+  .primary-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  }
+}
+
+/* Typography Scale */
+.display-lg { 
+  @apply text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.1];
+}
+.headline-md { 
+  @apply text-2xl md:text-3xl font-bold tracking-tight;
+}
+.body-lg { 
+  @apply text-base md:text-lg leading-relaxed;
+}
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -48,32 +96,17 @@
   75% { transform: translateX(5px); }
 }
 
-@keyframes crawl {
-  0% { transform: rotate(0deg) translateY(0); }
-  20% { transform: rotate(-10deg) translateY(-4px); }
-  40% { transform: rotate(0deg) translateY(0); }
-  60% { transform: rotate(10deg) translateY(-4px); }
-  80% { transform: rotate(0deg) translateY(0); }
-  100% { transform: rotate(0deg) translateY(0); }
-}
-
 .animate-shake {
   animation: shake 0.2s ease-in-out infinite;
 }
 
-.animate-crawl {
-  animation: crawl 2s ease-in-out infinite;
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-surface-high rounded-full;
 }

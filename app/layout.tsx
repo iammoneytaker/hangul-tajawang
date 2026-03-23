@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { 
   Geist, Geist_Mono, Noto_Sans_KR, Nanum_Myeongjo, Nanum_Pen_Script, 
   Jua, Gowun_Batang, Gowun_Dodum, Gamja_Flower, Single_Day, Stylish, 
-  Yeon_Sung, Nanum_Brush_Script, Gaegu, Poor_Story, East_Sea_Dokdo
+  Yeon_Sung, Nanum_Brush_Script, Gaegu, Poor_Story, East_Sea_Dokdo,
+  Plus_Jakarta_Sans, Inter
 } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PrivacyConsentModal } from "@/components/layout/PrivacyConsentModal";
+
+const plusJakartaSans = Plus_Jakarta_Sans({ variable: "--font-plus-jakarta", subsets: ["latin"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono" });
@@ -75,12 +79,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </Script>
       </head>
       <body className={`
+        ${plusJakartaSans.variable} ${inter.variable}
         ${geistSans.variable} ${geistMono.variable} ${notoSans.variable} 
         ${nanumMyeongjo.variable} ${nanumPen.variable} ${jua.variable} 
         ${gowunBatang.variable} ${gowunDodum.variable} ${gamjaFlower.variable}
         ${singleDay.variable} ${stylish.variable} ${yeonSung.variable} ${nanumBrush.variable}
         ${gaegu.variable} ${poorStory.variable} ${dokdo.variable}
-        antialiased bg-[#f8f9fa] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen flex flex-col
+        antialiased min-h-screen flex flex-col
       `}>
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NCVLQG83" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} /></noscript>
         <PrivacyConsentModal />
