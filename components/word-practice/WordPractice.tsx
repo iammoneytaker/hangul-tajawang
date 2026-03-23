@@ -127,7 +127,14 @@ export const WordPractice: React.FC = () => {
             <div className="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800"><p className="text-[10px] font-black text-zinc-400 uppercase mb-2 tracking-widest">정확도</p><p className="text-3xl font-black text-blue-600">{report.accuracy}%</p></div>
             <div className="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800"><p className="text-[10px] font-black text-zinc-400 uppercase mb-2 tracking-widest">최종 타수</p><p className="text-3xl font-black text-green-600">{report.kpm}타</p></div>
           </div>
-          <KeyboardRecommendationBanner variant="light" className="!mt-0 mb-8" />
+          <KeyboardRecommendationBanner 
+            variant="light" 
+            className="!mt-0 mb-8 !p-4 !rounded-3xl border border-zinc-100" 
+            title={report.accuracy > 95 ? "정확한 타건의 비결은?" : "타자 실력 향상의 지름길"}
+            description={report.accuracy > 95 
+              ? "완벽한 정확도를 유지해줄 최적의 키보드 컬렉션" 
+              : "안정적인 타건감을 제공하는 장비로 오타를 줄여보세요."}
+          />
           <button onClick={reset} className="w-full py-5 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-black rounded-2xl transition-all hover:scale-105 flex items-center justify-center gap-2"><RotateCcw size={20} /> 다시 선택하기</button>
         </div>
       </div>

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Trophy, RotateCcw, Play, Loader2, Star, Zap, Flame, Brain, Timer, ChevronRight } from "lucide-react";
+import { Trophy, RotateCcw, Play, Loader2, Star, Zap, Flame, Brain, Timer, ChevronRight, Keyboard } from "lucide-react";
 import { SupabaseService } from "@/lib/supabase";
+import { KeyboardRecommendationBanner } from "../layout/KeyboardRecommendationBanner";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -189,8 +190,16 @@ export const CardFlipGame: React.FC = () => {
                 <div className="bg-zinc-50 dark:bg-zinc-800 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800"><p className="text-[10px] font-black text-zinc-400 uppercase mb-1 tracking-widest">Max Combo</p><p className="text-3xl font-black text-zinc-900 dark:text-zinc-100">{maxCombo}</p></div>
             </div>
             {!user ? (
-                <div className="mb-10 p-8 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30"><p className="text-sm font-bold text-blue-600 mb-6 flex items-center justify-center gap-2"><Zap size={16} fill="currentColor" /> 기록을 남겨보세요!</p><button onClick={() => SupabaseService.signInWithKakao()} className="w-full py-5 bg-[#FEE500] text-black font-black rounded-2xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl active:scale-95"><svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12 3c-5.5 0-10 3.5-10 7.8 0 2.8 1.8 5.3 4.5 6.6l-1.1 4.1c-.1.5.4.8.8.6l4.8-3.2c.3 0 .7.1 1 .1 5.5 0 10-3.5 10-7.8S17.5 3 12 3" /></svg>3초 만에 로그인하고 저장</button></div>
-            ) : <div className="mb-10 text-sm font-black text-green-600 animate-pulse">랭킹에 기록이 성공적으로 등록되었습니다!</div>}
+                <div className="mb-6 p-8 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30"><p className="text-sm font-bold text-blue-600 mb-6 flex items-center justify-center gap-2"><Zap size={16} fill="currentColor" /> 기록을 남겨보세요!</p><button onClick={() => SupabaseService.signInWithKakao()} className="w-full py-5 bg-[#FEE500] text-black font-black rounded-2xl flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl active:scale-95"><svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12 3c-5.5 0-10 3.5-10 7.8 0 2.8 1.8 5.3 4.5 6.6l-1.1 4.1c-.1.5.4.8.8.6l4.8-3.2c.3 0 .7.1 1 .1 5.5 0 10-3.5 10-7.8S17.5 3 12 3" /></svg>3초 만에 로그인하고 저장</button></div>
+            ) : <div className="mb-6 text-sm font-black text-green-600 animate-pulse">랭킹에 기록이 성공적으로 등록되었습니다!</div>}
+            
+            <KeyboardRecommendationBanner 
+              variant="light" 
+              className="!mt-0 mb-6 !p-4 !rounded-3xl border border-zinc-100" 
+              title="반응 속도가 아쉬우신가요?"
+              description="당신의 기억력과 타자 속도를 뒷받침할 게이밍 키보드 컬렉션"
+            />
+
             <button onClick={initGame} className="w-full py-5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xl font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3"><RotateCcw size={24} /> 다시 시작하기</button>
         </div>
     </div>

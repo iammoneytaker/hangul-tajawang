@@ -7,11 +7,15 @@ import Link from "next/link";
 interface KeyboardRecommendationBannerProps {
   variant?: "light" | "dark" | "glass";
   className?: string;
+  title?: string;
+  description?: string;
 }
 
 export const KeyboardRecommendationBanner: React.FC<KeyboardRecommendationBannerProps> = ({ 
   variant = "light",
-  className = "" 
+  className = "",
+  title = "당신의 타자 리듬을 완성할 최적의 장비",
+  description = "전문가가 엄선한 키보드 추천 컬렉션을 확인해 보세요."
 }) => {
   const baseStyles = "relative overflow-hidden rounded-[2rem] p-6 transition-all hover:scale-[1.02] active:scale-[0.98] group flex flex-col sm:flex-row items-center justify-between gap-6 mt-8";
   
@@ -32,8 +36,8 @@ export const KeyboardRecommendationBanner: React.FC<KeyboardRecommendationBanner
           <Sparkles size={28} />
         </div>
         <div>
-          <h4 className="font-black text-lg mb-1 tracking-tight">당신의 타자 리듬을 완성할 최적의 장비</h4>
-          <p className={`text-xs font-medium ${variant === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>전문가가 엄선한 키보드 추천 컬렉션을 확인해 보세요.</p>
+          <h4 className="font-black text-lg mb-1 tracking-tight">{title}</h4>
+          <p className={`text-xs font-medium ${variant === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>{description}</p>
         </div>
       </div>
 

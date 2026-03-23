@@ -21,25 +21,31 @@ export const Header: React.FC = () => {
     setMounted(true);
     let isMounted = true;
 
-    // 1. 초기 렌더링 시 무조건 현재 세션을 정확히 한 번 가져옵니다.
     const initAuth = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        
         if (user && isMounted) {
           setUser(user);
-          const p = await SupabaseService.getMyProfile(user.id);
+          
+          let p = await SupabaseService.getMyProfile(user.id);
+          // 프로필이 아직 생성되지 않았다면 0.5초 대기 후 재시도
+          if (!p) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            p = await SupabaseService.getMyProfile(user.id);
+          }
+          
           if (isMounted) setProfile(p);
         }
       } catch (error) {
         console.error("인증 초기화 에러:", error);
       } finally {
-        if (isMounted) setLoading(false); // 데이터를 다 가져온 후 로딩 종료
+        if (isMounted) setLoading(false);
       }
     };
 
     initAuth();
 
-    // 2. 이후의 로그인/로그아웃 이벤트만 감지합니다.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
@@ -49,9 +55,16 @@ export const Header: React.FC = () => {
         const currentUser = session?.user || null;
         if (currentUser && isMounted) {
           setUser(currentUser);
-          const p = await SupabaseService.getMyProfile(currentUser.id);
+          
+          let p = await SupabaseService.getMyProfile(currentUser.id);
+          // onAuthStateChange에서도 동일하게 재시도 로직 적용
+          if (!p) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            p = await SupabaseService.getMyProfile(currentUser.id);
+          }
+          
           if (isMounted) setProfile(p);
-          router.refresh(); // 서버 데이터 동기화를 위해 refresh
+          router.refresh(); 
         }
       }
     });
