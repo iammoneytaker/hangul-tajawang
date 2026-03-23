@@ -44,13 +44,9 @@ export class SupabaseService {
   // --- Profiles ---
   static async getMyProfile(userId?: string) {
     let id = userId;
-    console.log(`[DB Query] getMyProfile 시작: ${id || 'No ID'}`);
     if (!id) {
       const user = await this.getCurrentUser();
-      if (!user) {
-        console.log("[DB Query] 유저 없음, 프로필 조회 중단");
-        return null;
-      }
+      if (!user) return null;
       id = user.id;
     }
     
@@ -62,13 +58,12 @@ export class SupabaseService {
         .maybeSingle();
 
       if (error) {
-        console.error("[DB Query] 프로필 fetch 에러:", error);
+        console.error("Profile fetch error:", error);
         return null;
       }
-      console.log("[DB Query] 프로필 fetch 성공:", data ? "데이터 있음" : "데이터 없음");
       return data;
     } catch (e) {
-      console.error("[DB Query] 프로필 조회 예외 발생:", e);
+      console.error("Profile fetch exception:", e);
       return null;
     }
   }

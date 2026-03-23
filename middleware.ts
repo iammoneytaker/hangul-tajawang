@@ -34,13 +34,7 @@ export async function middleware(request: NextRequest) {
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake can make it very hard to debug
   // auth issues.
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    console.log(`[Server Auth] User authenticated: ${user.id} at ${request.nextUrl.pathname}`);
-  } else {
-    // console.log(`[Server Auth] No session at ${request.nextUrl.pathname}`);
-  }
+  await supabase.auth.getUser()
 
   return response
 }

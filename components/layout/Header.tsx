@@ -23,11 +23,8 @@ export const Header: React.FC = () => {
     let isMounted = true;
 
     const initAuth = async () => {
-      console.log("[Auth] initAuth 시작");
-      
       const timeoutId = setTimeout(() => {
         if (isMounted) {
-          console.log("[Auth] 초기화 타임아웃 강제 해제");
           setLoading(false);
         }
       }, 2000);
@@ -37,13 +34,9 @@ export const Header: React.FC = () => {
         const initialUser = session?.user || null;
         
         if (initialUser && isMounted) {
-          console.log("[Auth] 세션 발견, 유저 ID 설정:", initialUser.id);
           setUser(initialUser);
-          
-          // 핵심: 세션만 확인되면 로딩을 먼저 풉니다!
           setLoading(false); 
           
-          // 프로필 로딩은 비동기로 따로 돌립니다.
           (async () => {
             let p = await SupabaseService.getMyProfile(initialUser.id);
             if (!p && isMounted) {
@@ -53,11 +46,9 @@ export const Header: React.FC = () => {
             if (isMounted) setProfile(p);
           })();
         } else {
-          console.log("[Auth] 초기 세션 없음");
           setLoading(false);
         }
       } catch (error) {
-        console.error("[Auth] 초기화 에러:", error);
         setLoading(false);
       } finally {
         clearTimeout(timeoutId);
@@ -67,14 +58,10 @@ export const Header: React.FC = () => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[Auth] 이벤트 발생:", event, "User:", session?.user?.id || "None");
-      
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const currentUser = session?.user || null;
         if (currentUser && isMounted) {
           setUser(currentUser);
-          
-          // 세션 확인 시 즉시 로딩 해제
           setLoading(false); 
 
           (async () => {

@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { User, Keyboard, Trophy, Clock, Heart, BookOpen, Trash2, Edit3, Loader2, ChevronRight, Settings, MessageSquare, Play, X, Save, Sparkles, Zap, Target, Layout, Camera } from "lucide-react";
+import { User, Keyboard, Trophy, Clock, Heart, BookOpen, Trash2, Edit3, Loader2, ChevronRight, Settings, MessageSquare, Play, X, Save, Sparkles, Zap, Target, Layout, Camera, LogOut } from "lucide-react";
 import { SupabaseService, supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export const MyPage: React.FC<{ onStartChallenge: (content: any) => void }> = ({ onStartChallenge }) => {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [results, setResults] = useState<any[]>([]);
@@ -106,6 +108,17 @@ export const MyPage: React.FC<{ onStartChallenge: (content: any) => void }> = ({
       fetchData();
     } catch (error) {
       alert("삭제 실패");
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!confirm("로그아웃 하시겠습니까?")) return;
+    try {
+      await SupabaseService.signOut();
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
@@ -215,7 +228,12 @@ export const MyPage: React.FC<{ onStartChallenge: (content: any) => void }> = ({
                         </>
                     )}
                 </div>
-                <p className="text-zinc-400 font-bold mb-10">{user.email}</p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                    <p className="text-zinc-400 font-bold">{user.email}</p>
+                    <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-red-500 rounded-xl text-[10px] font-black transition-all">
+                        <LogOut size={12} /> 로그아웃
+                    </button>
+                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <StatBox icon={<Zap size={18}/>} label="최고 타수" value={`${Math.round(profile?.best_speed || 0)}타`} color="text-blue-600" bg="bg-blue-50/50 dark:bg-blue-900/10" />
