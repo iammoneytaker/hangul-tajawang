@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
 
     const initAuth = async () => {
       console.log("🔍 [Auth] initAuth 시작");
-...
+      
       // 2초 후에는 무조건 로딩을 해제하는 안전장치
       const timeoutId = setTimeout(() => {
         if (isMounted) {
