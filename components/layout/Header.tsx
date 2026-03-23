@@ -19,6 +19,8 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     setMounted(true);
+    let isInitialMount = true;
+
     const checkUser = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -36,21 +38,44 @@ export const Header: React.FC = () => {
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser(session.user);
+      const currentUser = session?.user || null;
+      
+      // 유저 상태가 변경되었을 때만 상태 업데이트
+      setUser(prevUser => {
+        if (prevUser?.id !== currentUser?.id) {
+          return currentUser;
+        }
+        return prevUser;
+      });
+
+      if (currentUser) {
         try {
           const p = await SupabaseService.getMyProfile();
-          setProfile(p);
-          if (event === 'SIGNED_IN') router.refresh();
-        } catch (err) { console.error(err); }
+          setProfile(prevProfile => {
+            if (JSON.stringify(prevProfile) !== JSON.stringify(p)) {
+              return p;
+            }
+            return prevProfile;
+          });
+          
+          // SIGNED_IN 이벤트이고 초기 마운트가 아닐 때만 refresh (무한 루프 방지)
+          if (event === 'SIGNED_IN' && !isInitialMount) {
+            router.refresh();
+          }
+        } catch (err) { 
+          console.error(err); 
+        }
       } else {
-        setUser(null);
         setProfile(null);
       }
+      
       setLoading(false);
+      isInitialMount = false;
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   const handleLogin = async () => {
