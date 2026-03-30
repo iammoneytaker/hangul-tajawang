@@ -45,9 +45,11 @@ export const config = {
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - favicon.ico, sitemap.xml, robots.txt, app-ads.txt, manifest.json
+     * - auth/callback (handled by route handler)
+     * - Any path with a dot (likely a static file with an extension, including query params)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|app-ads.txt|manifest.json|auth/callback|.*\\..*).*)',
   ],
 }
