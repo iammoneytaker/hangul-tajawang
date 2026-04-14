@@ -11,12 +11,13 @@ import Image from "next/image";
 
 interface Props {
   externalContent?: any;
+  initialTextId?: string;
 }
 
 type FontType = "font-noto" | "font-myeongjo" | "font-batang" | "font-dodum" | "font-pen" | "font-brush" | "font-gaegu" | "font-poor" | "font-dokdo" | "font-gamja" | "font-single" | "font-yeon" | "font-stylish" | "font-jua";
 
-export const LongPractice: React.FC<Props> = ({ externalContent }) => {
-  const [selectedTextId, setSelectedTextId] = useState(LONG_TEXT_DB[0].id);
+export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId }) => {
+  const [selectedTextId, setSelectedTextId] = useState(initialTextId || LONG_TEXT_DB[0].id);
   const [inputValue, setInputValue] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -195,7 +196,9 @@ export const LongPractice: React.FC<Props> = ({ externalContent }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
             <span className="text-primary font-black text-[10px] uppercase tracking-[0.5em] mb-2 block">{externalContent ? "Challenge Transcription" : "Editorial Practice"}</span>
-            <h2 className="display-lg !text-5xl text-on-surface flex items-center gap-4">{currentText.title}</h2>
+            <h1 className="display-lg !text-5xl text-on-surface flex items-center gap-4">
+                {currentText.title} {!externalContent && <span className="text-2xl text-zinc-500 hidden md:inline-block ml-2 opacity-60"> 한글 타자 연습</span>}
+            </h1>
             <p className="text-sm text-zinc-400 font-black flex items-center gap-2 mt-4"><BookOpen size={14} className="text-primary" /> {currentText.author} · {currentText.source}</p>
         </div>
         <div className="flex items-center gap-4 bg-surface-lowest p-3 rounded-[2rem] shadow-sm">
