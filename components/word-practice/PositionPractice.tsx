@@ -17,7 +17,7 @@ const DOUBLE_CONSONANTS: Record<string, string> = {
   "Q": "ㅃ", "W": "ㅉ", "E": "ㄸ", "R": "ㄲ", "T": "ㅆ", "O": "ㅒ", "P": "ㅖ"
 };
 
-export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words" }> = ({ initialPhase }) => {
+export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initialTargetId?: string }> = ({ initialPhase, initialTargetId }) => {
   const [selectedStep, setSelectedStep] = useState<PracticeStep | null>(null);
   const [shuffledKeys, setShuffledKeys] = useState<string[]>([]);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
@@ -64,9 +64,10 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words" }> = (
 
   useEffect(() => {
     if (initialPhase && phase === "select") {
-      startStep(BASIC_PRACTICE_STEPS[0], initialPhase);
+      const targetStep = initialTargetId ? BASIC_PRACTICE_STEPS.find(s => s.id === initialTargetId) || BASIC_PRACTICE_STEPS[0] : BASIC_PRACTICE_STEPS[0];
+      startStep(targetStep, initialPhase);
     }
-  }, [initialPhase, phase, startStep]);
+  }, [initialPhase, initialTargetId, phase, startStep]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

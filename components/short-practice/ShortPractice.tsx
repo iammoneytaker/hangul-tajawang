@@ -5,8 +5,8 @@ import { TypingUtils, TypingReport } from "@/lib/typing-speed";
 import { SHORT_TEXT_DB, SHORT_TEXT_CATEGORIES } from "@/lib/short-text-data";
 import { Clock, Target, Zap, Keyboard as KbdIcon, Sparkles } from "lucide-react";
 
-export const ShortPractice: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState("전체");
+export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialCategory }) => {
+  const [activeCategory, setActiveCategory] = useState(initialCategory || "전체");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -124,12 +124,6 @@ export const ShortPractice: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] w-full max-w-5xl mx-auto p-4 py-20 overflow-hidden">
-      <div className="flex flex-wrap justify-center gap-3 mb-16 bg-surface-low p-2 rounded-[2rem] shadow-sm">
-        {SHORT_TEXT_CATEGORIES.map(cat => (
-            <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-6 py-2.5 rounded-full text-xs font-black transition-all ${activeCategory === cat ? 'bg-on-surface text-white shadow-lg' : 'text-zinc-400 hover:bg-surface-high'}`}>{cat}</button>
-        ))}
-      </div>
-
       <div className="mb-16 flex flex-wrap justify-center gap-8">
         <MetricBadge icon={<Zap size={18}/>} label="현재 타수" value={lastReport?.kpm || 0} unit="타" color="text-primary" />
         <MetricBadge icon={<Target size={18}/>} label="정확도" value={lastReport?.accuracy || 0} unit="%" color="text-green-600" />

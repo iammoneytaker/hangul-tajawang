@@ -63,9 +63,9 @@ export default async function TranscriptionDetailPage({ params }: Props) {
         <LongPractice initialTextId={text.id} />
 
         {/* SEO HTML Content */}
-        <article className="mt-20 w-full max-w-5xl px-6 lg:px-8 opacity-80 animate-in fade-in duration-1000">
+        <article className="mt-20 w-full max-w-5xl px-6 lg:px-8 animate-in fade-in duration-1000">
             <h2 className="text-3xl font-black mb-8 border-b border-surface-high pb-4">{text.title} 한글 타자 연습</h2>
-            <div className="prose prose-invert prose-lg text-zinc-300 max-w-none">
+            <div className="prose dark:prose-invert prose-lg text-zinc-700 dark:text-zinc-300 max-w-none">
                 <p className="leading-relaxed mb-8">
                     이 페이지는 <strong>{text.author}</strong>의 <strong>'{text.title}'</strong> 전문을 제공하며, 이를 활용하여 한글 타자 연습을 하실 수 있도록 구성되어 있습니다.
                     상단의 감성적인 원고지 화면에서 제시된 글을 따라 입력하며 연습을 진행해보세요.
@@ -74,7 +74,7 @@ export default async function TranscriptionDetailPage({ params }: Props) {
                 </p>
                 <div className="bg-surface-low p-10 rounded-[2.5rem] whitespace-pre-wrap leading-loose font-medium text-lg border border-surface-high shadow-inner">
                     <h3 className="text-2xl font-bold mb-6 text-primary">{text.title} 전문</h3>
-                    <div className="text-on-surface">
+                    <div className="text-zinc-800 dark:text-zinc-200 font-bold">
                       {text.content}
                     </div>
                 </div>

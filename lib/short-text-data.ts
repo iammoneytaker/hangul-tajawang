@@ -1,10 +1,12 @@
 export interface ShortTextData {
+  id: string;
   category: string;
   sentences: string[];
 }
 
 export const SHORT_TEXT_DB: ShortTextData[] = [
   {
+    id: 'healing',
     category: '위로/힐링',
     sentences: [
       "너는 지금도 충분히 잘하고 있으니까 아무 걱정 하지 마",
@@ -20,6 +22,7 @@ export const SHORT_TEXT_DB: ShortTextData[] = [
     ]
   },
   {
+    id: 'motivation',
     category: '동기부여',
     sentences: [
       "성공은 한순간에 이루어지는 것이 아니라 꾸준한 노력의 결과입니다",
@@ -35,6 +38,7 @@ export const SHORT_TEXT_DB: ShortTextData[] = [
     ]
   },
   {
+    id: 'love',
     category: '사랑',
     sentences: [
       "사랑해요 내 소중한 당신",
@@ -50,6 +54,7 @@ export const SHORT_TEXT_DB: ShortTextData[] = [
     ]
   },
   {
+    id: 'literature',
     category: '문학/명대사',
     sentences: [
       "봄은 어김없이 오고 꽃은 피어나네",
@@ -65,6 +70,7 @@ export const SHORT_TEXT_DB: ShortTextData[] = [
     ]
   },
   {
+    id: 'kpop',
     category: 'K-POP',
     sentences: [
       "Dynamite 시원한 밤이야 this life is so nice",
