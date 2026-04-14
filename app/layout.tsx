@@ -60,6 +60,12 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
   },
+  alternates: {
+    canonical: "https://hangul-tajawang.com",
+    types: {
+      'application/rss+xml': 'https://hangul-tajawang.com/feed.xml',
+    },
+  },
   verification: {
     other: {
       "naver-site-verification": "a2b9690769181edc8ee83bbbe17c9e693b18a21c",

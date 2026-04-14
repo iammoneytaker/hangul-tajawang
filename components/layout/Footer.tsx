@@ -12,6 +12,7 @@ export const Footer: React.FC = () => {
           <span className="font-medium">© 2026 한글타자왕 Web Edition.</span>
         </div>
         <div className="flex gap-8">
+          <Link href="/guide" className="hover:text-primary transition-colors font-medium">이용 가이드</Link>
           <Link href="/terms" className="hover:text-primary transition-colors font-medium">이용약관</Link>
           <Link href="/privacy" className="hover:text-primary transition-colors font-medium">개인정보처리방침</Link>
           <Link href="/contact" className="hover:text-primary transition-colors font-medium">문의하기</Link>
