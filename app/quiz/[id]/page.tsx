@@ -4,6 +4,7 @@ import { SpellingQuiz } from '@/components/quiz/SpellingQuiz';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PenTool, CheckCircle2 } from 'lucide-react';
+import { Suspense } from 'react';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -70,12 +71,14 @@ export default async function QuizDetailPage({ params }: Props) {
       
       <div className="flex flex-col items-center">
         {/* 인터랙티브 퀴즈 컴포넌트 */}
-        <SpellingQuiz 
-          question={data} 
-          nextQuestionId={nextData?.id || null} 
-          currentIndex={currentIndex} 
-          totalLength={QUIZ_DATA.length} 
-        />
+        <Suspense fallback={<div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 w-full max-w-2xl mx-auto h-80 rounded-3xl my-12" />}>
+          <SpellingQuiz 
+            question={data} 
+            nextQuestionId={nextData?.id || null} 
+            currentIndex={currentIndex} 
+            totalLength={QUIZ_DATA.length} 
+          />
+        </Suspense>
 
         {/* AEO 최적화 맞춤법 사전 아티클 영역 */}
         <article className="mt-12 w-full max-w-4xl px-6 lg:px-8 animate-in fade-in duration-1000">
