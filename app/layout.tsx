@@ -71,6 +71,9 @@ export const metadata: Metadata = {
       "naver-site-verification": "a2b9690769181edc8ee83bbbe17c9e693b18a21c",
     },
   },
+  other: {
+    "google-adsense-account": "ca-pub-5720611278808953",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
