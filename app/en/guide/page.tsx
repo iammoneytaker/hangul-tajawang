@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { Keyboard, Monitor, Apple, Smartphone, ChevronRight } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -10,7 +11,7 @@ const FAQ = [
   },
   {
     q: 'Do I need keyboard stickers to learn the Korean layout?',
-    a: 'No, and we recommend against them: stickers encourage looking down at the keyboard, which caps your speed permanently. Our position practice shows the layout on screen and drills each key with the correct finger, so the layout moves into muscle memory within days.',
+    a: 'No. The on-screen keyboard shows the Hangul key positions, so stickers are optional. If you use stickers at first, gradually try looking at the screen instead. Learn at your own pace; there is no fixed number of days needed to memorize the layout.',
   },
   {
     q: 'What is the difference between 2-set and 3-set Korean keyboards?',
@@ -37,6 +38,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/guide', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'How to Type in Korean - Complete Beginner Guide',
     description: 'Set up Korean input on any device, learn the Hangul layout, and start typing Korean today.',
     url: 'https://www.hangul-tajawang.com/en/guide',

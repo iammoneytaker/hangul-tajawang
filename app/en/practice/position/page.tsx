@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { Keyboard } from 'lucide-react';
 import { PositionPractice } from '@/components/word-practice/PositionPractice';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/practice/position', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Keyboard Position Practice',
     description: 'Master the Hangul keyboard layout step by step, with the correct finger for every key.',
     url: 'https://www.hangul-tajawang.com/en/practice/position',
@@ -43,7 +45,8 @@ export default function EnPositionPracticePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="flex flex-col items-center">
-        <PositionPractice initialPhase="keys" />
+        <p className="text-sm text-zinc-600 px-6 mb-4">The drill controls below are in Korean. Type the highlighted key to practice each keyboard row.</p>
+        <div lang="ko" className="w-full"><PositionPractice initialPhase="keys" /></div>
 
         <article className="mt-20 w-full px-6 lg:px-8 animate-in fade-in duration-1000">
           <h1 className="text-3xl font-bold mb-8 border-b border-surface-high pb-4 flex items-center gap-4">

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { SpeedTest } from '@/components/test/SpeedTest';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -10,11 +11,11 @@ const FAQ = [
   },
   {
     q: 'How is CPM calculated for Korean?',
-    a: 'Per jamo (individual Hangul letter), the same method used by Korean standard typing tutors. The syllable 한 counts as 3 keystrokes: ㅎ + ㅏ + ㄴ. Your CPM is the total number of jamo you typed correctly in 60 seconds, adjusted for accuracy.',
+    a: 'The test counts Hangul keystrokes in the text you enter during 60 seconds, including mistyped text. The syllable 한 counts as 3 strokes: ㅎ + ㅏ + ㄴ. Accuracy is measured separately by comparing your entered characters with the target. CPM here is not English WPM.',
   },
   {
     q: 'What do the typing tiers mean?',
-    a: 'Based on your accuracy-adjusted score: 600+ CPM is SSS (godlike), 500+ SS, 400+ S, 300+ A, 200+ B, 100+ C, and below that D. The average Korean office worker types around 300–400 CPM, so an A tier means you type like a native professional.',
+    a: 'At 95% accuracy or higher, 600+ CPM is SSS, 500+ SS, 400+ S, 300+ A, 200+ B, 100+ C, and below 100 is D. At 90–94% accuracy, the tier score is 90% of CPM and capped below A, so B is the highest possible tier. Below 90% accuracy, the tier is D regardless of speed.',
   },
   {
     q: 'The test is in Korean — can I still use it as a learner?',
@@ -36,6 +37,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/test', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Typing Speed Test - What Is Your Tier?',
     description: 'Measure your Korean typing speed and accuracy in 1 minute and share your tier card.',
     url: 'https://www.hangul-tajawang.com/en/test',
@@ -77,11 +79,11 @@ export default function EnSpeedTestPage() {
         <h1 className="serif-display text-3xl md:text-5xl font-bold mb-4">Korean Typing Speed Test</h1>
         <p className="text-zinc-600 text-base md:text-xl leading-relaxed break-keep">
           How fast can you type Hangul? Measure your <strong className="text-on-surface">CPM and accuracy</strong> in
-          60 seconds and get your typing tier.
+          60 seconds and get your typing tier. The test controls below are currently in Korean; press 테스트 시작하기 to start.
         </p>
       </div>
 
-      <SpeedTest />
+      <div lang="ko"><SpeedTest /></div>
 
       <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-6 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-surface-high pt-12 md:pt-16">
         <section>
@@ -101,7 +103,7 @@ export default function EnSpeedTestPage() {
         <section>
           <h2 className="text-lg font-bold mb-4 pb-2 border-b-2 border-success inline-block">Measure, then improve</h2>
           <p className="text-sm text-zinc-500 leading-relaxed">
-            Below the native-speaker average of 300–400 CPM? Build speed with{' '}
+            Want to improve your own previous score? Build speed with{' '}
             <Link prefetch={false} href="/en/practice" className="text-primary font-bold underline underline-offset-2">
               step-by-step practice
             </Link>{' '}

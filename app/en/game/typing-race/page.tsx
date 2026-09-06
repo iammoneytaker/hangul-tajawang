@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { TypingRaceGame } from '@/components/game/TypingRaceGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['korean typing game', 'typing race game', 'typing speed game', 'hangul typing game for beginners'],
   alternates: localeAlternates('/game/typing-race', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Typing Race - Korean Typing Speed Race',
     description: 'Race AI animals to the finish line and see how your Korean typing speed stacks up.',
     url: 'https://www.hangul-tajawang.com/en/game/typing-race',

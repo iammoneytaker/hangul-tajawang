@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { BlockPopGame } from '@/components/game/BlockPopGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['korean typing game', 'block typing game', 'word block game', 'hangul typing game'],
   alternates: localeAlternates('/game/block-pop', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Block Pop - Korean Word Block Typing Game',
     description: 'Pop the rising word blocks before they reach the ceiling — pure typing arcade.',
     url: 'https://www.hangul-tajawang.com/en/game/block-pop',

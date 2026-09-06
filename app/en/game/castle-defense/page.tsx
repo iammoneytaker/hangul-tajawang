@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { TypingDefenseGame } from '@/components/game/TypingDefenseGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['korean typing game', 'typing tower defense', 'typing defense game', 'hangul typing game'],
   alternates: localeAlternates('/game/castle-defense', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Castle Defense - Korean Typing Tower Defense',
     description: 'Type enemy words to fire arrows and hold the gate through waves and bosses.',
     url: 'https://www.hangul-tajawang.com/en/game/castle-defense',

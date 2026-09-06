@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -10,7 +11,7 @@ const FAQ = [
   },
   {
     q: 'How long should I practice each day?',
-    a: '10–15 minutes a day, every day, beats one long session a week. Finger muscle memory builds with frequency of repetition, not duration. Most learners see a clear speed jump within two weeks of short daily practice.',
+    a: 'Try a manageable routine, such as 10–15 minutes a day. Practice accurately, take breaks when your hands feel tired, and compare your own results over time. Progress depends on your starting point and how consistently you practice.',
   },
   {
     q: 'Do I need to install anything or create an account?',
@@ -21,7 +22,7 @@ const FAQ = [
 export const metadata: Metadata = {
   title: 'Korean Typing Practice for Beginners',
   description:
-    'Free step-by-step Korean typing practice: learn Hangul key positions, drill real Korean words, and type full sentences. The fastest way for beginners to build Korean typing speed.',
+    'Free step-by-step Korean typing practice: learn Hangul key positions, drill real Korean words, and type full sentences with an English guide for beginners.',
   keywords: [
     'korean typing practice',
     'korean typing practice for beginners',
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/practice', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Typing Practice - Choose Your Mode',
     description: 'Key positions, words, or sentences — pick a mode and start building Korean typing speed.',
     url: 'https://www.hangul-tajawang.com/en/practice',
@@ -94,9 +96,9 @@ export default function EnPracticeHubPage() {
         <p className="text-xs font-semibold tracking-[0.25em] text-primary uppercase mb-3">Practice Modes</p>
         <h1 className="serif-display text-4xl md:text-5xl font-bold mb-6">Korean Typing Practice for Beginners</h1>
         <p className="text-zinc-500 font-medium text-lg leading-relaxed">
-          Four stages, one path: learn the keys, master words, flow through sentences, then transcribe real literature.
+          Four stages, one path: learn the keys, master words, flow through sentences, then transcribe real literature.{' '}
           <br className="hidden md:block" />
-          All practice text is authentic Korean — the fastest way to internalize Hangul.
+          All practice text is Korean, with English explanations to help you get started.
         </p>
       </div>
 

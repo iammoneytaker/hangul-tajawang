@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { CardFlipGame } from '@/components/game/CardFlipGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['korean typing game', 'memory card game', 'typing memory game', 'hangul typing game'],
   alternates: localeAlternates('/game/card-flip', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Memory Flip - Korean Typing Card Game',
     description: 'No mouse allowed — flip every card by typing and find the matching pairs.',
     url: 'https://www.hangul-tajawang.com/en/game/card-flip',

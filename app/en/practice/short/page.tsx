@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { Quote, ArrowRight } from 'lucide-react';
 import { SHORT_TEXT_DB } from '@/lib/short-text-data';
@@ -41,6 +42,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/practice/short', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Sentence Typing Practice by Theme',
     description: 'Proverbs, quotes and healing lines — pick a theme and build your Korean typing flow.',
     url: 'https://www.hangul-tajawang.com/en/practice/short',
@@ -66,10 +68,10 @@ export default function EnShortPracticeListPage() {
 
       <div className="text-center mb-16">
         <h1 className="text-5xl font-bold mb-6">Korean Sentence Typing Practice</h1>
-        <p className="text-zinc-400 font-medium text-xl leading-relaxed">
-          Type real Korean sentences, one at a time, with live speed and accuracy tracking.
+        <p className="text-zinc-500 font-medium text-xl leading-relaxed">
+          Type real Korean sentences, one at a time, with live speed and accuracy tracking.{' '}
           <br className="hidden md:block" />
-          Pick a theme and find your typing rhythm.
+          Pick a theme and find your typing rhythm. Drills open in the Korean interface.
         </p>
       </div>
 
@@ -85,12 +87,12 @@ export default function EnShortPracticeListPage() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <Quote size={20} className="text-primary" />
-                <span className="text-[10px] font-bold uppercase text-primary tracking-widest">{theme.category}</span>
+                <span className="text-[10px] font-bold uppercase text-primary tracking-widest">{en?.title ?? 'Korean Sentences'}</span>
               </div>
               <h2 className="text-2xl font-bold text-on-surface mb-2 group-hover:text-primary transition-colors">
                 {en?.title ?? theme.category}
               </h2>
-              <p className="text-sm font-medium text-zinc-400 mb-6">
+              <p className="text-sm font-medium text-zinc-500 mb-6">
                 {en?.description ?? `${theme.sentences.length} Korean sentences to type.`}
               </p>
               <div className="mt-auto flex items-center justify-between p-4 bg-surface-lowest rounded-xl border border-surface-high">

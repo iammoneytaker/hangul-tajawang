@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { BookOpen, PenTool, ArrowRight, Sparkles } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -42,6 +43,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/transcription', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Type Korean Literature - Transcription Practice',
     description: 'Transcribe Korean poems and stories on a manuscript-paper screen — the final stage of Korean typing practice.',
     url: 'https://www.hangul-tajawang.com/en/transcription',
@@ -69,9 +71,9 @@ export default function EnTranscriptionPage() {
         <p className="text-xs font-semibold tracking-[0.25em] text-primary uppercase mb-3">Transcription · 필사</p>
         <h1 className="serif-display text-4xl md:text-5xl font-bold mb-6">Type Korean Literature</h1>
         <p className="text-zinc-500 font-medium text-lg md:text-xl leading-relaxed">
-          The final stage of Korean typing practice: transcribe real poems and stories,
+          The final stage of Korean typing practice: transcribe real poems and stories,{' '}
           <br className="hidden md:block" />
-          full text, on a warm manuscript-paper screen.
+          on a manuscript-paper screen. The practice interface opens in Korean.
         </p>
       </div>
 

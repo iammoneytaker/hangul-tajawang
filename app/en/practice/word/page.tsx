@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { Keyboard, ArrowRight } from 'lucide-react';
 import { BASIC_PRACTICE_STEPS } from '@/lib/word-data';
 import { localeAlternates } from '@/lib/i18n/alternates';
+
+const STEP_LABELS: Readonly<Record<string, { readonly title: string; readonly description: string }>> = {
+  step1: { title: 'Home Row', description: 'Practice ㅁ ㄴ ㅇ ㄹ ㅎ and ㅗ ㅓ ㅏ ㅣ.' },
+  step2: { title: 'Top Row', description: 'Practice ㅂ ㅈ ㄷ ㄱ ㅅ and ㅛ ㅕ ㅑ ㅐ ㅔ.' },
+  step3: { title: 'Bottom Row', description: 'Practice ㅋ ㅌ ㅊ ㅍ and ㅠ ㅜ ㅡ.' },
+  step4: { title: 'Shift & Tense Consonants', description: 'Practice ㄲ ㄸ ㅃ ㅆ ㅉ and ㅒ ㅖ with Shift.' },
+  step5: { title: 'Full Keyboard Review', description: 'Mix words from every keyboard row.' },
+};
 
 const FAQ = [
   {
@@ -32,6 +41,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/practice/word', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Word Typing Practice - Step-by-Step Drills',
     description: 'Real Korean words, organized by keyboard row, from home-row basics to tense consonants.',
     url: 'https://www.hangul-tajawang.com/en/practice/word',
@@ -57,10 +67,10 @@ export default function EnWordPracticeListPage() {
 
       <div className="text-center mb-16 animate-in slide-in-from-bottom duration-700">
         <h1 className="text-5xl font-bold mb-6">Korean Word Typing Practice</h1>
-        <p className="text-zinc-400 font-medium text-xl leading-relaxed">
-          Real Korean words organized by keyboard region — home row, top row, bottom row, and tense consonants.
+        <p className="text-zinc-500 font-medium text-xl leading-relaxed">
+          Real Korean words organized by keyboard region — home row, top row, bottom row, and tense consonants.{' '}
           <br className="hidden md:block" />
-          The single most effective stage for building Korean typing speed.
+          Build speed one keyboard region at a time. Drills open in the Korean interface.
         </p>
       </div>
 
@@ -84,9 +94,9 @@ export default function EnWordPracticeListPage() {
             </div>
 
             <h2 className="text-2xl font-bold text-on-surface mb-2 group-hover:text-primary transition-colors relative z-10">
-              {step.title}
+              {STEP_LABELS[step.id]?.title ?? `Step ${i + 1}`}
             </h2>
-            <p className="text-sm font-medium text-zinc-400 mb-6 relative z-10">{step.description}</p>
+            <p className="text-sm font-medium text-zinc-500 mb-6 relative z-10">{STEP_LABELS[step.id]?.description}</p>
 
             <div className="mt-auto flex items-center justify-between relative z-10 p-4 bg-surface-lowest rounded-xl border border-surface-high">
               <span className="text-xs font-bold text-zinc-500 line-clamp-1 flex-1">

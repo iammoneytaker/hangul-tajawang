@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { ChevronRight, Trophy } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/game', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Typing Games - Free Online Arcade',
     description: 'Six free Hangul typing games with leaderboards — practice that feels like play.',
     url: 'https://www.hangul-tajawang.com/en/game',

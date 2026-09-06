@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { WordGame } from '@/components/game/WordGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['acid rain typing game', 'korean typing game', 'word rain game', 'hangul typing game', 'korean word game'],
   alternates: localeAlternates('/game/acid-rain', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Acid Rain - Korean Word Rain Typing Game',
     description: 'Type falling Korean words before they hit the ground — the classic Korean typing game, free online.',
     url: 'https://www.hangul-tajawang.com/en/game/acid-rain',

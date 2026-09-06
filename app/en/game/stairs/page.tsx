@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import { StairsGame } from '@/components/game/StairsGame';
 import { GameJsonLd } from '@/components/seo/GameJsonLd';
 import { GamePageShell } from '../GamePageShell';
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   keywords: ['korean typing game', 'endless typing game', 'hangul typing game', 'word stairs game'],
   alternates: localeAlternates('/game/stairs', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Word Stairs - Endless Korean Typing Game',
     description: 'Type each word to climb one more step — how high can you carry the chick?',
     url: 'https://www.hangul-tajawang.com/en/game/stairs',

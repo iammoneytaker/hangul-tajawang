@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
 import Link from 'next/link';
 import { Timer, Keyboard, Gamepad2, BookOpen, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
@@ -18,7 +19,7 @@ const FAQ = [
   },
   {
     q: 'How is Korean typing speed measured?',
-    a: 'Korean typing speed is usually measured in CPM (characters per minute), counted per jamo (individual letter) rather than per syllable. The syllable 한 counts as 3 keystrokes: ㅎ + ㅏ + ㄴ. An average Korean office worker types around 300–400 CPM; our speed test converts your score into a fun tier from D up to SSS.',
+    a: 'This site measures Korean typing speed as Hangul keystrokes per minute, also labeled CPM. The syllable 한 counts as 3 strokes: ㅎ + ㅏ + ㄴ. Accuracy is reported separately and affects your D-to-SSS tier. This is not English WPM; compare your results using the same test and settings.',
   },
 ];
 
@@ -38,6 +39,7 @@ export const metadata: Metadata = {
   ],
   alternates: localeAlternates('/', 'en'),
   openGraph: {
+    ...ENGLISH_OPEN_GRAPH,
     title: 'Korean Typing Practice - Learn to Type Hangul Free',
     description:
       'Learn the Hangul keyboard, drill words and sentences, play Korean typing games, and test your speed. 100% free.',
@@ -154,8 +156,8 @@ export default function EnHomePage() {
       <section className="mb-20 md:mb-28">
         <h2 className="text-2xl md:text-3xl font-bold mb-6">Why practice Korean typing here?</h2>
         <p className="text-zinc-600 leading-loose font-medium mb-8">
-          Hangul Tajawang (한글타자왕, &ldquo;Korean Typing King&rdquo;) is one of Korea&rsquo;s most popular typing
-          practice sites, used daily by native Korean speakers to build real typing speed. Everything you practice here
+          Hangul Tajawang (한글타자왕, &ldquo;Korean Typing King&rdquo;) offers free typing
+          practice for Korean speakers and learners. Everything you practice here
           is authentic Korean text — real words, real sentences — typed on the standard 2-set (두벌식) keyboard layout
           that virtually all Koreans use. If you are learning Korean, typing is one of the fastest ways to internalize
           Hangul: your fingers learn to break syllables like 한 into ㅎ + ㅏ + ㄴ automatically.
