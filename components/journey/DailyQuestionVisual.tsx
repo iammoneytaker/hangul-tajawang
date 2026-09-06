@@ -4,6 +4,12 @@ import type { DailyQuestion } from '@/lib/daily-journey';
 export function DailyQuestionVisual({ question }: { question: DailyQuestion }) {
   const visual = question.visual;
   switch (visual.kind) {
+    case 'country-flag':
+      return <figure className="mb-6 rounded-xl bg-surface-low p-5">
+        <Image src={`https://flagcdn.com/w320/${visual.countryCode}.png`} alt="나라 맞히기 문제의 국기"
+          width={240} height={160} unoptimized className="mx-auto h-40 w-full max-w-60 object-contain" />
+        <figcaption className="mt-3 text-center text-sm text-secondary">색과 무늬를 보고 나라 이름을 떠올려 보세요.</figcaption>
+      </figure>;
     case 'flag':
       return <figure className="mb-6 flex items-center gap-5 rounded-xl bg-surface-low p-5">
         <Image src={`https://flagcdn.com/w160/${visual.countryCode}.png`} alt={`${visual.country} 국기`}

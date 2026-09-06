@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { answerDaily, currentDailyQuestion, emptyDailyState, hintDaily, prepareDaily } from '../lib/daily-journey';
+import { answerDaily, currentDailyQuestion, DAILY_QUESTIONS, emptyDailyState, hintDaily, prepareDaily } from '../lib/daily-journey';
 import { parseDailyState } from '../lib/daily-journey-storage';
 import { getKstDateString } from '../lib/kst-date';
 
@@ -52,4 +52,36 @@ test('손상된 저장값은 안전하게 초기 상태로 읽는다', () => {
   for (const value of ['broken', '{}', '{"version":1,"reviews":{},"session":{"questionIds":["missing"]}}']) {
     assert.deepEqual(parseDailyState(value), emptyDailyState());
   }
+});
+
+test('새로운 오늘의 문제에는 국기를 보고 나라를 입력하는 문제가 포함된다', () => {
+  const state = prepareDaily(emptyDailyState(), today);
+  const flag = state.session?.questionIds.map(id => DAILY_QUESTIONS.find(q => q.id === id)).find(q => q?.courseId === 'flag-quiz');
+  assert.ok(flag);
+  assert.equal(flag.visual.kind, 'country-flag');
+  assert.ok(!flag.prompt.includes(flag.answer));
+  assert.ok(!('country' in flag.visual));
+});
+
+test('국기 문제가 추가되어도 저장된 오늘의 문제와 완료 결과는 바꾸지 않는다', () => {
+  let state = prepareDaily(emptyDailyState(), today);
+  assert.ok(state.session);
+  state.session.questionIds = DAILY_QUESTIONS.filter(q => q.courseId === 'world-capitals').slice(0, 5).map(q => q.id);
+  const restored = parseDailyState(JSON.stringify(state));
+  assert.deepEqual(prepareDaily(restored, today), state);
+  for (let i = 0; i < 5; i++) {
+    const question = currentDailyQuestion(state);
+    assert.ok(question && state.session);
+    state = answerDaily({ ...state, session: { ...state.session, input: question.answer } }, today);
+  }
+  assert.ok(state.session?.completedAt);
+  assert.deepEqual(prepareDaily(parseDailyState(JSON.stringify(state)), today), state);
+});
+
+test('나라 맞히기는 호주 같은 통용 이름도 정답으로 인정한다', () => {
+  const state = prepareDaily(emptyDailyState(), today);
+  assert.ok(state.session);
+  state.session.questionIds = ['flag-quiz:au', ...state.session.questionIds.filter(id => id !== 'flag-quiz:au').slice(0, 4)];
+  state.session.input = '호주';
+  assert.equal(answerDaily(state, today).session?.answers.length, 1);
 });

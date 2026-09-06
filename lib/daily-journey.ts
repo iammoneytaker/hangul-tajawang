@@ -11,11 +11,13 @@ export interface DailyQuestion {
   aliases: string[];
   detail: string;
   visual: { kind: 'flag'; countryCode: string; country: string }
+    | { kind: 'country-flag'; countryCode: string }
     | { kind: 'element'; symbol: string; atomicNumber: number }
     | { kind: 'history'; order: number; year: string };
 }
 
-const COURSE_IDS = ['world-capitals', 'joseon-kings', 'periodic-table'];
+const COURSE_IDS = ['flag-quiz', 'world-capitals', 'joseon-kings', 'periodic-table'];
+const FLAG_ALIASES: Record<string, string[]> = { kr: ['한국'], au: ['호주'], tr: ['터키'], us: ['미합중국'], za: ['남아공'] };
 export const DAILY_QUESTIONS: DailyQuestion[] = COURSE_IDS.flatMap(courseId => {
   const course = JOURNEY_COURSES.find(item => item.id === courseId);
   if (!course) return [];
@@ -23,13 +25,17 @@ export const DAILY_QUESTIONS: DailyQuestion[] = COURSE_IDS.flatMap(courseId => {
     id: `${course.id}:${station.id}`,
     courseId: course.id,
     category: course.category,
-    prompt: course.flow === 'quiz' ? `${station.name}${course.questionSuffix || ''}`
+    prompt: course.id === 'flag-quiz' ? '이 국기는 어느 나라·지역의 국기일까요?'
+      : course.flow === 'quiz' ? `${station.name}${course.questionSuffix || ''}`
       : course.ui === 'periodic' ? `원자번호 ${index + 1}번 (${station.reading}), 이 원소는?`
       : `조선 ${index + 1}대 왕은?`,
     answer: course.flow === 'quiz' ? station.fact : station.name,
-    aliases: course.flow === 'quiz' ? station.aliases || [] : [],
-    detail: course.flow === 'quiz' ? station.detail || `${station.name}의 수도는 ${station.fact}입니다.` : station.fact,
-    visual: course.id === 'world-capitals'
+    aliases: course.id === 'flag-quiz' ? station.aliases || FLAG_ALIASES[station.id] || []
+      : course.flow === 'quiz' ? station.aliases || [] : [],
+    detail: course.id === 'flag-quiz' ? `${station.name}의 국기입니다.`
+      : course.flow === 'quiz' ? station.detail || `${station.name}의 수도는 ${station.fact}입니다.` : station.fact,
+    visual: course.id === 'flag-quiz' ? { kind: 'country-flag' as const, countryCode: station.id }
+      : course.id === 'world-capitals'
       ? { kind: 'flag' as const, countryCode: station.id, country: station.name }
       : course.id === 'periodic-table'
         ? { kind: 'element' as const, symbol: station.reading || '', atomicNumber: index + 1 }
