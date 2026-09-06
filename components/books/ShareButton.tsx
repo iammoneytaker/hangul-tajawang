@@ -1,5 +1,6 @@
 "use client";
 
+import { usePracticeT } from '@/lib/i18n/practice-ui';
 import React, { useState } from "react";
 import { Share2, Check } from "lucide-react";
 
@@ -20,6 +21,7 @@ export function ShareButton({
   label?: string;
   className?: string;
 }) {
+  const { isEn, t } = usePracticeT();
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
@@ -42,9 +44,9 @@ export function ShareButton({
   };
 
   return (
-    <button type="button" onClick={share} className={className} aria-label={`${title} 공유하기`}>
+    <button type="button" onClick={share} className={className} aria-label={isEn ? `Share ${title}` : `${title} 공유하기`}>
       {copied ? <Check size={15} /> : <Share2 size={15} />}
-      {copied ? "링크 복사됨!" : label}
+      {copied ? t("링크 복사됨!") : t(label)}
     </button>
   );
 }

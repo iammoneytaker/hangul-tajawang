@@ -1,3 +1,4 @@
+import { LOCALIZED_DETAIL_PATHS } from '@/lib/i18n/practice-content';
 import { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { LONG_TEXT_DB } from '@/lib/long-text-data';
@@ -65,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 영문 페이지 (2026-09 신설 — 코어 페이지만, 한글 콘텐츠 상세는 제외)
   const EN_LAST_UPDATED = '2026-09-06';
-  const enPages = LOCALIZED_KO_PATHS.map((koPath) => ({
+  const enPages = [...LOCALIZED_KO_PATHS, ...LOCALIZED_DETAIL_PATHS].map((koPath) => ({
     url: `${baseUrl}${koToEnPath(koPath)}`,
     lastModified: EN_LAST_UPDATED,
     changeFrequency: 'monthly' as const,

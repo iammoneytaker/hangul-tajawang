@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/i18n/alternates';
 import { Metadata } from 'next';
 import { BASIC_PRACTICE_STEPS } from '@/lib/word-data';
 import { PositionPractice } from '@/components/word-practice/PositionPractice';
@@ -26,9 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "타자 기초",
       "한글타자왕"
     ],
-    alternates: {
-      canonical: `https://www.hangul-tajawang.com/practice/word/${data.id}`,
-    },
+    alternates: localeAlternates(`/practice/word/${data.id}`, 'ko'),
     openGraph: {
       title: `${data.title} 낱말 타자 연습 | 한글타자왕`,
       description: `${data.title} 범위의 단어들을 치며 타자 실력을 쑥쑥 올려보세요.`,

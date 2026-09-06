@@ -1,5 +1,6 @@
 "use client";
 
+import { usePracticeT } from '@/lib/i18n/practice-ui';
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
 import { SHORT_TEXT_DB, SHORT_TEXT_CATEGORIES } from "@/lib/short-text-data";
@@ -9,6 +10,7 @@ import { scrollIntoViewOnFocus } from "@/hooks/useVirtualKeyboard";
 import { track } from '@/lib/analytics';
 
 export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialCategory }) => {
+  const { isEn, t, href } = usePracticeT();
   const [activeCategory, setActiveCategory] = useState(initialCategory || "전체");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
@@ -133,9 +135,9 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
     <div className="flex flex-col items-center justify-center min-h-[60dvh] md:min-h-[70dvh] w-full max-w-5xl mx-auto p-4 py-6 md:py-8 overflow-x-clip">
       {/* 노트북처럼 세로가 짧은 화면에서 입력 중에도 실시간 타수가 보이도록 상단에 고정 */}
       <div className="sticky top-20 z-30 mb-6 md:mb-8 flex flex-wrap justify-center gap-3 md:gap-8">
-        <MetricBadge icon={<Zap size={18}/>} label="현재 타수" value={lastReport?.kpm || 0} unit="타" color="text-primary" />
-        <MetricBadge icon={<Target size={18}/>} label="정확도" value={lastReport?.accuracy || 0} unit="%" color="text-green-600" />
-        <MetricBadge icon={<Clock size={18}/>} label="진행 상황" value={`${currentIndex + 1}/${shuffledSentences.length}`} unit="" color="text-secondary" />
+        <MetricBadge icon={<Zap size={18}/>} label={t("현재 타수")} value={lastReport?.kpm || 0} unit={t("타")} color="text-primary" />
+        <MetricBadge icon={<Target size={18}/>} label={t("정확도")} value={lastReport?.accuracy || 0} unit="%" color="text-green-600" />
+        <MetricBadge icon={<Clock size={18}/>} label={t("진행 상황")} value={`${currentIndex + 1}/${shuffledSentences.length}`} unit="" color="text-secondary" />
       </div>
 
       <div className={`relative w-full max-w-4xl transition-all duration-700 ease-in-out ${isFlying ? 'translate-x-[120%] -translate-y-32 rotate-12 opacity-0' : 'translate-x-0 opacity-100'}`}>
@@ -152,7 +154,7 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
       <div className="w-full max-w-3xl mt-6 md:mt-12 relative group">
         <input
           key={`${activeCategory}-${currentIndex}`}
-          data-typing-input ref={inputRef}
+          aria-label={isEn ? 'Korean sentence input' : '문장 입력'} lang="ko" data-typing-input ref={inputRef}
           type="text"
           value={inputValue}
           onChange={handleInputChange}
@@ -163,7 +165,7 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
           autoCapitalize="off"
           spellCheck={false}
           className={`w-full h-16 md:h-24 px-5 md:px-12 text-xl sm:text-2xl md:text-4xl bg-surface-lowest rounded-2xl md:rounded-2xl shadow-[0_20px_40px_rgba(21,28,39,0.04)] outline-hidden transition-all text-center font-plus-jakarta font-bold ${isFlying ? 'text-green-500 scale-95 opacity-50' : 'text-on-surface focus:shadow-xl focus:shadow-primary/5'}`}
-          placeholder="문장을 입력해 주세요"
+          placeholder={t("문장을 입력해 주세요")}
         />
         <div className="absolute -bottom-16 left-0 w-full flex flex-col items-center gap-4">
             <div className="h-2.5 bg-surface-high w-full max-w-lg rounded-full overflow-hidden shadow-inner">
@@ -173,14 +175,14 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
                 ></div>
             </div>
             <div className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                <KbdIcon size={14} /> 끝까지 입력하면 자동으로 다음 문장으로 넘어갑니다.
+                <KbdIcon size={14} /> {t("끝까지 입력하면 자동으로 다음 문장으로 넘어갑니다.")}
             </div>
         </div>
       </div>
 
       {/* 코어 출구 — 문장 다음은 지식: 지식타자로 순환 */}
-      <a href="/journey" className="mt-28 group flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
-        문장은 충분히 쳤다면, 이제 지식을 타자로 — 지식타자 <span className="group-hover:translate-x-1 transition-transform">→</span>
+      <a href={isEn ? href('/transcription') : '/journey'} className="mt-28 group flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
+        {isEn ? 'Next: type Korean literature ' : '문장은 충분히 쳤다면, 이제 지식을 타자로 — 지식타자 '}<span className="group-hover:translate-x-1 transition-transform">→</span>
       </a>
 
       <div className="mt-10 pt-16 border-t border-outline-variant/60 w-full">

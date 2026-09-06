@@ -6,13 +6,7 @@ import { SHORT_TEXT_DB } from '@/lib/short-text-data';
 import { localeAlternates } from '@/lib/i18n/alternates';
 
 // 테마 카드에 붙일 영어 설명 (지문 데이터 자체는 한글 그대로)
-const THEME_LABELS_EN: Record<string, { title: string; description: string }> = {
-  healing: { title: 'Comfort & Healing', description: 'Warm, encouraging lines — gentle sentences with everyday vocabulary.' },
-  motivation: { title: 'Motivation', description: 'Energizing quotes about effort and growth, slightly longer sentences.' },
-  love: { title: 'Love', description: 'Short romantic lines — great rhythm practice with common expressions.' },
-  literature: { title: 'Literature & Quotes', description: 'Memorable lines from Korean literature and famous sayings.' },
-  proverb: { title: 'Proverbs', description: 'Classic Korean proverbs — short, punchy, and full of culture.' },
-};
+import { THEME_LABELS_EN } from '@/lib/i18n/practice-content';
 
 const FAQ = [
   {
@@ -71,7 +65,7 @@ export default function EnShortPracticeListPage() {
         <p className="text-zinc-500 font-medium text-xl leading-relaxed">
           Type real Korean sentences, one at a time, with live speed and accuracy tracking.{' '}
           <br className="hidden md:block" />
-          Pick a theme and find your typing rhythm. Drills open in the Korean interface.
+          Pick a theme and find your typing rhythm. Controls and results are in English.
         </p>
       </div>
 
@@ -82,7 +76,7 @@ export default function EnShortPracticeListPage() {
             <Link
               prefetch={false}
               key={theme.id}
-              href={`/practice/short/${theme.id}`}
+              href={`/en/practice/short/${theme.id}`}
               className="group flex flex-col bg-surface-low p-8 rounded-2xl border border-surface-high hover:border-primary/50 transition-all hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,74,198,0.1)]"
             >
               <div className="flex items-center gap-3 mb-4">

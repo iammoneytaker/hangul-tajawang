@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/i18n/alternates';
 import { Metadata } from 'next';
 import { SHORT_TEXT_DB } from '@/lib/short-text-data';
 import { ShortPractice } from '@/components/short-practice/ShortPractice';
@@ -26,9 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "감성 문장 타자",
       "한글타자왕"
     ],
-    alternates: {
-      canonical: `https://www.hangul-tajawang.com/practice/short/${data.id}`,
-    },
+    alternates: localeAlternates(`/practice/short/${data.id}`, 'ko'),
     openGraph: {
       title: `${data.category} 짧은 글 타자 연습 | 한글타자왕`,
       description: `${data.category} 명언과 글귀를 치며 타자 실력을 키워보세요.`,

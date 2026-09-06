@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { usePracticeT } from '@/lib/i18n/practice-ui';
+import { STEP_LABELS } from '@/lib/i18n/practice-content';
 import Link from 'next/link';
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
 import { RotateCcw, Target, CheckCircle2, Flame, Trophy, ArrowRight, Keyboard as KbdIcon, Sparkles } from "lucide-react";
@@ -75,12 +77,14 @@ function practiceOrder(step: PracticeStep) {
 }
 
 export function PositionPractice(props: PositionPracticeProps) {
+  const { t } = usePracticeT();
   const hydrated = useHydrated();
   return hydrated ? <PracticeSession key={`${props.initialPhase}:${props.initialTargetId}`} {...props} />
-    : <p className="py-16 text-center text-secondary" role="status">연습을 준비하고 있어요.</p>;
+    : <p className="py-16 text-center text-secondary" role="status">{t("연습을 준비하고 있어요.")}</p>;
 }
 
 const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initialTargetId }) => {
+  const { isEn, t, href } = usePracticeT();
   const [initial] = useState(() => {
     const step = initialPhase ? BASIC_PRACTICE_STEPS.find(s => s.id === initialTargetId) || BASIC_PRACTICE_STEPS[0] : null;
     return { step, ...(step ? practiceOrder(step) : { keys: [], words: [] }) };
@@ -251,17 +255,17 @@ const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initia
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-surface-low text-primary rounded-full text-[10px] font-bold mb-6 tracking-widest uppercase">
                 <KbdIcon size={14} /> NO INPUT BOX, JUST TYPE!
             </div>
-            <h2 className="display-lg mb-6">기초 연습 구간 선택</h2>
-            <p className="text-zinc-500 font-medium text-xl">자판 위치부터 실제 낱말까지 단계별로 연습하세요.</p>
+            <h2 className="display-lg mb-6">{t("기초 연습 구간 선택")}</h2>
+            <p className="text-zinc-500 font-medium text-xl">{t("자판 위치부터 실제 낱말까지 단계별로 연습하세요.")}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {BASIC_PRACTICE_STEPS.map((step, idx) => (
                 <button key={step.id} onClick={() => startStep(step)} className="group bg-surface-lowest p-10 rounded-2xl text-left hover:shadow-[0_20px_40px_rgba(21,28,39,0.06)] transition-all hover:-translate-y-2 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><KbdIcon size={80} /></div>
                     <span className="inline-block px-3 py-1 bg-surface-high text-primary text-[10px] font-bold rounded-lg uppercase mb-6 tracking-widest">Step {idx + 1}</span>
-                    <h3 className="headline-md mb-3 group-hover:text-primary transition-colors">{step.title}</h3>
-                    <p className="text-zinc-400 text-sm font-medium mb-8 leading-relaxed">{step.description}</p>
-                    <div className="flex items-center gap-2 text-primary font-bold text-sm">연습 시작 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></div>
+                    <h3 className="headline-md mb-3 group-hover:text-primary transition-colors">{isEn ? STEP_LABELS[step.id]?.title : step.title}</h3>
+                    <p className="text-zinc-400 text-sm font-medium mb-8 leading-relaxed">{isEn ? STEP_LABELS[step.id]?.description : step.description}</p>
+                    <div className="flex items-center gap-2 text-primary font-bold text-sm">{t("연습 시작")} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></div>
                 </button>
             ))}
         </div>
@@ -276,7 +280,7 @@ const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initia
     <div className="flex flex-col items-center justify-center py-4 md:py-16 max-w-5xl mx-auto px-3 md:px-4 w-full" onClick={() => hiddenInputRef.current?.focus()}>
       <input
         key={phase === "words" ? `word-${currentIndex}` : "keys-input"}
-        data-typing-input ref={hiddenInputRef}
+        aria-label={isEn ? 'Korean typing input' : '한글 타자 입력'} lang="ko" data-typing-input ref={hiddenInputRef}
         type="text"
         value={inputValue}
         onChange={handleWordChange}
@@ -291,8 +295,8 @@ const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initia
 
       <div className="w-full flex flex-wrap justify-between items-center gap-2 mb-4 md:mb-16 bg-surface-lowest p-4 md:p-6 rounded-2xl md:rounded-2xl shadow-[0_20px_40px_rgba(21,28,39,0.04)]">
         <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">{phase === "keys" ? "1단계: 자판 익히기" : "2단계: 낱말 연습"}</span>
-            <h2 className="headline-md !text-base md:!text-xl">{selectedStep!.title}</h2>
+            <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">{phase === "keys" ? t("1단계: 자판 익히기") : t("2단계: 낱말 연습")}</span>
+            <h2 className="headline-md !text-base md:!text-xl">{(isEn ? STEP_LABELS[selectedStep?.id || '']?.title : selectedStep?.title)}</h2>
         </div>
         <div className="flex items-center gap-2 md:gap-8">
             <div className="flex items-center gap-2 md:gap-3 px-3 py-2 md:px-5 md:py-2.5 bg-surface-low rounded-2xl text-primary shadow-sm">
@@ -300,7 +304,7 @@ const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initia
                 <span className="text-sm font-bold">{currentIndex + 1} / {phase === "keys" ? shuffledKeys.length : shuffledWords.length}</span>
             </div>
             {combo > 2 && <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-orange-50 rounded-2xl animate-bounce text-orange-600 font-bold text-sm"><Flame size={18} /> {combo} COMBO</div>}
-            <button onClick={() => setPhase("select")} className="p-3 hover:bg-surface-low rounded-2xl transition-colors text-zinc-300 hover:text-primary"><RotateCcw size={22} /></button>
+            <button aria-label={isEn ? 'Choose a stage' : '단계 선택'} onClick={() => setPhase("select")} className="p-3 hover:bg-surface-low rounded-2xl transition-colors text-zinc-300 hover:text-primary"><RotateCcw size={22} /></button>
         </div>
       </div>
 
@@ -308,26 +312,26 @@ const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initia
         <div className="flex flex-col items-center justify-center py-20 animate-in zoom-in duration-500 w-full">
             <div className="glass-card p-8 md:p-16 text-center max-w-lg w-full">
                 <CheckCircle2 className="w-24 h-24 text-green-500 mx-auto mb-8" />
-                <h2 className="headline-md mb-4">자판 마스터!</h2>
-                <p className="text-zinc-500 mb-12 font-medium leading-relaxed">자판 위치를 익혔습니다. <br/>이제 이 글자들로 이루어진 낱말을 쳐보세요!</p>
-                <button onClick={() => { setPhase("words"); resetProgress(); setInputValue(""); setTimeout(() => hiddenInputRef.current?.focus(), 100); }} className="w-full py-6 primary-gradient text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20">2단계: 낱말 연습 시작 <ArrowRight size={20} /></button>
+                <h2 className="headline-md mb-4">{t("자판 마스터!")}</h2>
+                <p className="text-zinc-500 mb-12 font-medium leading-relaxed">{t("자판 위치를 익혔습니다.")} <br/>{t("이제 이 글자들로 이루어진 낱말을 쳐보세요!")}</p>
+                <button onClick={() => { setPhase("words"); resetProgress(); setInputValue(""); setTimeout(() => hiddenInputRef.current?.focus(), 100); }} className="w-full py-6 primary-gradient text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20">{t("2단계: 낱말 연습 시작")} <ArrowRight size={20} /></button>
             </div>
         </div>
       ) : phase === "result" ? (
         <div className="flex flex-col items-center justify-center animate-in zoom-in duration-500 w-full max-w-xl text-center">
             <div className="glass-card p-8 md:p-16 w-full">
                 <div className="inline-flex p-8 bg-yellow-50 rounded-full mb-10"><Trophy className="w-24 h-24 text-yellow-500" /></div>
-                <h2 className="display-lg !text-3xl md:!text-5xl mb-4">과정 완료!</h2>
-                <p className="text-zinc-400 font-bold mb-12">{selectedStep!.title} 연습을 모두 마쳤습니다.</p>
+                <h2 className="display-lg !text-3xl md:!text-5xl mb-4">{t("과정 완료!")}</h2>
+                <p className="text-zinc-400 font-bold mb-12">{(isEn ? STEP_LABELS[selectedStep?.id || '']?.title : selectedStep?.title)}{isEn ? ' completed.' : ' 연습을 모두 마쳤습니다.'}</p>
                 <div className="grid grid-cols-2 gap-6 mb-12">
-                    <div className="bg-surface-low p-5 sm:p-8 rounded-2xl"><p className="text-xs font-bold text-zinc-500 mb-3">첫 입력 정확도</p><p className="text-4xl font-bold text-primary">{report?.accuracy}%</p></div>
-                    <div className="bg-surface-low p-8 rounded-2xl"><p className="text-[10px] font-bold text-zinc-400 uppercase mb-3 tracking-widest">평균 타수</p><p className="text-4xl font-bold text-green-600">{report?.kpm}타</p></div>
+                    <div className="bg-surface-low p-5 sm:p-8 rounded-2xl"><p className="text-xs font-bold text-zinc-500 mb-3">{t("첫 입력 정확도")}</p><p className="text-4xl font-bold text-primary">{report?.accuracy}%</p></div>
+                    <div className="bg-surface-low p-8 rounded-2xl"><p className="text-[10px] font-bold text-zinc-400 uppercase mb-3 tracking-widest">{t("평균 타수")}</p><p className="text-4xl font-bold text-green-600">{report?.kpm}{isEn ? "" : "타"}</p></div>
                 </div>
-                <p className="text-sm text-zinc-600 mb-6">오타 없이 완성한 낱말의 비율입니다. 수정한 낱말은 {shuffledWords.length - Math.round(shuffledWords.length * (report?.accuracy || 0) / 100)}개예요.</p>
-                <button onClick={() => { setPhase("select"); track('activity_next', { mode: 'word', destination: 'step_select' }); }} className="w-full py-6 bg-on-surface text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-on-surface/10">단계 선택으로 돌아가기</button>
+                <p className="text-sm text-zinc-600 mb-6">{isEn ? 'Accuracy counts words completed without corrections. Words corrected: ' : '오타 없이 완성한 낱말의 비율입니다. 수정한 낱말은 '}{shuffledWords.length - Math.round(shuffledWords.length * (report?.accuracy || 0) / 100)}{isEn ? '' : '개예요.'}</p>
+                <button onClick={() => { setPhase("select"); track('activity_next', { mode: 'word', destination: 'step_select' }); }} className="w-full py-6 bg-on-surface text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-on-surface/10">{t("단계 선택으로 돌아가기")}</button>
                 {/* 코어 출구 — 자리를 뗐으면 지식을 손으로 */}
-                <Link href="/journey" prefetch={false} className="mt-5 block text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
-                  자리는 익혔으니, 이제 외우면서 쳐볼까요? — 지식타자 →
+                <Link href={isEn ? href('/practice/short') : '/journey'} prefetch={false} className="mt-5 block text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
+                  {isEn ? 'Next: practice Korean sentences →' : '자리는 익혔으니, 이제 외우면서 쳐볼까요? — 지식타자 →'}
                 </Link>
             </div>
         </div>

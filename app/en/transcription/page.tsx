@@ -5,14 +5,7 @@ import { BookOpen, PenTool, ArrowRight, Sparkles } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n/alternates';
 
 // 학습자에게 소개할 대표작 — 개별 화면(/transcription/[id])은 한국어 UI 공유
-const FEATURED_WORKS = [
-  { id: 'poem_1', ko: '별 헤는 밤', en: 'Counting the Stars at Night', author: 'Yun Dong-ju', type: 'Poem', level: 'Beginner' },
-  { id: 'poem_2', ko: '진달래꽃', en: 'Azaleas', author: 'Kim So-wol', type: 'Poem', level: 'Beginner' },
-  { id: 'tale_1', ko: '토끼와 거북이', en: 'The Tortoise and the Hare', author: 'Aesop (Korean)', type: 'Tale', level: 'Beginner' },
-  { id: 'poem_6', ko: '알 수 없어요', en: 'I Cannot Know', author: 'Han Yong-un', type: 'Poem', level: 'Intermediate' },
-  { id: 'poem_8', ko: '광야', en: 'The Wide Plain', author: 'Yi Yuk-sa', type: 'Poem', level: 'Advanced' },
-  { id: 'novel_1', ko: '운수 좋은 날', en: 'A Lucky Day (excerpt)', author: 'Hyun Jin-geon', type: 'Novel', level: 'Advanced' },
-];
+import { FEATURED_WORKS } from '@/lib/i18n/practice-content';
 
 const FAQ = [
   {
@@ -73,7 +66,7 @@ export default function EnTranscriptionPage() {
         <p className="text-zinc-500 font-medium text-lg md:text-xl leading-relaxed">
           The final stage of Korean typing practice: transcribe real poems and stories,{' '}
           <br className="hidden md:block" />
-          on a manuscript-paper screen. The practice interface opens in Korean.
+          on a manuscript-paper screen. English controls guide you from start to finish.
         </p>
       </div>
 
@@ -82,7 +75,7 @@ export default function EnTranscriptionPage() {
           <Link
             prefetch={false}
             key={w.id}
-            href={`/transcription/${w.id}`}
+            href={`/en/transcription/${w.id}`}
             className="group flex flex-col bg-surface-low p-7 rounded-2xl border border-surface-high hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,74,198,0.1)]"
           >
             <div className="flex items-center justify-between mb-3">
@@ -110,8 +103,7 @@ export default function EnTranscriptionPage() {
           <Link prefetch={false} href="/transcription" className="text-primary font-bold underline underline-offset-2">
             Korean transcription page
           </Link>
-          — the transcription screen itself is shared with Korean users and appears in Korean, but the flow is simply:
-          type what you read.
+          (Korean interface). The six picks above have English practice screens.
         </p>
       </div>
 

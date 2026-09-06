@@ -18,7 +18,7 @@ const FAQ = [
     a: 'At 95% accuracy or higher, 600+ CPM is SSS, 500+ SS, 400+ S, 300+ A, 200+ B, 100+ C, and below 100 is D. At 90–94% accuracy, the tier score is 90% of CPM and capped below A, so B is the highest possible tier. Below 90% accuracy, the tier is D regardless of speed.',
   },
   {
-    q: 'The test is in Korean — can I still use it as a learner?',
+    q: 'Do I need to know Korean to use the test?',
     a: 'Yes, that is the point: the test uses real Korean sentences, which is exactly what you need to practice. If the sentences feel too hard, warm up with word practice first, then come back to measure your progress.',
   },
 ];
@@ -79,11 +79,11 @@ export default function EnSpeedTestPage() {
         <h1 className="serif-display text-3xl md:text-5xl font-bold mb-4">Korean Typing Speed Test</h1>
         <p className="text-zinc-600 text-base md:text-xl leading-relaxed break-keep">
           How fast can you type Hangul? Measure your <strong className="text-on-surface">CPM and accuracy</strong> in
-          60 seconds and get your typing tier. The test controls below are currently in Korean; press 테스트 시작하기 to start.
+          60 seconds and get your typing tier. Press Start test below. Enable a Korean keyboard before typing.
         </p>
       </div>
 
-      <div lang="ko"><SpeedTest /></div>
+      <SpeedTest />
 
       <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-6 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-surface-high pt-12 md:pt-16">
         <section>

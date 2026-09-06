@@ -1,0 +1,6 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { localeAlternates } from '@/lib/i18n/alternates';
+import { ENGLISH_OPEN_GRAPH } from '@/lib/i18n/english-metadata';
+export const metadata: Metadata = { title: 'Contact', description: 'Contact Hangul Tajawang support.', alternates: localeAlternates('/contact', 'en'), openGraph: { ...ENGLISH_OPEN_GRAPH, title: 'Contact Hangul Tajawang', url: 'https://www.hangul-tajawang.com/en/contact' } };
+export default function Page() { return <section className="paper-card max-w-3xl mx-auto my-12 p-6 md:p-12"><Link href="/en" className="text-primary font-bold">Home</Link><h1 className="text-3xl font-bold mt-6 mb-4">Contact</h1><p className="text-zinc-600 mb-6">Have a question, a problem, or a feature suggestion? Contact the Hangul Tajawang support team at Bluecommunications Inc.</p><a href="mailto:bluecomms.ailab@gmail.com" className="text-primary font-bold break-all">bluecomms.ailab@gmail.com</a><h2 className="text-xl font-bold mt-8 mb-3">Support hours</h2><p className="text-zinc-600">Weekdays, 10:00–18:00 Korea Standard Time. Closed on weekends and Korean public holidays.</p><p className="text-zinc-600 mt-5">For technical issues, include your device, browser, the page URL, and what happened.</p></section>; }

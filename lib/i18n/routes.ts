@@ -2,6 +2,8 @@
 // 로케일 판정은 URL 경로에서만 한다 — 쿠키·Accept-Language로 라우팅을 바꾸지 않는다(국내 색인 보호).
 // /cn 등 로케일 추가 시 LOCALES와 프리픽스 매핑만 확장하면 된다.
 
+import { LOCALIZED_DETAIL_PATHS } from './practice-content';
+
 export const BASE_URL = 'https://www.hangul-tajawang.com';
 
 export type Locale = 'ko' | 'en';
@@ -23,6 +25,9 @@ export const LOCALIZED_KO_PATHS = [
   '/game/block-pop',
   '/game/typing-race',
   '/guide',
+  '/terms',
+  '/privacy',
+  '/contact',
 ] as const;
 
 export function koToEnPath(koPath: string): string {
@@ -46,9 +51,10 @@ export function localeFromPathname(pathname: string): Locale {
  * 대응 페이지가 없으면 상대 언어의 홈으로 보낸다. (JS 상태 전환이 아니라 실제 <a> 링크로 쓸 것)
  */
 export function switchLocaleHref(pathname: string): string {
+  const supports = (path: string) => (LOCALIZED_KO_PATHS as readonly string[]).includes(path) || LOCALIZED_DETAIL_PATHS.includes(path) || ['/mypage', '/library', '/terms', '/privacy', '/contact'].includes(path);
   if (isEnPath(pathname)) {
     const ko = enToKoPath(pathname);
-    return (LOCALIZED_KO_PATHS as readonly string[]).includes(ko) ? ko : '/';
+    return supports(ko) ? ko : '/';
   }
-  return (LOCALIZED_KO_PATHS as readonly string[]).includes(pathname) ? koToEnPath(pathname) : '/en';
+  return supports(pathname) ? koToEnPath(pathname) : '/en';
 }

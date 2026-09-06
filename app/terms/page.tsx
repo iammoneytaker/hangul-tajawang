@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/i18n/alternates';
 import React from "react";
 import Link from "next/link";
 import { ChevronLeft, Scale, Mail } from "lucide-react";
@@ -6,9 +7,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "이용약관 | 한글타자왕",
   description: "한글타자왕의 서비스 이용약관입니다. 서비스 이용에 필요한 권리와 의무를 확인하세요.",
-  alternates: {
-    canonical: 'https://www.hangul-tajawang.com/terms',
-  }
+  alternates: localeAlternates('/terms', 'ko')
 };
 
 // 매시간 재생성(ISR) → 2026-09-01 00:00(KST) 이후 재생성 시점에 개정판으로 자동 전환

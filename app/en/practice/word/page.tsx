@@ -5,13 +5,7 @@ import { Keyboard, ArrowRight } from 'lucide-react';
 import { BASIC_PRACTICE_STEPS } from '@/lib/word-data';
 import { localeAlternates } from '@/lib/i18n/alternates';
 
-const STEP_LABELS: Readonly<Record<string, { readonly title: string; readonly description: string }>> = {
-  step1: { title: 'Home Row', description: 'Practice ㅁ ㄴ ㅇ ㄹ ㅎ and ㅗ ㅓ ㅏ ㅣ.' },
-  step2: { title: 'Top Row', description: 'Practice ㅂ ㅈ ㄷ ㄱ ㅅ and ㅛ ㅕ ㅑ ㅐ ㅔ.' },
-  step3: { title: 'Bottom Row', description: 'Practice ㅋ ㅌ ㅊ ㅍ and ㅠ ㅜ ㅡ.' },
-  step4: { title: 'Shift & Tense Consonants', description: 'Practice ㄲ ㄸ ㅃ ㅆ ㅉ and ㅒ ㅖ with Shift.' },
-  step5: { title: 'Full Keyboard Review', description: 'Mix words from every keyboard row.' },
-};
+import { STEP_LABELS } from '@/lib/i18n/practice-content';
 
 const FAQ = [
   {
@@ -70,7 +64,7 @@ export default function EnWordPracticeListPage() {
         <p className="text-zinc-500 font-medium text-xl leading-relaxed">
           Real Korean words organized by keyboard region — home row, top row, bottom row, and tense consonants.{' '}
           <br className="hidden md:block" />
-          Build speed one keyboard region at a time. Drills open in the Korean interface.
+          Build speed one keyboard region at a time. Controls and results are in English.
         </p>
       </div>
 
@@ -79,7 +73,7 @@ export default function EnWordPracticeListPage() {
           <Link
             prefetch={false}
             key={step.id}
-            href={`/practice/word/${step.id}`}
+            href={`/en/practice/word/${step.id}`}
             className="group flex flex-col bg-surface-low p-8 rounded-2xl border border-surface-high hover:border-primary/50 transition-all hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,74,198,0.1)] relative overflow-hidden"
             style={{ animationDelay: `${i * 50}ms` }}
           >
@@ -127,8 +121,7 @@ export default function EnWordPracticeListPage() {
             ))}
           </ul>
           <p className="text-zinc-600 leading-loose font-medium">
-            Note: the practice screens are shared with our Korean users, so their interface is in Korean — the drill
-            itself is fully visual (type the word shown) and needs no translation. New to the layout? Do{' '}
+            The controls and results are in English; the words you type stay in Korean. New to the layout? Do{' '}
             <Link prefetch={false} href="/en/practice/position" className="text-primary font-bold underline underline-offset-2">
               key position practice
             </Link>{' '}

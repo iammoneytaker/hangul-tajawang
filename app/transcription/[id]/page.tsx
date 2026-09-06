@@ -1,3 +1,5 @@
+import { FEATURED_WORKS } from '@/lib/i18n/practice-content';
+import { localeAlternates } from '@/lib/i18n/alternates';
 import { Metadata } from 'next';
 import { LONG_TEXT_DB } from '@/lib/long-text-data';
 import { fetchEpisodeSafe, fetchBooksSafe, type EpisodePageData } from '@/lib/books-db';
@@ -45,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         "한글 타자 연습",
         "한글타자왕"
     ],
-    alternates: {
+    alternates: FEATURED_WORKS.some(work => work.id === resolvedParams.id) ? localeAlternates(`/transcription/${resolvedParams.id}`, 'ko') : {
       canonical: `https://www.hangul-tajawang.com/transcription/${resolvedParams.id}`,
     },
     openGraph: {

@@ -4,7 +4,10 @@ const origin = process.argv[2] || 'http://localhost:3003';
 const site = 'https://www.hangul-tajawang.com';
 const paths = ['', '/test', '/practice', '/practice/position', '/practice/word', '/practice/short',
   '/transcription', '/guide', '/game', '/game/acid-rain', '/game/stairs',
-  '/game/castle-defense', '/game/card-flip', '/game/block-pop', '/game/typing-race'];
+  '/game/castle-defense', '/game/card-flip', '/game/block-pop', '/game/typing-race', '/terms', '/privacy', '/contact',
+  ...['step1', 'step2', 'step3', 'step4', 'step5'].map(id => `/practice/word/${id}`),
+  ...['healing', 'motivation', 'love', 'literature', 'proverb'].map(id => `/practice/short/${id}`),
+  ...['poem_1', 'poem_2', 'tale_1', 'poem_6', 'poem_8', 'novel_1'].map(id => `/transcription/${id}`)];
 
 for (const path of paths) {
   const response = await fetch(`${origin}/en${path}`, { signal: AbortSignal.timeout(20000) });

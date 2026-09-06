@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/i18n/alternates';
 import React from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ShieldCheck, Mail } from 'lucide-react';
@@ -7,9 +8,7 @@ export const metadata: Metadata = {
   title: '개인정보 처리방침 | 한글타자왕',
   description:
     '한글타자왕의 개인정보 처리방침입니다. 사용자의 정보를 소중히 다룹니다.',
-  alternates: {
-    canonical: 'https://www.hangul-tajawang.com/privacy',
-  },
+  alternates: localeAlternates('/privacy', 'ko'),
 };
 
 export const revalidate = 3600;

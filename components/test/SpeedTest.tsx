@@ -1,5 +1,6 @@
 "use client";
 
+import { usePracticeT } from '@/lib/i18n/practice-ui';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { TypingUtils } from "@/lib/typing-speed";
 import { track } from "@/lib/analytics";
@@ -27,6 +28,7 @@ function parseGrade(grade: string): { tier: string; name: string } {
 }
 
 export const SpeedTest: React.FC = () => {
+  const { isEn, t, href } = usePracticeT();
   const [gameState, setGameState] = useState<"ready" | "running" | "done">("ready");
   const [sentences, setSentences] = useState<string[]>([]);
   const [sentenceIndex, setSentenceIndex] = useState(0);
@@ -164,18 +166,18 @@ export const SpeedTest: React.FC = () => {
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(255,255,255,0.75)";
     ctx.font = "700 36px sans-serif";
-    ctx.fillText("한글타자왕 · 1분 타자 속도 테스트", 540, 130);
+    ctx.fillText(t("한글타자왕 · 1분 타자 속도 테스트"), 540, 130);
 
     ctx.font = "120px sans-serif";
     ctx.fillText(meta.emoji, 540, 300);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "900 220px sans-serif";
-    ctx.fillText(`${tier}급`, 540, 530);
+    ctx.fillText(isEn ? tier : `${tier}급`, 540, 530);
 
     ctx.font = "800 56px sans-serif";
     ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.fillText(name, 540, 620);
+    ctx.fillText(t(name), 540, 620);
 
     // 스탯 박스
     ctx.fillStyle = "rgba(255,255,255,0.12)";
@@ -190,16 +192,16 @@ export const SpeedTest: React.FC = () => {
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "900 96px sans-serif";
-    ctx.fillText(`${result.kpm}타`, 340, 820);
+    ctx.fillText(isEn ? String(result.kpm) : `${result.kpm}타`, 340, 820);
     ctx.fillText(`${result.accuracy}%`, 740, 820);
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.font = "700 32px sans-serif";
-    ctx.fillText("분당 타수", 340, 865);
-    ctx.fillText("정확도", 740, 865);
+    ctx.fillText(t("분당 타수"), 340, 865);
+    ctx.fillText(t("정확도"), 740, 865);
 
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.font = "700 34px sans-serif";
-    ctx.fillText("나도 측정하러 가기 → www.hangul-tajawang.com", 540, 990);
+    ctx.fillText(t("나도 측정하러 가기 → www.hangul-tajawang.com"), 540, 990);
     return c;
   };
 
@@ -212,7 +214,7 @@ export const SpeedTest: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `한글타자왕_타자티어_${result?.kpm}타.png`;
+      a.download = isEn ? `typing-tier-${result?.kpm}-cpm.png` : `한글타자왕_타자티어_${result?.kpm}타.png`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -226,9 +228,11 @@ export const SpeedTest: React.FC = () => {
       if (!blob) return;
       const file = new File([blob], "typing-tier.png", { type: "image/png" });
       const shareData = {
-        title: "한글타자왕 타자 티어",
-        text: `1분 타자 테스트 결과: ${result.grade}, ${result.kpm}타! 너도 측정해봐 👉`,
-        url: "https://www.hangul-tajawang.com/test",
+        title: t("한글타자왕 타자 티어"),
+        text: isEn
+          ? `My 1-minute Korean typing test: tier ${parseGrade(result.grade).tier}, ${result.kpm} CPM. Try it!`
+          : `1분 타자 테스트 결과: ${result.grade}, ${result.kpm}타! 너도 측정해봐 👉`,
+        url: `https://www.hangul-tajawang.com${href("/test")}`,
         files: [file],
       };
       try {
@@ -247,41 +251,41 @@ export const SpeedTest: React.FC = () => {
       <div className="w-full max-w-xl mx-auto py-6 md:py-12 px-4 animate-in zoom-in duration-500">
         <div className="rounded-2xl md:rounded-2xl p-8 md:p-14 text-center text-white shadow-2xl relative overflow-hidden"
              style={{ background: `linear-gradient(135deg, ${meta.colors[0]}, ${meta.colors[1]})` }}>
-          <p className="text-white/70 font-bold text-[10px] md:text-xs uppercase tracking-[0.3em] mb-6">1분 타자 속도 테스트 결과</p>
+          <p className="text-white/70 font-bold text-[10px] md:text-xs uppercase tracking-[0.3em] mb-6">{t("1분 타자 속도 테스트 결과")}</p>
           <div className="text-6xl mb-4">{meta.emoji}</div>
-          <h2 className="text-6xl md:text-8xl font-bold mb-2 tracking-tighter">{tier}급</h2>
-          <p className="text-xl md:text-2xl font-bold text-white/90 mb-8">{name}</p>
+          <h2 className="text-6xl md:text-8xl font-bold mb-2 tracking-tighter">{tier}{isEn ? '' : '급'}</h2>
+          <p className="text-xl md:text-2xl font-bold text-white/90 mb-8">{t(name)}</p>
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
-            <div className="bg-white/10 rounded-2xl p-4 md:p-6"><p className="text-3xl md:text-4xl font-bold">{result.kpm}타</p><p className="text-[10px] md:text-xs font-bold text-white/60 mt-1">분당 타수</p></div>
-            <div className="bg-white/10 rounded-2xl p-4 md:p-6"><p className="text-3xl md:text-4xl font-bold">{result.accuracy}%</p><p className="text-[10px] md:text-xs font-bold text-white/60 mt-1">정확도</p></div>
+            <div className="bg-white/10 rounded-2xl p-4 md:p-6"><p className="text-3xl md:text-4xl font-bold">{result.kpm}{isEn ? " CPM" : "타"}</p><p className="text-[10px] md:text-xs font-bold text-white/60 mt-1">{t("분당 타수")}</p></div>
+            <div className="bg-white/10 rounded-2xl p-4 md:p-6"><p className="text-3xl md:text-4xl font-bold">{result.accuracy}%</p><p className="text-[10px] md:text-xs font-bold text-white/60 mt-1">{t("정확도")}</p></div>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={shareCard} className="flex-1 py-4 bg-white text-zinc-900 font-bold rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"><Share2 size={18} /> 결과 자랑하기</button>
-            <button onClick={downloadCard} className="flex-1 py-4 bg-white/15 border border-white/30 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-white/25 transition-all"><Download size={18} /> 이미지 저장</button>
+            <button onClick={shareCard} className="flex-1 py-4 bg-white text-zinc-900 font-bold rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"><Share2 size={18} /> {t("결과 자랑하기")}</button>
+            <button onClick={downloadCard} className="flex-1 py-4 bg-white/15 border border-white/30 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-white/25 transition-all"><Download size={18} /> {t("이미지 저장")}</button>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
-          <button onClick={startTest} className="w-full py-5 bg-zinc-900 text-white text-lg font-bold rounded-2xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2"><RotateCcw size={20} /> 다시 측정하기</button>
+          <button onClick={startTest} className="w-full py-5 bg-zinc-900 text-white text-lg font-bold rounded-2xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2"><RotateCcw size={20} /> {t("다시 측정하기")}</button>
 
           {/* 측정 이후의 동선 — 코어 3개로 연결 */}
-          <Link prefetch={false} href="/journey" className="group paper-card p-5 flex items-center justify-between hover:border-primary/50 transition-colors">
+          <Link prefetch={false} href={isEn ? href('/practice/word') : '/journey'} className="group paper-card p-5 flex items-center justify-between hover:border-primary/50 transition-colors">
             <div>
-              <p className="font-bold text-on-surface group-hover:text-primary transition-colors">측정은 끝. 이제 손으로 외워볼까?</p>
-              <p className="text-sm text-zinc-500 mt-0.5">조선 왕조·세계 수도를 타자로 정복하는 지식타자</p>
+              <p className="font-bold text-on-surface group-hover:text-primary transition-colors">{isEn ? 'Build accuracy one word at a time' : '측정은 끝. 이제 손으로 외워볼까?'}</p>
+              <p className="text-sm text-zinc-500 mt-0.5">{isEn ? 'Practice Korean words by keyboard region' : '조선 왕조·세계 수도를 타자로 정복하는 지식타자'}</p>
             </div>
             <ChevronRight size={18} className="text-zinc-400 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
           </Link>
-          <Link prefetch={false} href="/challenge" className="group paper-card p-5 flex items-center justify-between hover:border-primary/50 transition-colors">
+          <Link prefetch={false} href={isEn ? href('/transcription') : '/challenge'} className="group paper-card p-5 flex items-center justify-between hover:border-primary/50 transition-colors">
             <div>
-              <p className="font-bold text-on-surface group-hover:text-primary transition-colors">이 속도로 필사 챌린지 랭킹에 도전</p>
-              <p className="text-sm text-zinc-500 mt-0.5">{result.kpm}타면 충분해요 — 좋은 문장으로 실전처럼</p>
+              <p className="font-bold text-on-surface group-hover:text-primary transition-colors">{isEn ? 'Put your skills to work with literature' : '이 속도로 필사 챌린지 랭킹에 도전'}</p>
+              <p className="text-sm text-zinc-500 mt-0.5">{result.kpm}{isEn ? " CPM" : "타"}{isEn ? ' — try a poem or story' : '면 충분해요 — 좋은 문장으로 실전처럼'}</p>
             </div>
             <ChevronRight size={18} className="text-zinc-400 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
           </Link>
           <div className="grid grid-cols-2 gap-3">
-            <Link prefetch={false} href="/practice" className="py-4 bg-surface-low rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 hover:text-primary transition-colors"><Trophy size={16} /> 타수 올리는 연습 <ChevronRight size={14} /></Link>
-            <Link prefetch={false} href="/game/typing-race" className="py-4 bg-surface-low rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 hover:text-primary transition-colors"><Gamepad2 size={16} /> 타자 레이스 도전 <ChevronRight size={14} /></Link>
+            <Link prefetch={false} href={href("/practice")} className="py-4 bg-surface-low rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 hover:text-primary transition-colors"><Trophy size={16} /> {t("타수 올리는 연습")} <ChevronRight size={14} /></Link>
+            <Link prefetch={false} href={href("/game/typing-race")} className="py-4 bg-surface-low rounded-2xl font-bold text-sm flex items-center justify-center gap-1.5 hover:text-primary transition-colors"><Gamepad2 size={16} /> {t("타자 레이스 도전")} <ChevronRight size={14} /></Link>
           </div>
         </div>
       </div>
@@ -296,15 +300,15 @@ export const SpeedTest: React.FC = () => {
           <Timer size={18} className={timeLeft <= 10 && gameState === "running" ? "text-red-500 animate-pulse" : "text-primary"} />
           <span className={`text-xl md:text-2xl font-bold tabular-nums ${timeLeft <= 10 && gameState === "running" ? "text-red-500" : "text-on-surface"}`}>{Math.ceil(timeLeft)}s</span>
         </div>
-        <div className="flex items-center gap-2 bg-surface-lowest px-4 py-2.5 md:px-6 md:py-3 rounded-2xl shadow-sm"><Zap size={18} className="text-yellow-500" /><span className="text-xl md:text-2xl font-bold text-on-surface tabular-nums">{liveKpm}타</span></div>
+        <div className="flex items-center gap-2 bg-surface-lowest px-4 py-2.5 md:px-6 md:py-3 rounded-2xl shadow-sm"><Zap size={18} className="text-yellow-500" /><span className="text-xl md:text-2xl font-bold text-on-surface tabular-nums">{liveKpm}{isEn ? " CPM" : "타"}</span></div>
       </div>
 
       {/* 문장 카드 */}
       <div className="relative w-full bg-surface-lowest shadow-[0_30px_60px_rgba(21,28,39,0.08)] p-6 sm:p-10 md:p-16 rounded-2xl md:rounded-2xl text-center mb-4 md:mb-8 min-h-[120px] md:min-h-[180px] flex items-center justify-center">
         {gameState === "ready" ? (
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-zinc-500 font-medium leading-relaxed break-keep">60초 동안 나오는 문장을 정확하고 빠르게 입력하세요.<br className="hidden sm:block" /> 타이머는 <strong className="text-on-surface">첫 글자를 치는 순간</strong> 시작됩니다.</p>
-            <button onClick={startTest} className="px-10 py-5 primary-gradient text-white text-lg font-bold rounded-full shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">테스트 시작하기</button>
+            <p className="text-zinc-500 font-medium leading-relaxed break-keep">{t("60초 동안 나오는 문장을 정확하고 빠르게 입력하세요.")}<br className="hidden sm:block" /> {t("타이머는")} <strong className="text-on-surface">{t("첫 글자를 치는 순간")}</strong> {t("시작됩니다.")}</p>
+            <button onClick={startTest} className="px-10 py-5 primary-gradient text-white text-lg font-bold rounded-full shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">{t("테스트 시작하기")}</button>
           </div>
         ) : (
           <div className="text-xl sm:text-2xl md:text-4xl leading-relaxed font-plus-jakarta font-bold select-none break-keep">{renderHighlightedText()}</div>
@@ -314,7 +318,7 @@ export const SpeedTest: React.FC = () => {
       {/* 입력창 */}
       <input
         key={`s-${sentenceIndex}`}
-        data-typing-input ref={inputRef}
+        aria-label={isEn ? 'Korean typing test input' : '타자 테스트 입력'} lang="ko" data-typing-input ref={inputRef}
         type="text"
         value={inputValue}
         onChange={handleInputChange}
@@ -327,9 +331,9 @@ export const SpeedTest: React.FC = () => {
         autoCapitalize="off"
         spellCheck={false}
         className={`w-full h-16 md:h-24 px-5 md:px-10 text-xl md:text-3xl bg-surface-lowest rounded-2xl md:rounded-2xl shadow-lg outline-hidden text-center font-bold transition-all ${gameState === "running" ? "ring-4 ring-primary/10 focus:ring-primary/30" : "opacity-50"}`}
-        placeholder={gameState === "running" ? "여기에 입력하세요" : "시작 버튼을 눌러주세요"}
+        placeholder={gameState === "running" ? t("여기에 입력하세요") : t("시작 버튼을 눌러주세요")}
       />
-      <p className="mt-4 text-center text-[10px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2"><Target size={13} /> 문장을 끝까지 치면 자동으로 다음 문장이 나옵니다</p>
+      <p className="mt-4 text-center text-[10px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2"><Target size={13} /> {t("문장을 끝까지 치면 자동으로 다음 문장이 나옵니다")}</p>
     </div>
   );
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import { usePracticeT } from '@/lib/i18n/practice-ui';
+import { FEATURED_WORKS } from '@/lib/i18n/practice-content';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { LONG_TEXT_DB, PILSA_SERIES, type LongTextData } from "@/lib/long-text-data";
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
@@ -93,6 +95,7 @@ function mobileAccumulatorsFromDesktopInput(
 }
 
 export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, dbText, dbNextText }) => {
+  const { isEn, t, href } = usePracticeT();
   const [selectedTextId, setSelectedTextId] = useState(initialTextId || LONG_TEXT_DB[0].id);
   const [inputValue, setInputValue] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -128,7 +131,8 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
   const currentText = useMemo(() =>
     externalContent || dbText || LONG_TEXT_DB.find(t => t.id === selectedTextId) || LONG_TEXT_DB[0],
   [externalContent, dbText, selectedTextId]);
-  const displayTitle = useMemo(() => keepKoreanCounterTogether(currentText.title), [currentText.title]);
+  const englishWork = FEATURED_WORKS.find(work => work.id === currentText.id);
+  const displayTitle = isEn && englishWork ? englishWork.en : keepKoreanCounterTogether(currentText.title);
 
   const lines = useMemo(
     () => createMobileSegments(currentText.content, Boolean(currentText.seriesId)),
@@ -351,9 +355,9 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
 
   const resumeBanner = resume && !report ? (
     <div className="w-full max-w-3xl mx-auto mb-3 flex items-center justify-between gap-3 px-4 md:px-5 py-3 bg-primary/10 border border-primary/30 rounded-2xl animate-in fade-in duration-500">
-      <p className="text-xs md:text-sm font-bold text-on-surface break-keep">저장된 {Math.round(resume.percent)}% 지점부터 이어 쓰는 중이에요</p>
+      <p className="text-xs md:text-sm font-bold text-on-surface break-keep">{isEn ? `Resumed from ${Math.round(resume.percent)}%` : `저장된 ${Math.round(resume.percent)}% 지점부터 이어 쓰는 중이에요`}</p>
       <div className="flex gap-1.5 shrink-0 items-center">
-        <button onClick={dismissResume} className="px-4 py-2 bg-surface-lowest text-xs font-bold text-zinc-500 rounded-full hover:text-primary transition-colors">처음부터</button>
+        <button onClick={dismissResume} className="px-4 py-2 bg-surface-lowest text-xs font-bold text-zinc-500 rounded-full hover:text-primary transition-colors">{t("처음부터")}</button>
       </div>
     </div>
   ) : null;
@@ -493,10 +497,10 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
               <div className={`absolute inset-0 pointer-events-none z-0 ${paperAssets[paperType].overlay}`} style={{ backgroundImage: `url(${paperAssets[paperType].img})`, backgroundSize: paperType === 'hanji' ? 'auto' : 'cover' }} />
               <div className="relative z-10 text-on-surface">
                   <div className="flex justify-center mb-8"><div className="primary-gradient text-white p-6 rounded-full shadow-2xl"><Award size={60} /></div></div>
-                  <h2 className={`display-lg !text-3xl md:!text-5xl mb-4 ${fontFamily}`}>{currentText.title}</h2>
-                  <p className="text-zinc-500 text-xs font-bold mb-8 md:mb-16 tracking-[0.3em] uppercase">By {currentText.author} / {currentText.source || '한글타자왕'}</p>
+                  <h2 className={`display-lg !text-3xl md:!text-5xl mb-4 ${fontFamily}`}>{displayTitle}</h2>
+                  <p className="text-zinc-500 text-xs font-bold mb-8 md:mb-16 tracking-[0.3em] uppercase">By {isEn ? englishWork?.author || currentText.author : currentText.author} / {isEn ? 'Hangul Tajawang' : currentText.source || '한글타자왕'}</p>
                   <div className="grid grid-cols-3 gap-3 md:gap-8 mb-8 md:mb-16">
-                      <ResultItem label="Keystrokes" value={report.kpm} unit="타" />
+                      <ResultItem label="Keystrokes" value={report.kpm} unit={t("타")} />
                       <ResultItem label="Accuracy" value={report.accuracy} unit="%" />
                       <ResultItem label="Time" value={report.elapsedSeconds} unit="s" />
                   </div>
@@ -528,30 +532,30 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
             const series = currentText.seriesId ? PILSA_SERIES.find((s) => s.id === currentText.seriesId) : null;
             const shareUrl = currentText.seriesId
               ? `https://www.hangul-tajawang.com/transcription/series/${currentText.seriesId}`
-              : `https://www.hangul-tajawang.com/transcription/${currentText.id}`;
+              : `https://www.hangul-tajawang.com${href(`/transcription/${currentText.id}`)}`;
             return (
               <ShareButton
                 url={shareUrl}
-                title={series ? `${series.title} — 한글타자왕 오리지널 연재` : `${currentText.title} — 한글타자왕 필사`}
-                text={series ? series.logline : `'${currentText.title}'을 키보드로 한 자 한 자 새겨보세요.`}
-                label={currentText.seriesId ? "이 책 공유하기" : "이 글 공유하기"}
+                title={isEn ? `${displayTitle} — Hangul Tajawang` : series ? `${series.title} — 한글타자왕 오리지널 연재` : `${currentText.title} — 한글타자왕 필사`}
+                text={isEn ? 'Practice typing Korean literature with English controls.' : series ? series.logline : `'${currentText.title}'을 키보드로 한 자 한 자 새겨보세요.`}
+                label={t(currentText.seriesId ? "이 책 공유하기" : "이 글 공유하기")}
                 className="mt-6 w-full py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center justify-center gap-2"
               />
             );
           })()}
-          <Link prefetch={false} href="/library" className="mt-8 block text-center text-white font-bold text-sm md:text-base hover:underline underline-offset-4">
-            <BookOpen size={18} className="inline-block mr-1.5" /> 방금 새긴 책이 서재에 꽂혔습니다 · 내 서재 보기 →
+          <Link prefetch={false} href={href("/library")} className="mt-8 block text-center text-white font-bold text-sm md:text-base hover:underline underline-offset-4">
+            <BookOpen size={18} className="inline-block mr-1.5" /> {isEn ? 'Saved to My Library →' : '방금 새긴 책이 서재에 꽂혔습니다 · 내 서재 보기 →'}
           </Link>
           {/* 코어 출구 — 원고지 필사를 챌린지 생산 도구로 */}
-          <Link prefetch={false} href="/challenge" className="mt-4 block w-full py-5 bg-white/10 text-white text-center font-bold rounded-2xl hover:bg-white/20 transition-all">
-            내가 고른 글로 필사 챌린지 만들기 → 다른 사람들과 함께 쓰기
+          <Link prefetch={false} href={isEn ? href('/transcription') : '/challenge'} className="mt-4 block w-full py-5 bg-white/10 text-white text-center font-bold rounded-2xl hover:bg-white/20 transition-all">
+            {isEn ? 'Choose another work →' : '내가 고른 글로 필사 챌린지 만들기 → 다른 사람들과 함께 쓰기'}
           </Link>
-          <Link prefetch={false} href="/journey" className="mt-3 block text-center text-white/80 font-bold text-sm hover:text-white hover:underline underline-offset-4">
-            문장 다음은 지식 — 조선 왕조·세계 수도를 타자로 외우는 지식타자 →
+          <Link prefetch={false} href={isEn ? href('/game') : '/journey'} className="mt-3 block text-center text-white/80 font-bold text-sm hover:text-white hover:underline underline-offset-4">
+            {isEn ? 'Keep practicing with typing games →' : '문장 다음은 지식 — 조선 왕조·세계 수도를 타자로 외우는 지식타자 →'}
           </Link>
           <div className="mt-6 flex gap-6">
-              <button onClick={resetState} className="flex-1 py-6 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">연습 종료</button>
-              <button onClick={() => window.location.reload()} className="flex-[2] py-6 primary-gradient text-white font-bold rounded-2xl shadow-2xl shadow-primary/30 hover:scale-[1.02] transition-all">다시 연습하기</button>
+              <button onClick={resetState} className="flex-1 py-6 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all">{t("연습 종료")}</button>
+              <button onClick={() => window.location.reload()} className="flex-[2] py-6 primary-gradient text-white font-bold rounded-2xl shadow-2xl shadow-primary/30 hover:scale-[1.02] transition-all">{t("다시 연습하기")}</button>
           </div>
         </div>
       </div>
@@ -584,12 +588,12 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-base font-bold text-on-surface truncate flex-1">{displayTitle}</h1>
           <span className="shrink-0 px-3 py-1 primary-gradient text-white text-[11px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-primary/20">
-            문단 {lineIndex + 1}/{lines.length}
+            {isEn ? 'Paragraph' : '문단'} {lineIndex + 1}/{lines.length}
           </span>
         </div>
         <div className="flex gap-2">
-          <MetricItem icon={<Zap size={18} />} label="현재 타수" value={mobileKPM} unit="타" color="text-primary" />
-          <MetricItem icon={<Target size={18} />} label="정확도" value={mobileAccuracy} unit="%" color="text-green-600" />
+          <MetricItem icon={<Zap size={18} />} label={t("현재 타수")} value={mobileKPM} unit={t("타")} color="text-primary" />
+          <MetricItem icon={<Target size={18} />} label={t("정확도")} value={mobileAccuracy} unit="%" color="text-green-600" />
         </div>
 
         {/* 문장 카드 */}
@@ -614,9 +618,9 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
-          aria-label={`${lineIndex + 1}번째 문단 필사 입력`}
+          aria-label={isEn ? `Transcription paragraph ${lineIndex + 1}` : `${lineIndex + 1}번째 문단 필사 입력`}
           className="w-full h-14 px-4 text-lg text-center bg-surface-lowest rounded-2xl shadow-sm outline-hidden font-bold text-on-surface focus:shadow-xl focus:shadow-primary/5 transition-all"
-          placeholder="이 문단을 그대로 입력하세요"
+          placeholder={t("이 문단을 그대로 입력하세요")}
         />
 
         {/* 진행바 (전체 글자 기준) */}
@@ -649,9 +653,9 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
       ) : (
         <>
       <div className="flex justify-center gap-2 md:gap-8 mb-0 md:mb-4 flex-wrap">
-        <MetricItem icon={<Zap size={18}/>} label="현재 타수" value={liveKPM} unit="타" color="text-primary" />
-        <MetricItem icon={<Target size={18}/>} label="정확도" value={liveAccuracy} unit="%" color="text-green-600" />
-        <MetricItem icon={<Clock size={18}/>} label="진행 시간" value={Math.floor(elapsedSeconds)} unit="초" color="text-secondary" />
+        <MetricItem icon={<Zap size={18}/>} label={t("현재 타수")} value={liveKPM} unit={t("타")} color="text-primary" />
+        <MetricItem icon={<Target size={18}/>} label={t("정확도")} value={liveAccuracy} unit="%" color="text-green-600" />
+        <MetricItem icon={<Clock size={18}/>} label={t("진행 시간")} value={Math.floor(elapsedSeconds)} unit={t("초")} color="text-secondary" />
       </div>
 
       {resumeBanner}
@@ -662,17 +666,17 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
         <div>
             <span className="text-primary font-bold text-[10px] uppercase tracking-[0.5em] mb-2 block">{externalContent ? "Challenge Transcription" : "Editorial Practice"}</span>
             <h1 className="display-lg !text-2xl md:!text-5xl text-on-surface flex items-center gap-4 break-keep text-balance">
-                {displayTitle} {!externalContent && <span className="text-2xl text-zinc-500 hidden lg:inline-block ml-2 opacity-60 whitespace-nowrap"> 한글 타자 연습</span>}
+                {displayTitle} {!externalContent && <span className="text-2xl text-zinc-500 hidden lg:inline-block ml-2 opacity-60 whitespace-nowrap"> {t("한글 타자 연습")}</span>}
             </h1>
-            <p className="text-sm text-zinc-400 font-bold flex items-center gap-2 mt-2 md:mt-4"><BookOpen size={14} className="text-primary" /> {currentText.author} · {currentText.source}</p>
+            <p className="text-sm text-zinc-400 font-bold flex items-center gap-2 mt-2 md:mt-4"><BookOpen size={14} className="text-primary" /> {isEn ? englishWork?.author || currentText.author : currentText.author} · {isEn ? 'Korean text' : currentText.source}</p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 bg-surface-lowest p-3 rounded-2xl md:rounded-2xl shadow-sm w-full md:w-auto">
           <div className="flex items-center gap-2 md:gap-4 px-2 md:px-4 md:border-r border-surface-high">
             <Type size={18} className="text-primary" />
-            <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value as FontType)} className="bg-transparent text-sm font-bold outline-hidden cursor-pointer appearance-none hover:text-primary transition-colors">
-                <option value="font-noto">본고딕</option><option value="font-myeongjo">나눔명조</option><option value="font-batang">고운바탕</option><option value="font-dodum">고운돋움</option><option value="font-pen">나눔펜</option><option value="font-brush">나눔브러쉬</option><option value="font-gaegu">개구체</option><option value="font-poor">푸어스토리</option><option value="font-dokdo">독도체</option><option value="font-gamja">감자꽃</option><option value="font-single">싱글데이</option><option value="font-yeon">연성체</option><option value="font-stylish">스타일리시</option><option value="font-jua">배민 주아</option>
+            <select aria-label={isEn ? 'Typeface' : '글꼴'} value={fontFamily} onChange={(e) => setFontFamily(e.target.value as FontType)} className="bg-transparent text-sm font-bold outline-hidden cursor-pointer appearance-none hover:text-primary transition-colors">
+                <option value="font-noto">{t("본고딕")}</option><option value="font-myeongjo">{t("나눔명조")}</option><option value="font-batang">{t("고운바탕")}</option><option value="font-dodum">{t("고운돋움")}</option><option value="font-pen">{t("나눔펜")}</option><option value="font-brush">{t("나눔브러쉬")}</option><option value="font-gaegu">{t("개구체")}</option><option value="font-poor">{t("푸어스토리")}</option><option value="font-dokdo">{t("독도체")}</option><option value="font-gamja">{t("감자꽃")}</option><option value="font-single">{t("싱글데이")}</option><option value="font-yeon">{t("연성체")}</option><option value="font-stylish">{t("스타일리시")}</option><option value="font-jua">{t("배민 주아")}</option>
             </select>
-            <input type="range" min="16" max="40" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} className="w-24 accent-primary" />
+            <input aria-label={isEn ? 'Text size' : '글자 크기'} type="range" min="16" max="40" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} className="w-24 accent-primary" />
           </div>
           <div className="flex items-center gap-2 px-2">
             <PaperBtn active={paperType==='white'} label="White" onClick={()=>setPaperType('white')} />
@@ -697,7 +701,7 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
                 <span className="flex items-center gap-2"><Clock size={16}/> {Math.floor(elapsedSeconds/60)}:{String(Math.floor(elapsedSeconds)%60).padStart(2,'0')}</span>
             </div>
           </div>
-          <textarea data-typing-input ref={textareaRef} lang="ko" aria-label="필사 입력" value={inputValue} onChange={handleInputChange} autoCorrect="off" autoCapitalize="off" spellCheck={false} className="flex-1 min-h-0 w-full max-w-[42rem] bg-transparent resize-none outline-hidden leading-relaxed whitespace-pre-wrap break-keep [overflow-wrap:anywhere] z-10 py-0 text-on-surface placeholder:text-zinc-400/30" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }} placeholder="이곳에 필사를 시작하세요..." />
+          <textarea data-typing-input ref={textareaRef} lang="ko" aria-label={t("필사 입력")} value={inputValue} onChange={handleInputChange} autoCorrect="off" autoCapitalize="off" spellCheck={false} className="flex-1 min-h-0 w-full max-w-[42rem] bg-transparent resize-none outline-hidden leading-relaxed whitespace-pre-wrap break-keep [overflow-wrap:anywhere] z-10 py-0 text-on-surface placeholder:text-zinc-400/30" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }} placeholder={t("이곳에 필사를 시작하세요...")} />
 
           <div className="mt-4 md:mt-12 relative h-12 md:h-16 w-full flex items-end">
               <div className="absolute w-full h-2 bg-surface-high rounded-full mb-2 shadow-inner" />
@@ -806,15 +810,15 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
                 <ScrollText size={300} />
             </div>
             <div className="relative z-10 text-center md:text-left flex-1">
-                <div className="inline-flex px-5 py-1.5 bg-primary rounded-full text-[10px] font-bold uppercase tracking-widest mb-8 shadow-lg shadow-primary/20">커뮤니티와 함께</div>
-                <h2 className="display-lg !text-3xl md:!text-5xl mb-6 break-keep text-balance">유저들이 만든 글은 <span className="whitespace-nowrap">어때요?</span></h2>
-                <p className="text-zinc-400 font-medium text-xl leading-relaxed max-w-xl break-keep text-balance">매일 새로운 감성 명문이 올라오는 필사 챌린지에서 다른 유저들과 소통하며 연습해 보세요.</p>
+                <div className="inline-flex px-5 py-1.5 bg-primary rounded-full text-[10px] font-bold uppercase tracking-widest mb-8 shadow-lg shadow-primary/20">{isEn ? 'Keep exploring' : '커뮤니티와 함께'}</div>
+                <h2 className="display-lg !text-3xl md:!text-5xl mb-6 break-keep text-balance">{isEn ? 'Find your next Korean read' : <>유저들이 만든 글은 <span className="whitespace-nowrap">어때요?</span></>}</h2>
+                <p className="text-zinc-400 font-medium text-xl leading-relaxed max-w-xl break-keep text-balance">{isEn ? 'Choose another poem or story and practice at your own pace.' : '매일 새로운 감성 명문이 올라오는 필사 챌린지에서 다른 유저들과 소통하며 연습해 보세요.'}</p>
             </div>
             <Link prefetch={false} 
-                href="/challenge" 
+                href={isEn ? href('/transcription') : '/challenge'}
                 className="px-12 py-7 bg-white text-on-surface font-bold rounded-2xl hover:scale-[1.05] transition-all flex items-center gap-4 whitespace-nowrap shadow-2xl group relative z-10"
             >
-                필사 챌린지 참여하기 <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform text-primary" />
+                {isEn ? 'Browse literature' : '필사 챌린지 참여하기'} <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform text-primary" />
             </Link>
         </div>
       )}
