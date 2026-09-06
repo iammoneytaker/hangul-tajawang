@@ -2,7 +2,10 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import ClientChallengeWrapper from "./ClientChallengeWrapper";
-import { KeyboardAdSidebar } from "@/components/layout/KeyboardAdSidebar";
+import { WeeklyChallenges } from '@/components/challenge/WeeklyChallenges';
+import { loadWeeklyPopularity } from '@/lib/weekly-popularity';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "필사 챌린지 - 유저 생성 타자 연습",
@@ -39,11 +42,21 @@ async function fetchChallengesForSEO() {
 }
 
 export default async function ChallengePage() {
-  const challenges = await fetchChallengesForSEO();
+  const [challenges, popularity] = await Promise.all([
+    fetchChallengesForSEO(),
+    loadWeeklyPopularity(supabase).catch(() => {
+      console.error('Weekly popularity could not be loaded.');
+      return null;
+    }),
+  ]);
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4">
-      <h1 className="sr-only">필사 챌린지 - 유저 참여형 타자 연습</h1>
+      <header className="mb-8">
+        <h1 className="serif-display text-3xl font-bold">필사 챌린지</h1>
+        <p className="mt-3 text-secondary leading-relaxed">함께 나눈 글을 필사하며 타자 실력을 키워보세요.</p>
+      </header>
+      <WeeklyChallenges popularity={popularity} />
       
       {/* 
         [SEO 크롤링 링크 섹션]

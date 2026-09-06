@@ -56,6 +56,7 @@ helpful-reactor-*.json
 scripts/usage-events.sql
 stats/
 *.sql
+/tests/daily-sql.mjs
 # 개인정보 — 절대 커밋 금지
 member-emails.csv
 
