@@ -419,7 +419,7 @@ export const StairsGame: React.FC = () => {
               {isMilestone && (
                 <div className="absolute bottom-full mb-9 left-1/2 -translate-x-1/2 flex flex-col items-center text-[10px] font-bold text-amber-100">
                   <span className="text-lg leading-none">🚩</span>
-                  <span className="px-1.5 py-0.5 rounded bg-amber-500/90 text-white">{s.floor}층</span>
+                  <span className="px-1.5 py-0.5 rounded bg-amber-500/90 text-white">{s.floor}{isEn ? " floors" : "층"}</span>
                 </div>
               )}
               {/* 계단 발판 (착지한 칸은 살짝 눌렸다 올라오는 bounce) */}
@@ -446,7 +446,7 @@ export const StairsGame: React.FC = () => {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={chickSprite}
-              alt="병아리 캐릭터"
+              alt={t("병아리 캐릭터")}
               draggable={false}
               className="drop-shadow-lg select-none pointer-events-none"
               style={{ width: CHICK, height: CHICK, maxWidth: "none", transform: playerTransform, transition: falling ? "transform 0.65s cubic-bezier(.5,0,1,1)" : "transform 0.15s ease-out", transformOrigin: "bottom center" }}
@@ -528,7 +528,7 @@ export const StairsGame: React.FC = () => {
       <div className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar bg-white rounded-2xl p-8 shadow-2xl text-center border border-zinc-200 animate-in zoom-in duration-500">
         <div className="inline-flex p-6 bg-emerald-50 rounded-full mb-8"><Trophy className="w-20 h-20 text-yellow-500" /></div>
         <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs mb-1">{t("도달 층수")}</p>
-        <h2 className="text-6xl font-bold text-zinc-900 mb-2 tracking-tighter">{floor}층</h2>
+        <h2 className="text-6xl font-bold text-zinc-900 mb-2 tracking-tighter">{floor}{isEn ? " floors" : "층"}</h2>
         <p className="text-zinc-500 font-bold mb-10">
           {floor >= 100 ? t("구름 위까지! 대단한 등반이었어요.") : floor >= 50 ? t("절반의 고지를 넘었어요. 한 번 더!") : t("발끝이 근질근질하죠? 다시 올라볼까요?")}
         </p>
@@ -564,7 +564,7 @@ export const StairsGame: React.FC = () => {
         <span className="flex items-center gap-1"><span className="text-[9px] text-zinc-500 font-bold uppercase">{t("층")}</span><span className="text-sm font-bold text-emerald-400 tabular-nums">{floor}</span></span>
         <span className="flex-1 min-w-[60px] max-w-[140px] flex items-center gap-1"><GaugeIcon size={12} className={gaugeText} />{gaugeBar(true)}</span>
         {combo > 1 && <span className="text-orange-500 font-bold text-xs italic flex items-center gap-0.5 ml-auto"><Flame size={11} fill="currentColor" />{combo}</span>}
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setMuted(sound.toggleMuted())} aria-label="음소거" className={`shrink-0 text-zinc-400 ${combo > 1 ? "" : "ml-auto"}`}>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setMuted(sound.toggleMuted())} aria-label={t("음소거")} className={`shrink-0 text-zinc-400 ${combo > 1 ? "" : "ml-auto"}`}>
           {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
         </button>
       </>
@@ -582,15 +582,15 @@ export const StairsGame: React.FC = () => {
 
       {/* Game Dashboard (데스크톱 ≥lg) — 게이지 바를 크게 배치 */}
       <div className="hidden lg:flex w-full items-center gap-6 px-4 md:px-8 py-3 md:py-4 bg-zinc-900 text-white rounded-2xl md:rounded-2xl shadow-xl border border-zinc-800 shrink-0">
-        <div className="flex flex-col shrink-0"><span className="text-[9px] text-zinc-500 uppercase font-bold mb-0.5">Floor</span><span className="text-2xl font-bold text-emerald-400 flex items-center gap-1"><TrendingUp size={20} />{floor}층</span></div>
+        <div className="flex flex-col shrink-0"><span className="text-[9px] text-zinc-500 uppercase font-bold mb-0.5">Floor</span><span className="text-2xl font-bold text-emerald-400 flex items-center gap-1"><TrendingUp size={20} />{floor}{isEn ? " floors" : "층"}</span></div>
         <div className="flex flex-col shrink-0"><span className="text-[9px] text-zinc-500 uppercase font-bold mb-0.5">Level</span><span className="text-2xl font-bold text-blue-400">{level}</span></div>
         <div className="flex-1 flex flex-col gap-1 min-w-0">
-          <span className={`text-[9px] uppercase font-bold flex items-center gap-1 ${gaugeText}`}><GaugeIcon size={12} /> 남은 게이지 {Math.round(gauge)}%</span>
+          <span className={`text-[9px] uppercase font-bold flex items-center gap-1 ${gaugeText}`}><GaugeIcon size={12} /> {t("남은 게이지")} {Math.round(gauge)}%</span>
           {gaugeBar()}
         </div>
         <div className="flex items-center gap-4 shrink-0">
           {combo > 1 && <div className="animate-bounce"><span className="text-orange-500 font-bold text-lg italic flex items-center gap-1"><Flame size={16} fill="currentColor" /> {combo}</span></div>}
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setMuted(sound.toggleMuted())} aria-label="음소거 토글" className="w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0">
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setMuted(sound.toggleMuted())} aria-label={t("음소거 토글")} className="w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors shrink-0">
             {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
           <div className="h-8 w-px bg-zinc-800 hidden sm:block"></div>
@@ -617,13 +617,13 @@ export const StairsGame: React.FC = () => {
                     {rank.profiles?.avatar_url ? <Image src={rank.profiles.avatar_url} alt="p" width={24} height={32} className="w-6 h-6 rounded-lg object-cover aspect-square" /> : <div className="w-6 h-6 bg-zinc-50 rounded-lg flex items-center justify-center text-zinc-400"><User size={12} /></div>}
                     <div className="min-w-0"><p className="text-sm font-bold truncate text-zinc-900 leading-tight">{rank.profiles?.nickname || t("익명")}</p><p className="text-[9px] font-bold text-zinc-400">Lv.{rank.level}</p></div>
                   </div>
-                  <div className="text-right shrink-0"><p className="text-sm font-bold text-emerald-600">{rank.score.toLocaleString()}층</p></div>
+                  <div className="text-right shrink-0"><p className="text-sm font-bold text-emerald-600">{rank.score.toLocaleString()}{isEn ? " floors" : "층"}</p></div>
                 </div>
               )) : <div className="text-center py-10 text-zinc-400 text-xs font-medium">{t("기록 없음")}</div>}
           </div>
           {!user && (
             <p className="mt-4 text-[9px] text-zinc-400 font-bold text-center leading-relaxed px-2 animate-pulse">
-              로그인을 하시면 나만의 소중한 기록을 <br />실시간 랭킹에 남길 수 있습니다.
+              {t("로그인을 하시면 나만의 소중한 기록을")} <br />{t("실시간 랭킹에 남길 수 있습니다.")}
             </p>
           )}
           <div className="mt-4 pt-4 border-t border-zinc-100 text-center"><div className="bg-zinc-50 p-3 rounded-xl flex items-center justify-center gap-2"><Star size={14} className="text-emerald-600" fill="currentColor" /><span className="font-bold text-xs">{profile?.nickname || "Guest"}</span></div></div>

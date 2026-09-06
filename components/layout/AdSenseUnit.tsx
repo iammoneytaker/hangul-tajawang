@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsEnRoute } from '@/lib/i18n/game-ui';
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { BookOpenText, Brain, Gamepad2, Sparkles, ArrowRight } from 'lucide-react';
@@ -65,6 +66,7 @@ const PILLAR_PROMOS = [
  * 홍보 배너로 회수한다. 지면(unit)별로 축을 순환시켜 고르게 노출한다.
  */
 const HouseAdFallback: React.FC<{ width: number; height: number; unit: string }> = ({ width, height, unit }) => {
+  const isEn = useIsEnRoute();
   useEffect(() => {
     (window as any).dataLayer?.push({ event: 'house_ad_impression', ad_unit: unit, ad_size: `${width}x${height}` });
   }, [unit, width, height]);
@@ -74,7 +76,12 @@ const HouseAdFallback: React.FC<{ width: number; height: number; unit: string }>
   };
 
   // 지면 이름 해시로 축 선택 — 같은 지면은 항상 같은 축(하이드레이션 안정), 지면끼리는 분산
-  const promo = PILLAR_PROMOS[Math.abs([...unit].reduce((a, c) => a + c.charCodeAt(0), 0)) % PILLAR_PROMOS.length];
+  const promos = isEn ? [
+    { href: '/en/transcription', icon: BookOpenText, tall: ['Type Korean', 'literature'], thin: 'Read closely. Type Korean literature.', square: ['Practice with', 'Korean literature'], cta: 'Start typing' },
+    { href: '/en/practice', icon: Brain, tall: ['Learn the keys', 'Build your skills'], thin: 'Learn Hangul, one keystroke at a time.', square: ['Learn the keys', 'Build your skills'], cta: 'Practice' },
+    { href: '/en/game', icon: Gamepad2, tall: ['Play and learn', 'Typing games'], thin: 'Build Korean typing skills through play.', square: ['Play and learn', 'Typing games'], cta: 'Play now' },
+  ] : PILLAR_PROMOS;
+  const promo = promos[Math.abs([...unit].reduce((a, c) => a + c.charCodeAt(0), 0)) % PILLAR_PROMOS.length];
   const Icon = promo.icon;
 
   const isVertical = height > width * 1.5;   // 160x600 스카이스크래퍼
@@ -86,11 +93,11 @@ const HouseAdFallback: React.FC<{ width: number; height: number; unit: string }>
         className="group flex flex-col items-center justify-between bg-gradient-to-b from-blue-600 to-indigo-700 text-white rounded-2xl p-5 text-center overflow-hidden relative hover:scale-[1.02] transition-transform"
         style={{ width: `${width}px`, height: `${height}px`, maxWidth: '100%' }}
       >
-        <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-200">한글타자왕</span>
+        <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-blue-200">{isEn ? "Hangul Tajawang" : "한글타자왕"}</span>
         <div className="flex flex-col items-center gap-4">
           <Icon size={48} className="opacity-90 group-hover:-rotate-6 transition-transform" />
           <p className="font-bold text-lg leading-snug break-keep">{promo.tall[0]}<br />{promo.tall[1]}</p>
-          <p className="text-[11px] text-blue-200 font-medium leading-relaxed break-keep">타자를 치는 시간을<br />가치 있게</p>
+          <p className="text-[11px] text-blue-200 font-medium leading-relaxed break-keep">{isEn ? <>Make every<br />keystroke count</> : <>타자를 치는 시간을<br />가치 있게</>}</p>
         </div>
         <span className="px-4 py-2 bg-white text-blue-700 rounded-full text-[11px] font-bold flex items-center gap-1">
           {promo.cta} <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
@@ -110,7 +117,7 @@ const HouseAdFallback: React.FC<{ width: number; height: number; unit: string }>
           <p className="font-bold text-sm leading-tight break-keep truncate">{promo.thin}</p>
         </div>
         <span className="shrink-0 px-3 py-1.5 bg-white text-blue-700 rounded-full text-[10px] font-bold flex items-center gap-1">
-          보기 <ArrowRight size={11} />
+          {isEn ? 'Explore' : '보기'} <ArrowRight size={11} />
         </span>
       </Link>
     );
@@ -122,7 +129,7 @@ const HouseAdFallback: React.FC<{ width: number; height: number; unit: string }>
       className="group flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl p-6 text-center overflow-hidden relative hover:scale-[1.02] transition-transform"
       style={{ width: `${width}px`, height: `${height}px`, maxWidth: '100%' }}
     >
-      <span className="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold uppercase tracking-[0.3em] text-blue-200 flex items-center gap-1"><Sparkles size={10} /> 한글타자왕</span>
+      <span className="absolute top-3 left-1/2 -translate-x-1/2 text-[9px] font-bold uppercase tracking-[0.3em] text-blue-200 flex items-center gap-1"><Sparkles size={10} /> {isEn ? "Hangul Tajawang" : "한글타자왕"}</span>
       <Icon size={40} className="opacity-90 group-hover:-rotate-6 transition-transform" />
       <p className="font-bold text-lg leading-snug break-keep">{promo.square[0]}<br />{promo.square[1]}</p>
       <span className="px-4 py-2 bg-white text-blue-700 rounded-full text-[11px] font-bold flex items-center gap-1">

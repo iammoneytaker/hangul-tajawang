@@ -1,11 +1,13 @@
 "use client";
 
+import { usePracticeT } from '@/lib/i18n/practice-ui';
 import React, { useState, useEffect } from "react";
 import { ShieldCheck, Check, ChevronRight, Loader2, ExternalLink } from "lucide-react";
 import { SupabaseService } from "@/lib/supabase";
 import Link from "next/link";
 
 export const PrivacyConsentModal = () => {
+  const { isEn, t } = usePracticeT();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -32,7 +34,7 @@ export const PrivacyConsentModal = () => {
       await SupabaseService.updatePrivacyConsent();
       setShow(false);
     } catch (error) {
-      alert("처리에 실패했습니다. 다시 시도해 주세요.");
+      alert(t("처리에 실패했습니다. 다시 시도해 주세요."));
     } finally {
       setLoading(false);
     }
@@ -50,46 +52,47 @@ export const PrivacyConsentModal = () => {
                 onClick={() => setShowFullText(false)}
                 className="mb-6 flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-blue-600 transition-colors"
               >
-                <ChevronRight className="rotate-180" size={16} /> 뒤로 가기
+                <ChevronRight className="rotate-180" size={16} /> {t("뒤로 가기")}
               </button>
-              <h2 className="text-xl font-bold mb-6">개인정보 처리방침 전문</h2>
+              <h2 className="text-xl font-bold mb-6">{t("개인정보 처리방침 전문")}</h2>
               <div className="h-64 overflow-y-auto pr-4 space-y-6 text-sm text-zinc-500 leading-relaxed custom-scrollbar">
                 <section>
-                  <h3 className="font-bold text-zinc-900 mb-2">1. 수집하는 개인정보 항목</h3>
+                  <h3 className="font-bold text-zinc-900 mb-2">{t("1. 수집하는 개인정보 항목")}</h3>
                   <ul className="list-disc ml-4 space-y-1">
-                    <li>소셜 로그인 정보: 이메일, 닉네임, 프로필 이미지</li>
-                    <li>서비스 이용 기록: 타자 연습 기록(타수, 정확도, 오타 리스트), 최고 기록 등</li>
-                    <li>자동 수집 항목: 쿠키, 방문 일시, 기기 정보 등</li>
+                    <li>{t("소셜 로그인 정보: 이메일, 닉네임, 프로필 이미지")}</li>
+                    <li>{t("서비스 이용 기록: 타자 연습 기록(타수, 정확도, 오타 리스트), 최고 기록 등")}</li>
+                    <li>{t("자동 수집 항목: 쿠키, 방문 일시, 기기 정보 등")}</li>
                   </ul>
                 </section>
                 <section>
-                  <h3 className="font-bold text-zinc-900 mb-2">2. 개인정보의 사용 목적</h3>
+                  <h3 className="font-bold text-zinc-900 mb-2">{t("2. 개인정보의 사용 목적")}</h3>
                   <ul className="list-disc ml-4 space-y-1">
-                    <li>회원 관리 및 로그인 서비스 제공</li>
-                    <li>서비스 제공 및 품질 개선 (통계 데이터, 버그 수정)</li>
-                    <li>이용 패턴 분석 및 맞춤형 광고 제공</li>
+                    <li>{t("회원 관리 및 로그인 서비스 제공")}</li>
+                    <li>{t("서비스 제공 및 품질 개선 (통계 데이터, 버그 수정)")}</li>
+                    <li>{t("이용 패턴 분석 및 맞춤형 광고 제공")}</li>
                   </ul>
                 </section>
                 <section>
-                  <h3 className="font-bold text-zinc-900 mb-2">3. 개인정보의 공유 및 위탁</h3>
-                  <p>서비스 운영을 위해 Supabase, Google Analytics, Microsoft Clarity 등을 활용합니다.</p>
+                  <h3 className="font-bold text-zinc-900 mb-2">{t("3. 개인정보의 공유 및 위탁")}</h3>
+                  <p>{t("서비스 운영을 위해 Supabase, Google Analytics, Microsoft Clarity 등을 활용합니다.")}</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-zinc-900 mb-2">4. 개인정보의 보안 및 보유 기간</h3>
-                  <p>회원 탈퇴 시까지 또는 서비스 종료 시까지 보유하며, 목적 달성 시 지체 없이 파기합니다.</p>
+                  <h3 className="font-bold text-zinc-900 mb-2">{t("4. 개인정보의 보안 및 보유 기간")}</h3>
+                  <p>{t("회원 탈퇴 시까지 또는 서비스 종료 시까지 보유하며, 목적 달성 시 지체 없이 파기합니다.")}</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-zinc-900 mb-2">5. 개인정보 보호책임자 및 문의처</h3>
-                  <p>블루커뮤니케이션즈 주식회사 · 개인정보 보호책임자 홍상원</p>
+                  <h3 className="font-bold text-zinc-900 mb-2">{t("5. 개인정보 보호책임자 및 문의처")}</h3>
+                  <p>{t("블루커뮤니케이션즈 주식회사 · 개인정보 보호책임자 홍상원")}</p>
                   <p>bluecomms.ailab@gmail.com</p>
                 </section>
               </div>
               <div className="mt-8 pt-8 border-t border-zinc-100">
+                {isEn && <Link href="/en/privacy" target="_blank" className="block underline text-primary mb-4">Read the full privacy policy in English</Link>}
                 <button 
                   onClick={() => { setShowFullText(false); setAccepted(true); }}
                   className="w-full py-4 bg-zinc-900 text-white font-bold rounded-2xl transition-all active:scale-95"
                 >
-                  확인 및 동의하기
+                  {t("확인 및 동의하기")}
                 </button>
               </div>
             </div>
@@ -99,10 +102,10 @@ export const PrivacyConsentModal = () => {
                 <ShieldCheck size={32} />
               </div>
               
-              <h2 className="text-2xl font-bold mb-4">서비스 이용을 위한 <br/>개인정보처리방침 동의 안내</h2>
+              <h2 className="text-2xl font-bold mb-4">{t("서비스 이용을 위한")} <br/>{t("개인정보처리방침 동의 안내")}</h2>
               <p className="text-zinc-500 font-medium mb-8 leading-relaxed">
-                한글타자왕은 사용자의 개인정보를 소중히 다룹니다. <br/>
-                안전한 서비스 이용을 위해 개정된 개인정보처리방침에 동의해 주세요.
+                {t("한글타자왕은 사용자의 개인정보를 소중히 다룹니다.")} <br/>
+                {t("안전한 서비스 이용을 위해 개정된 개인정보처리방침에 동의해 주세요.")}
               </p>
 
               <div className="w-full space-y-4 mb-10">
@@ -114,7 +117,7 @@ export const PrivacyConsentModal = () => {
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-zinc-400">
                       <ExternalLink size={14} />
                     </div>
-                    <span className="text-sm font-bold text-zinc-700">개인정보처리방침 전문 보기</span>
+                    <span className="text-sm font-bold text-zinc-700">{t("개인정보처리방침 전문 보기")}</span>
                   </div>
                   <ChevronRight size={16} className="text-zinc-400 group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -133,7 +136,7 @@ export const PrivacyConsentModal = () => {
                     <Check size={14} strokeWidth={4} />
                   </div>
                   <span className={`text-sm font-bold ${accepted ? "text-blue-600" : "text-zinc-400"}`}>
-                    개인정보처리방침을 읽었으며 이에 동의합니다. (필수)
+                    {t("개인정보처리방침을 읽었으며 이에 동의합니다. (필수)")}
                   </span>
                 </button>
               </div>
@@ -143,7 +146,7 @@ export const PrivacyConsentModal = () => {
                 onClick={handleAccept}
                 className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="animate-spin" /> : "동의하고 시작하기"}
+                {loading ? <Loader2 className="animate-spin" /> : t("동의하고 시작하기")}
               </button>
               
               <p className="mt-6 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">

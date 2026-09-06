@@ -37,7 +37,7 @@ export function GamePageShell({
           ))}
         </ol>
         <p className="mt-8 text-sm text-zinc-500 leading-relaxed">
-          The game runs in English on this page — only the words you type are Korean, and that's the practice.
+          The game runs in English on this page — only the words you type are Korean, and that is the practice.
           You need the Korean input method (IME) enabled; new to that? Read{' '}
           <Link prefetch={false} href="/en/guide" className="text-primary font-bold underline underline-offset-2">
             how to type in Korean

@@ -542,7 +542,7 @@ export const TypingDefenseGame: React.FC = () => {
     showUpgrades && mounted ? createPortal(<UpgradeModal choices={snapshot.upgradeChoices} wave={snapshot.wave} onPick={chooseUpgrade} />, document.body) : null;
 
   const muteButton = (
-    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={toggleMute} className="shrink-0 w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors" aria-label="음소거 토글">
+    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={toggleMute} className="shrink-0 w-9 h-9 rounded-xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors" aria-label={t("음소거 토글")}>
       {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
     </button>
   );
@@ -625,7 +625,7 @@ export const TypingDefenseGame: React.FC = () => {
       <div className="fixed inset-0 z-[9985] bg-slate-950 flex flex-col p-3 gap-3">
         <div className="flex gap-3 items-stretch shrink-0">
           {hudBar}
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={exitDesktopGame} aria-label="게임 종료" className="shrink-0 w-11 rounded-2xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors">
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={exitDesktopGame} aria-label={t("게임 종료")} className="shrink-0 w-11 rounded-2xl bg-zinc-800 text-zinc-300 flex items-center justify-center hover:bg-zinc-700 transition-colors">
             <ArrowRight className="rotate-180" size={20} />
           </button>
         </div>
@@ -665,7 +665,7 @@ export const TypingDefenseGame: React.FC = () => {
         <span className="flex items-center gap-1 text-sm font-bold text-blue-400 tabular-nums"><Shield size={13} />{snapshot.shieldCount}</span>
         <span className="flex items-center gap-1 text-sm font-bold text-purple-400 tabular-nums"><Sparkles size={13} />{snapshot.combo}</span>
         <span className="flex items-center gap-1 text-sm font-bold text-yellow-400 tabular-nums ml-auto"><Trophy size={13} />{snapshot.score.toLocaleString()}</span>
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={toggleMute} className="shrink-0 text-zinc-400" aria-label="음소거">
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={toggleMute} className="shrink-0 text-zinc-400" aria-label={t("음소거")}>
           {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
         </button>
       </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsEnRoute } from '@/lib/i18n/game-ui';
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -7,6 +8,7 @@ import { Bell, X, Heart, MessageSquare, Clock, ChevronRight, Loader2, Sparkles, 
 import { SupabaseService, supabase } from "@/lib/supabase";
 
 export const NotificationDrawer = ({ userId }: { userId: string }) => {
+  const isEn = useIsEnRoute();
   const [isOpen, setIsOpen] = useState(false);
   const [activities, setActivities] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -65,13 +67,13 @@ export const NotificationDrawer = ({ userId }: { userId: string }) => {
       <div className="relative w-full max-w-sm bg-white h-full shadow-[-20px_0_80px_rgba(0,0,0,0.4)] flex flex-col animate-in slide-in-from-right duration-500 border-l border-zinc-200">
         <div className="p-8 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
             <div>
-                <h3 className="text-2xl font-bold text-zinc-900">알림 센터</h3>
+                <h3 className="text-2xl font-bold text-zinc-900">{isEn ? "Notifications" : "알림 센터"}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                     <Sparkles size={12} className="text-blue-500" />
                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Realtime Activity</p>
                 </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="p-3 hover:bg-zinc-200 rounded-2xl transition-all active:scale-90 text-zinc-400">
+            <button aria-label={isEn ? 'Close notifications' : '알림 닫기'} onClick={() => setIsOpen(false)} className="p-3 hover:bg-zinc-200 rounded-2xl transition-all active:scale-90 text-zinc-400">
                 <X size={20}/>
             </button>
         </div>
@@ -80,7 +82,7 @@ export const NotificationDrawer = ({ userId }: { userId: string }) => {
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-32 gap-4">
                     <Loader2 className="animate-spin text-blue-600" size={32} />
-                    <p className="text-sm font-bold text-zinc-400">알림을 불러오는 중...</p>
+                    <p className="text-sm font-bold text-zinc-400">{isEn ? "Loading notifications…" : "알림을 불러오는 중..."}</p>
                 </div>
             ) : activities.length > 0 ? (
                 activities.map((act) => (
@@ -94,9 +96,9 @@ export const NotificationDrawer = ({ userId }: { userId: string }) => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm leading-tight text-zinc-700">
-                                <span className="font-bold text-zinc-900">{act.actor?.nickname || '익명'}</span>님이 
-                                <span className="font-bold text-blue-600"> {act.content?.title || '작성하신 글'}</span>에 
-                                {act.type === 'like' ? ' 좋아요를 눌렀습니다.' : ' 댓글을 남겼습니다.'}
+                                <span className="font-bold text-zinc-900">{act.actor?.nickname || (isEn ? 'Anonymous' : '익명')}</span>{isEn ? ' interacted with ' : '님이 '}
+                                <span className="font-bold text-blue-600"> {act.content?.title || (isEn ? 'your post' : '작성하신 글')}</span>{isEn ? ': ' : '에 '}
+                                {isEn ? (act.type === 'like' ? 'liked your post.' : 'left a comment.') : (act.type === 'like' ? ' 좋아요를 눌렀습니다.' : ' 댓글을 남겼습니다.')}
                             </p>
                             <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-zinc-400">
                                 <Clock size={10} />
@@ -113,13 +115,13 @@ export const NotificationDrawer = ({ userId }: { userId: string }) => {
                     <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Bell size={32} className="text-zinc-200" />
                     </div>
-                    <p className="text-sm font-bold text-zinc-400">최근 도착한 알림이 없습니다.</p>
+                    <p className="text-sm font-bold text-zinc-400">{isEn ? "No recent notifications." : "최근 도착한 알림이 없습니다."}</p>
                 </div>
             )}
         </div>
         
         <div className="p-8 border-t border-zinc-100 bg-zinc-50">
-            <button onClick={() => setIsOpen(false)} className="w-full py-4 bg-zinc-900 text-white font-bold rounded-2xl hover:scale-[1.02] transition-all shadow-xl">확인 완료</button>
+            <button aria-label={isEn ? 'Close notifications' : '알림 닫기'} onClick={() => setIsOpen(false)} className="w-full py-4 bg-zinc-900 text-white font-bold rounded-2xl hover:scale-[1.02] transition-all shadow-xl">{isEn ? "Done" : "확인 완료"}</button>
         </div>
       </div>
     </div>
@@ -129,7 +131,7 @@ export const NotificationDrawer = ({ userId }: { userId: string }) => {
     <>
       {/* 종 아이콘 버튼 (헤더에 렌더링) */}
       <button 
-        onClick={handleOpen}
+        aria-label={isEn ? 'Notifications' : '알림'} onClick={handleOpen}
         className="relative p-2.5 bg-zinc-100 border border-transparent hover:border-blue-500/30 rounded-2xl transition-all group active:scale-90"
       >
         <Bell size={20} className="text-zinc-500 group-hover:text-blue-600 transition-colors" />

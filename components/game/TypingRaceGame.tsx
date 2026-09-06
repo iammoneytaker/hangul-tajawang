@@ -351,7 +351,7 @@ export const TypingRaceGame: React.FC = () => {
               </div>
               {gameState === "playing" && nextWord && (
                 <div className="hidden sm:block px-6 py-3 rounded-2xl bg-zinc-100 text-zinc-400 text-xl font-bold">
-                  다음: {nextWord}
+                  {t("다음: ")}{nextWord}
                 </div>
               )}
             </div>
@@ -369,15 +369,15 @@ export const TypingRaceGame: React.FC = () => {
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${i === 0 ? "bg-yellow-400 text-white" : i === 1 ? "bg-zinc-300 text-zinc-600" : i === 2 ? "bg-orange-400 text-white" : "bg-zinc-100 text-zinc-400"}`}>{i + 1}</div>
                   <div className="flex-1 flex items-center gap-2 min-w-0">
                     {rank.profiles?.avatar_url ? <Image src={rank.profiles.avatar_url} alt="p" width={24} height={32} className="w-6 h-6 rounded-lg object-cover aspect-square" /> : <div className="w-6 h-6 bg-zinc-50 rounded-lg flex items-center justify-center text-zinc-400"><User size={12} /></div>}
-                    <div className="min-w-0"><p className="text-sm font-bold truncate text-zinc-900 leading-tight">{rank.profiles?.nickname || t("익명")}</p><p className="text-[9px] font-bold text-zinc-400">{rank.level}등 완주</p></div>
+                    <div className="min-w-0"><p className="text-sm font-bold truncate text-zinc-900 leading-tight">{rank.profiles?.nickname || t("익명")}</p><p className="text-[9px] font-bold text-zinc-400">{isEn ? `Finished #${rank.level}` : `${rank.level}등 완주`}</p></div>
                   </div>
-                  <div className="text-right shrink-0"><p className="text-sm font-bold text-blue-600">{rank.score.toLocaleString()}타</p></div>
+                  <div className="text-right shrink-0"><p className="text-sm font-bold text-blue-600">{rank.score.toLocaleString()}{isEn ? " CPM" : "타"}</p></div>
                 </div>
               )) : <div className="text-center py-10 text-zinc-400 text-xs font-medium">{t("기록 없음")}</div>}
           </div>
           {!user && (
             <p className="mt-4 text-[9px] text-zinc-400 font-bold text-center leading-relaxed px-2 animate-pulse">
-              로그인을 하시면 나만의 소중한 기록을 <br />실시간 랭킹에 남길 수 있습니다.
+              {t("로그인을 하시면 나만의 소중한 기록을")} <br />{t("실시간 랭킹에 남길 수 있습니다.")}
             </p>
           )}
           <div className="mt-4 pt-4 border-t border-zinc-100 text-center"><div className="bg-zinc-50 p-3 rounded-xl flex items-center justify-center gap-2"><Flag size={14} className="text-blue-600" /><span className="font-bold text-xs">{profile?.nickname || "Guest"}</span></div></div>

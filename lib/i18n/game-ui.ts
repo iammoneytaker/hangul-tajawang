@@ -8,6 +8,11 @@ import { usePathname } from 'next/navigation';
 import { isEnPath } from './routes';
 
 const EN: Record<string, string> = {
+  "게임 종료": "Exit game",
+  "음소거": "Mute audio",
+  "음소거 토글": "Toggle audio",
+  "남은 게이지": "Energy",
+  "병아리 캐릭터": "Chick character",
   // ── 공통 (시작/결과/랭킹) ────────────────────────────────────────────
   '게임 시작': 'Start Game',
   '준비가 되면 시작하세요': 'Press start when ready',

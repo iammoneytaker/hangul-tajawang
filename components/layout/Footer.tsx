@@ -22,9 +22,9 @@ export const Footer: React.FC = () => {
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-center sm:flex sm:gap-8">
           <Link href={guideHref} prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerGuide}</Link>
-          <Link href="/terms" prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerTerms}</Link>
-          <Link href="/privacy" prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerPrivacy}</Link>
-          <Link href="/contact" prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerContact}</Link>
+          <Link href={locale === "en" ? "/en/terms" : "/terms"} prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerTerms}</Link>
+          <Link href={locale === "en" ? "/en/privacy" : "/privacy"} prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerPrivacy}</Link>
+          <Link href={locale === "en" ? "/en/contact" : "/contact"} prefetch={false} className="hover:text-primary transition-colors font-medium">{t.footerContact}</Link>
           {/* 언어 전환 — 실제 <a> 링크 (크롤러 발견 경로) */}
           <a href={switchLocaleHref(pathname)} className="hover:text-primary transition-colors font-medium">{t.languageSwitch}</a>
         </div>

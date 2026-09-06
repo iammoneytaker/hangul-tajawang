@@ -1,5 +1,6 @@
 "use client";
 
+import { useGameT } from '@/lib/i18n/game-ui';
 import React from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -23,6 +24,7 @@ export const MobileGameShell: React.FC<{
   onResume: () => void;
   onExit: () => void;
 }> = ({ overlay, hud, input, children, paused, onResume, onExit }) => {
+  const { t } = useGameT();
   return createPortal(
     <div
       className="fixed left-0 w-full z-[9990] bg-zinc-950 flex flex-col"
@@ -34,7 +36,7 @@ export const MobileGameShell: React.FC<{
         <button
           type="button"
           onClick={onExit}
-          aria-label="게임 종료"
+          aria-label={t("게임 종료")}
           className="shrink-0 w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 flex items-center justify-center active:scale-90 transition-transform"
         >
           <X size={16} />

@@ -330,7 +330,7 @@ export const BlockPopGame: React.FC = () => {
           </div>
           {!user && (
             <p className="mt-4 text-[9px] text-zinc-400 font-bold text-center leading-relaxed px-2 animate-pulse">
-              로그인을 하시면 나만의 소중한 기록을 <br />실시간 랭킹에 남길 수 있습니다.
+              {t("로그인을 하시면 나만의 소중한 기록을")} <br />{t("실시간 랭킹에 남길 수 있습니다.")}
             </p>
           )}
           <div className="mt-4 pt-4 border-t border-zinc-100 text-center"><div className="bg-zinc-50 p-3 rounded-xl flex items-center justify-center gap-2"><Boxes size={14} className="text-rose-600" /><span className="font-bold text-xs">{profile?.nickname || "Guest"}</span></div></div>
