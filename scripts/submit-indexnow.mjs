@@ -2,7 +2,7 @@
 /**
  * IndexNow 색인 요청 스크립트
  * 사이트맵의 모든 URL을 IndexNow에 제출합니다.
- * 네이버, 빙(Bing), Yandex 등 IndexNow 지원 검색엔진에 즉시 반영됩니다.
+ * IndexNow 지원 검색엔진에 URL 변경을 알립니다. 실제 크롤링·색인을 보장하지 않습니다.
  * (구글은 IndexNow 미지원 — 구글은 submit-gsc-sitemap.mjs 사용)
  *
  * 사용법:
