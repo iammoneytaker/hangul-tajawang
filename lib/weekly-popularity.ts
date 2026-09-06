@@ -14,10 +14,13 @@ export interface PopularChallenge {
   readonly category: string | null;
   readonly participants: number;
   readonly lastCompletedAt: string;
+  readonly likes: number;
+  readonly comments: number;
 }
 
 export interface WeeklyPopularity {
   readonly items: readonly PopularChallenge[];
+  readonly monthlyItems: readonly PopularChallenge[];
   readonly asOf: string;
 }
 
@@ -33,14 +36,14 @@ export function rankWeeklyCompletions(rows: readonly WeeklyCompletion[]): Popula
     posts.set(row.content_id, post);
   }
   return [...posts].map(([id, post]) => ({ id, title: post.title, category: post.category,
-    participants: post.users.size, lastCompletedAt: post.last,
+    participants: post.users.size, lastCompletedAt: post.last, likes: 0, comments: 0,
   })).sort((a, b) => b.participants - a.participants
     || Date.parse(b.lastCompletedAt) - Date.parse(a.lastCompletedAt) || a.id.localeCompare(b.id)).slice(0, 3);
 }
 
 export async function loadWeeklyPopularity(client: SupabaseClient, now = new Date()): Promise<WeeklyPopularity> {
   const asOf = now.toISOString();
-  const since = new Date(now.getTime() - 7 * 86400000).toISOString();
+  const since = new Date(now.getTime() - 30 * 86400000).toISOString();
   const rows: WeeklyCompletion[] = [];
   const signal = AbortSignal.timeout(15000);
   let after: string | null = null;
@@ -58,5 +61,19 @@ export async function loadWeeklyPopularity(client: SupabaseClient, now = new Dat
     rows.push(...page);
     after = page[page.length - 1].id;
   }
-  return { items: rankWeeklyCompletions(rows), asOf };
+  const weekStart = now.getTime() - 7 * 86400000;
+  const items = rankWeeklyCompletions(rows.filter(row => Date.parse(row.created_at) >= weekStart));
+  const monthlyItems = rankWeeklyCompletions(rows);
+  const ids = [...new Set([...items, ...monthlyItems].map(item => item.id))];
+  if (!ids.length) return { items, monthlyItems, asOf };
+  const { data, error } = await client.from('typing_contents')
+    .select('id,like_count,typing_comments(count)').in('id', ids).lt('report_count', 10).abortSignal(signal)
+    .returns<{ id: string; like_count: number | null; typing_comments: { count: number }[] }[]>();
+  if (error) throw error;
+  const reactions = new Map((data ?? []).map(row => [row.id, row]));
+  const withReactions = (ranked: readonly PopularChallenge[]) => ranked.flatMap(item => {
+    const reaction = reactions.get(item.id);
+    return reaction ? [{ ...item, likes: reaction.like_count ?? 0, comments: reaction.typing_comments[0]?.count ?? 0 }] : [];
+  });
+  return { items: withReactions(items), monthlyItems: withReactions(monthlyItems), asOf };
 }
