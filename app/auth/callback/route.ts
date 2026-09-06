@@ -1,3 +1,4 @@
+import { AUTH_RETURN_COOKIE, safeAuthReturn } from '@/lib/i18n/auth-return';
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -5,10 +6,12 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') ?? '/'
+  const cookieStore = await cookies()
+  const savedPath = cookieStore.get(AUTH_RETURN_COOKIE)?.value
+  const next = safeAuthReturn(requestUrl.searchParams.get('next') ?? savedPath)
+  cookieStore.delete(AUTH_RETURN_COOKIE)
 
   if (code) {
-    const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -38,5 +41,5 @@ export async function GET(request: Request) {
   }
 
   // 진짜 실패한 경우
-  return NextResponse.redirect(`${requestUrl.origin}/auth/auth-code-error`)
+  return NextResponse.redirect(`${requestUrl.origin}${next === '/en' || next.startsWith('/en/') ? '/en/auth-error' : '/auth/auth-code-error'}`)
 }

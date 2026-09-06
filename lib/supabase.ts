@@ -1,3 +1,4 @@
+import { AUTH_RETURN_COOKIE, safeAuthReturn } from './i18n/auth-return';
 import { createBrowserClient } from '@supabase/ssr'
 import { assertImageFile, resizeToWebp } from './image-resize';
 
@@ -19,6 +20,9 @@ export class SupabaseService {
     
     // 현재 접속한 도메인을 기반으로 콜백 주소 생성
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.hangul-tajawang.com';
+    if (typeof window !== 'undefined') {
+      document.cookie = `${AUTH_RETURN_COOKIE}=${safeAuthReturn(window.location.pathname)}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+    }
     const redirectUrl = `${origin.replace(/\/$/, '')}/auth/callback`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
