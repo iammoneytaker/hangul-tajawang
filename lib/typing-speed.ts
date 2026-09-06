@@ -64,9 +64,8 @@ export class TypingUtils {
   }
 
   static getGrade(kpm: number, accuracy: number): string {
-    let score = kpm;
-    if (accuracy < 90) score *= 0.8;
-    else if (accuracy < 95) score *= 0.9;
+    if (!Number.isFinite(kpm) || !Number.isFinite(accuracy) || accuracy < 90) return 'D급 (연습필요)';
+    const score = accuracy < 95 ? Math.min(kpm * 0.9, 299) : kpm;
 
     if (score >= 600) return 'SSS급 (신)';
     if (score >= 500) return 'SS급 (고수)';
@@ -75,6 +74,13 @@ export class TypingUtils {
     if (score >= 200) return 'B급 (중급자)';
     if (score >= 100) return 'C급 (초급자)';
     return 'D급 (연습필요)';
+  }
+
+  static generateWordReport(words: string[], wordsWithMistakes: number, elapsedSeconds: number): TypingReport {
+    const text = words.join('');
+    const report = this.generateReport(text, text, 0, elapsedSeconds);
+    const accuracy = this.calculateAccuracy(Math.max(0, words.length - wordsWithMistakes), words.length);
+    return { ...report, accuracy, grade: this.getGrade(report.kpm, accuracy) };
   }
 
   static generateReport(

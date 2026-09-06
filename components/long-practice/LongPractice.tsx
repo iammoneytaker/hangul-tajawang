@@ -604,7 +604,7 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
         {/* 입력창: 줄마다 리마운트해 IME 잔여 조합 제거 */}
         <input
           key={lineIndex}
-          ref={lineInputRef}
+          data-typing-input ref={lineInputRef}
           type="text"
           value={lineInput}
           onChange={handleLineInputChange}
@@ -697,7 +697,7 @@ export const LongPractice: React.FC<Props> = ({ externalContent, initialTextId, 
                 <span className="flex items-center gap-2"><Clock size={16}/> {Math.floor(elapsedSeconds/60)}:{String(Math.floor(elapsedSeconds)%60).padStart(2,'0')}</span>
             </div>
           </div>
-          <textarea ref={textareaRef} lang="ko" aria-label="필사 입력" value={inputValue} onChange={handleInputChange} autoCorrect="off" autoCapitalize="off" spellCheck={false} className="flex-1 min-h-0 w-full max-w-[42rem] bg-transparent resize-none outline-hidden leading-relaxed whitespace-pre-wrap break-keep [overflow-wrap:anywhere] z-10 py-0 text-on-surface placeholder:text-zinc-400/30" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }} placeholder="이곳에 필사를 시작하세요..." />
+          <textarea data-typing-input ref={textareaRef} lang="ko" aria-label="필사 입력" value={inputValue} onChange={handleInputChange} autoCorrect="off" autoCapitalize="off" spellCheck={false} className="flex-1 min-h-0 w-full max-w-[42rem] bg-transparent resize-none outline-hidden leading-relaxed whitespace-pre-wrap break-keep [overflow-wrap:anywhere] z-10 py-0 text-on-surface placeholder:text-zinc-400/30" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }} placeholder="이곳에 필사를 시작하세요..." />
 
           <div className="mt-4 md:mt-12 relative h-12 md:h-16 w-full flex items-end">
               <div className="absolute w-full h-2 bg-surface-high rounded-full mb-2 shadow-inner" />

@@ -1,4 +1,5 @@
 "use client";
+import { useGameAnalytics } from '@/hooks/useGameAnalytics';
 
 import { useGameT } from "@/lib/i18n/game-ui";
 
@@ -38,6 +39,7 @@ export const BlockPopGame: React.FC = () => {
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [gameState, setGameState] = useState<"ready" | "playing" | "gameover">("ready");
+  useGameAnalytics('block-pop', gameState);
   const [mounted, setMounted] = useState(false);
 
   const [rankings, setRankings] = useState<any[]>([]);
@@ -260,7 +262,7 @@ export const BlockPopGame: React.FC = () => {
   );
 
   const gameInput = (
-    <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? "h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 border-zinc-700 focus:border-rose-500 placeholder:text-zinc-500" : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? "border-zinc-900 focus:border-rose-500" : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("블록 단어를 입력하세요!") : t("준비가 되면 시작하세요")} autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
+    <input data-typing-input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? "h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 border-zinc-700 focus:border-rose-500 placeholder:text-zinc-500" : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? "border-zinc-900 focus:border-rose-500" : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("블록 단어를 입력하세요!") : t("준비가 되면 시작하세요")} autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
   );
 
   // ── 모바일 풀스크린 몰입 모드 ──

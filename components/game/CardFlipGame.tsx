@@ -1,4 +1,5 @@
 "use client";
+import { useGameAnalytics } from '@/hooks/useGameAnalytics';
 
 import { useGameT } from "@/lib/i18n/game-ui";
 
@@ -42,6 +43,7 @@ export const CardFlipGame: React.FC = () => {
   const [maxCombo, setMaxCombo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(180);
   const [gameState, setGameState] = useState<"ready" | "playing" | "gameover">("ready");
+  useGameAnalytics('card-flip', gameState);
   const [mounted, setMounted] = useState(false);
   
   const [user, setUser] = useState<any>(null);
@@ -243,7 +245,7 @@ export const CardFlipGame: React.FC = () => {
 
   const cardInput = (
     <form onSubmit={handleInput} className={isMobilePlaying ? "w-full" : "w-full max-w-2xl mx-auto shrink-0 pb-2"}>
-      <input ref={inputRef} type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} readOnly={isLocked} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isLocked ? "border-zinc-700 opacity-60" : "border-purple-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${isLocked ? 'border-zinc-100 opacity-50' : 'border-purple-500 focus:shadow-purple-200/40 focus:ring-4 ring-purple-100'}`}`} placeholder={isLocked ? t("판정 대기 중...") : t("단어 입력 후 엔터!")} autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
+      <input data-typing-input ref={inputRef} type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} readOnly={isLocked} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isLocked ? "border-zinc-700 opacity-60" : "border-purple-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${isLocked ? 'border-zinc-100 opacity-50' : 'border-purple-500 focus:shadow-purple-200/40 focus:ring-4 ring-purple-100'}`}`} placeholder={isLocked ? t("판정 대기 중...") : t("단어 입력 후 엔터!")} autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
     </form>
   );
 

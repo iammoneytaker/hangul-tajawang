@@ -1,4 +1,5 @@
 "use client";
+import { useGameAnalytics } from '@/hooks/useGameAnalytics';
 
 import { useGameT, waveLabel, waveClearLabel } from "@/lib/i18n/game-ui";
 
@@ -117,6 +118,7 @@ export const TypingDefenseGame: React.FC = () => {
 
   const [snapshot, setSnapshot] = useState<TypingDefenseState>(engineRef.current.state);
   const [gameState, setGameState] = useState<GameState>("ready");
+  useGameAnalytics('castle-defense', gameState);
   const [inputValue, setInputValue] = useState("");
   const [targetId, setTargetId] = useState<number | null>(null);
   const [effects, setEffects] = useState<Effect[]>([]);
@@ -515,7 +517,7 @@ export const TypingDefenseGame: React.FC = () => {
   const commandInput = (
     <form onSubmit={handleSubmit} className={isMobilePlaying ? "w-full" : "w-full shrink-0"}>
       <input
-        ref={inputRef}
+        data-typing-input ref={inputRef}
         type="text"
         value={inputValue}
         onChange={handleChange}

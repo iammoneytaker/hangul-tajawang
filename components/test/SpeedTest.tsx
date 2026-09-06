@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { TypingUtils } from "@/lib/typing-speed";
+import { track } from "@/lib/analytics";
 import { SHORT_TEXT_DB } from "@/lib/short-text-data";
 import { scrollIntoViewOnFocus } from "@/hooks/useVirtualKeyboard";
 import { Timer, Zap, Target, RotateCcw, Download, Share2, Trophy, ChevronRight, Gamepad2 } from "lucide-react";
@@ -81,7 +82,7 @@ export const SpeedTest: React.FC = () => {
     const grade = TypingUtils.getGrade(kpm, accuracy);
     setResult({ kpm, accuracy, grade });
     setGameState("done");
-    (window as any).dataLayer?.push({ event: "speed_test_complete", kpm, accuracy, tier: grade });
+    track('speed_test_complete', { kpm, accuracy, tier: grade });
   }, [accumulate]);
 
   // 타이머: 첫 입력부터 60초
@@ -112,7 +113,10 @@ export const SpeedTest: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (gameState !== "running") return;
     const val = e.target.value;
-    if (!startTimeRef.current && val.length > 0) startTimeRef.current = Date.now();
+    if (!startTimeRef.current && val.length > 0) {
+      startTimeRef.current = Date.now();
+      track('speed_test_start');
+    }
     setInputValue(val);
     checkComplete(val);
   };
@@ -202,7 +206,7 @@ export const SpeedTest: React.FC = () => {
   const downloadCard = () => {
     const c = drawResultCard();
     if (!c) return;
-    (window as any).dataLayer?.push({ event: "tier_card_download" });
+    track('tier_card_download');
     c.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
@@ -217,7 +221,7 @@ export const SpeedTest: React.FC = () => {
   const shareCard = async () => {
     const c = drawResultCard();
     if (!c || !result) return;
-    (window as any).dataLayer?.push({ event: "tier_card_share" });
+    track('tier_card_share');
     c.toBlob(async (blob) => {
       if (!blob) return;
       const file = new File([blob], "typing-tier.png", { type: "image/png" });
@@ -310,7 +314,7 @@ export const SpeedTest: React.FC = () => {
       {/* 입력창 */}
       <input
         key={`s-${sentenceIndex}`}
-        ref={inputRef}
+        data-typing-input ref={inputRef}
         type="text"
         value={inputValue}
         onChange={handleInputChange}

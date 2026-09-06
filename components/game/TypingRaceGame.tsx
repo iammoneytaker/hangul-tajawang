@@ -1,4 +1,5 @@
 "use client";
+import { useGameAnalytics } from '@/hooks/useGameAnalytics';
 
 import { useGameT, raceRankLabel } from "@/lib/i18n/game-ui";
 
@@ -40,6 +41,7 @@ const pickWord = (level: number, avoid: string): string => {
 export const TypingRaceGame: React.FC = () => {
   const { isEn, t } = useGameT();
   const [gameState, setGameState] = useState<"ready" | "playing" | "finished">("ready");
+  useGameAnalytics('typing-race', gameState);
   const [playerDist, setPlayerDist] = useState(0);
   const [botDists, setBotDists] = useState<number[]>([0, 0, 0]);
   const [word, setWord] = useState("");
@@ -287,7 +289,7 @@ export const TypingRaceGame: React.FC = () => {
   );
 
   const raceInput = (
-    <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isWrongNow ? "border-rose-500" : "border-zinc-700 focus:border-blue-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? (isWrongNow ? "border-rose-500" : "border-zinc-900 focus:border-blue-500") : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("위 단어를 입력하세요!") : t("준비가 되면 시작하세요")} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
+    <input data-typing-input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isWrongNow ? "border-rose-500" : "border-zinc-700 focus:border-blue-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? (isWrongNow ? "border-rose-500" : "border-zinc-900 focus:border-blue-500") : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("위 단어를 입력하세요!") : t("준비가 되면 시작하세요")} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
   );
 
   // ── 모바일 풀스크린 몰입 모드 ──

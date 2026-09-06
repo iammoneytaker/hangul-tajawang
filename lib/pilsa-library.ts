@@ -91,7 +91,6 @@ export function recordCompletion(meta: PilsaSourceMeta, completion: PilsaComplet
     progress: undefined,
   };
   saveDb(db);
-  (window as any).dataLayer?.push({ event: "pilsa_complete", source: meta.sourceType, work: meta.title });
   // 로그인 상태면 서버에도 기록 (실패해도 로컬은 이미 저장됨 — 다음 동기화 때 백필)
   void pushCompletionToServer(meta, completion);
 }

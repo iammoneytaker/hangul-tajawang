@@ -6,6 +6,7 @@ import { SHORT_TEXT_DB, SHORT_TEXT_CATEGORIES } from "@/lib/short-text-data";
 import { Clock, Target, Zap, Keyboard as KbdIcon, Sparkles } from "lucide-react";
 import { KeyboardAdBanner } from "../layout/KeyboardAdBanner";
 import { scrollIntoViewOnFocus } from "@/hooks/useVirtualKeyboard";
+import { track } from '@/lib/analytics';
 
 export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialCategory }) => {
   const [activeCategory, setActiveCategory] = useState(initialCategory || "전체");
@@ -76,7 +77,10 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     if (isFlying || !targetSentence) return;
-    if (!startTime && newValue.length > 0) setStartTime(Date.now());
+    if (!startTime && newValue.length > 0) {
+      setStartTime(Date.now());
+      track('practice_start', { mode: 'short', category: activeCategory });
+    }
     setInputValue(newValue);
     const nowElapsed = startTime ? (Date.now() - startTime) / 1000 : 0.1;
     const currentReport = TypingUtils.generateReport(targetSentence, newValue, 0, nowElapsed);
@@ -92,6 +96,7 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
     setIsFlying(true);
     const finalReport = TypingUtils.generateReport(targetSentence, finalValue, 0, finalElapsed);
     setReport(finalReport);
+    track('practice_complete', { mode: 'short', category: activeCategory, kpm: finalReport.kpm, accuracy: finalReport.accuracy });
     setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % shuffledSentences.length);
       setInputValue("");
@@ -147,7 +152,7 @@ export const ShortPractice: React.FC<{ initialCategory?: string }> = ({ initialC
       <div className="w-full max-w-3xl mt-6 md:mt-12 relative group">
         <input
           key={`${activeCategory}-${currentIndex}`}
-          ref={inputRef}
+          data-typing-input ref={inputRef}
           type="text"
           value={inputValue}
           onChange={handleInputChange}

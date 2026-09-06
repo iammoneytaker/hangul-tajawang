@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import Link from 'next/link';
 import { TypingUtils, TypingReport } from "@/lib/typing-speed";
 import { RotateCcw, Target, CheckCircle2, Flame, Trophy, ArrowRight, Keyboard as KbdIcon, Sparkles } from "lucide-react";
 import { BASIC_PRACTICE_STEPS, PracticeStep } from "@/lib/word-data";
+import { track } from "@/lib/analytics";
+import { useHydrated } from '@/hooks/useHydrated';
 
 type Phase = "select" | "keys" | "transition" | "words" | "result";
 
@@ -63,11 +66,29 @@ function decomposeToJamos(text: string): string[] {
   return out;
 }
 
-export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initialTargetId?: string }> = ({ initialPhase, initialTargetId }) => {
-  const [selectedStep, setSelectedStep] = useState<PracticeStep | null>(null);
-  const [shuffledKeys, setShuffledKeys] = useState<string[]>([]);
-  const [shuffledWords, setShuffledWords] = useState<string[]>([]);
-  const [phase, setPhase] = useState<Phase>("select");
+interface PositionPracticeProps { initialPhase?: 'keys' | 'words'; initialTargetId?: string }
+
+function practiceOrder(step: PracticeStep) {
+  const keys: string[] = [];
+  while (keys.length < 30) keys.push(...[...step.keys].sort(() => Math.random() - 0.5));
+  return { keys: keys.slice(0, 30), words: [...step.words].sort(() => Math.random() - 0.5) };
+}
+
+export function PositionPractice(props: PositionPracticeProps) {
+  const hydrated = useHydrated();
+  return hydrated ? <PracticeSession key={`${props.initialPhase}:${props.initialTargetId}`} {...props} />
+    : <p className="py-16 text-center text-secondary" role="status">연습을 준비하고 있어요.</p>;
+}
+
+const PracticeSession: React.FC<PositionPracticeProps> = ({ initialPhase, initialTargetId }) => {
+  const [initial] = useState(() => {
+    const step = initialPhase ? BASIC_PRACTICE_STEPS.find(s => s.id === initialTargetId) || BASIC_PRACTICE_STEPS[0] : null;
+    return { step, ...(step ? practiceOrder(step) : { keys: [], words: [] }) };
+  });
+  const [selectedStep, setSelectedStep] = useState<PracticeStep | null>(initial.step);
+  const [shuffledKeys, setShuffledKeys] = useState<string[]>(initial.keys);
+  const [shuffledWords, setShuffledWords] = useState<string[]>(initial.words);
+  const [phase, setPhase] = useState<Phase>(initialPhase || 'select');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState(""); 
   
@@ -81,15 +102,14 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   // 자판 익히기 단계: 지금까지 소비한 자소 수 (입력값은 지우지 않고 계속 쌓는다 → IME 조합 충돌 방지)
   const processedJamosRef = useRef(0);
+  const mistakenWords = useRef(new Set<number>());
+  const inputStarted = useRef(false);
 
   const startStep = useCallback((step: PracticeStep, targetPhase: Phase = "keys") => {
     setSelectedStep(step);
-    let keysForPractice: string[] = [];
-    while (keysForPractice.length < 30) {
-        keysForPractice.push(...[...step.keys].sort(() => Math.random() - 0.5));
-    }
-    setShuffledKeys(keysForPractice.slice(0, 30));
-    setShuffledWords([...step.words].sort(() => Math.random() - 0.5));
+    const order = practiceOrder(step);
+    setShuffledKeys(order.keys);
+    setShuffledWords(order.words);
     setPhase(targetPhase);
     setCurrentIndex(0);
     setInputValue("");
@@ -98,6 +118,8 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
     setCombo(0);
     setStartTime(null);
     setReport(null);
+    mistakenWords.current.clear();
+    inputStarted.current = false;
     setTimeout(() => hiddenInputRef.current?.focus(), 100);
   }, []);
 
@@ -108,14 +130,9 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
     setCorrectCount(0);
     setCombo(0);
     setStartTime(null);
+    mistakenWords.current.clear();
+    inputStarted.current = false;
   }, []);
-
-  useEffect(() => {
-    if (initialPhase && phase === "select") {
-      const targetStep = initialTargetId ? BASIC_PRACTICE_STEPS.find(s => s.id === initialTargetId) || BASIC_PRACTICE_STEPS[0] : BASIC_PRACTICE_STEPS[0];
-      startStep(targetStep, initialPhase);
-    }
-  }, [initialPhase, initialTargetId, phase, startStep]);
 
   // 물리 키보드의 키 눌림 시각 효과 + ESC (매칭은 input 값 기반으로 처리하므로 여기선 하지 않음)
   useEffect(() => {
@@ -173,12 +190,19 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
     setCombo(cmb);
     setCorrectCount(correct);
     setTimeout(() => setActiveKey(null), 150);
-    if (finished) setPhase("transition");
+    if (finished) {
+      setPhase("transition");
+      track('practice_complete', { mode: 'position', step: selectedStep?.id || '', targets: correct });
+    }
   };
 
   const handleWordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    if (!startTime && val.length > 0) setStartTime(Date.now());
+    if (!inputStarted.current && val.length > 0 && (phase === 'keys' || phase === 'words')) {
+      inputStarted.current = true;
+      setStartTime(e.timeStamp);
+      track('practice_start', { mode: phase === 'keys' ? 'position' : 'word', step: selectedStep?.id || '' });
+    }
 
     if (phase === "keys") {
       setInputValue(val);
@@ -189,7 +213,12 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
 
     const target = shuffledWords[currentIndex];
     setInputValue(val);
-    if (val.length > 0 && !target.startsWith(val)) {
+    const targetJamos = decomposeToJamos(target).join('');
+    const inputJamos = decomposeToJamos(val).join('');
+    const wrong = val.length > 0 && (!/^[가-힣ㄱ-ㅎㅏ-ㅣ]+$/.test(val) || !targetJamos.startsWith(inputJamos));
+    if (wrong) {
+        mistakenWords.current.add(currentIndex);
+        setCombo(0);
         setWrongKey("wrong");
     } else {
         setWrongKey(null);
@@ -208,10 +237,11 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
   };
 
   const finishPractice = () => {
-    const timeTaken = (Date.now() - (startTime || Date.now())) / 1000;
-    const finalReport = TypingUtils.generateReport(shuffledWords.join(" "), shuffledWords.join(" "), 0, timeTaken);
+    const timeTaken = startTime === null ? 0 : (performance.now() - startTime) / 1000;
+    const finalReport = TypingUtils.generateWordReport(shuffledWords, mistakenWords.current.size, timeTaken);
     setReport(finalReport);
     setPhase("result");
+    track('practice_complete', { mode: 'word', step: selectedStep?.id || '', kpm: finalReport.kpm, accuracy: finalReport.accuracy });
   };
 
   if (phase === "select") {
@@ -246,7 +276,7 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
     <div className="flex flex-col items-center justify-center py-4 md:py-16 max-w-5xl mx-auto px-3 md:px-4 w-full" onClick={() => hiddenInputRef.current?.focus()}>
       <input
         key={phase === "words" ? `word-${currentIndex}` : "keys-input"}
-        ref={hiddenInputRef}
+        data-typing-input ref={hiddenInputRef}
         type="text"
         value={inputValue}
         onChange={handleWordChange}
@@ -290,14 +320,15 @@ export const PositionPractice: React.FC<{ initialPhase?: "keys" | "words", initi
                 <h2 className="display-lg !text-3xl md:!text-5xl mb-4">과정 완료!</h2>
                 <p className="text-zinc-400 font-bold mb-12">{selectedStep!.title} 연습을 모두 마쳤습니다.</p>
                 <div className="grid grid-cols-2 gap-6 mb-12">
-                    <div className="bg-surface-low p-8 rounded-2xl"><p className="text-[10px] font-bold text-zinc-400 uppercase mb-3 tracking-widest">정확도</p><p className="text-4xl font-bold text-primary">{report?.accuracy}%</p></div>
+                    <div className="bg-surface-low p-5 sm:p-8 rounded-2xl"><p className="text-xs font-bold text-zinc-500 mb-3">첫 입력 정확도</p><p className="text-4xl font-bold text-primary">{report?.accuracy}%</p></div>
                     <div className="bg-surface-low p-8 rounded-2xl"><p className="text-[10px] font-bold text-zinc-400 uppercase mb-3 tracking-widest">평균 타수</p><p className="text-4xl font-bold text-green-600">{report?.kpm}타</p></div>
                 </div>
-                <button onClick={() => setPhase("select")} className="w-full py-6 bg-on-surface text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-on-surface/10">단계 선택으로 돌아가기</button>
+                <p className="text-sm text-zinc-600 mb-6">오타 없이 완성한 낱말의 비율입니다. 수정한 낱말은 {shuffledWords.length - Math.round(shuffledWords.length * (report?.accuracy || 0) / 100)}개예요.</p>
+                <button onClick={() => { setPhase("select"); track('activity_next', { mode: 'word', destination: 'step_select' }); }} className="w-full py-6 bg-on-surface text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-on-surface/10">단계 선택으로 돌아가기</button>
                 {/* 코어 출구 — 자리를 뗐으면 지식을 손으로 */}
-                <a href="/journey" className="mt-5 block text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
+                <Link href="/journey" prefetch={false} className="mt-5 block text-sm font-bold text-zinc-500 hover:text-primary transition-colors">
                   자리는 익혔으니, 이제 외우면서 쳐볼까요? — 지식타자 →
-                </a>
+                </Link>
             </div>
         </div>
       ) : (

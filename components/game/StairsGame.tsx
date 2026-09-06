@@ -1,4 +1,5 @@
 "use client";
+import { useGameAnalytics } from '@/hooks/useGameAnalytics';
 
 import { useGameT } from "@/lib/i18n/game-ui";
 
@@ -81,6 +82,7 @@ const growStairs = (last: Stair, count: number): Stair[] => {
 export const StairsGame: React.FC = () => {
   const { isEn, t } = useGameT();
   const [gameState, setGameState] = useState<"ready" | "playing" | "gameover">("ready");
+  useGameAnalytics('stairs', gameState);
   const [stairs, setStairs] = useState<Stair[]>([]);
   const [floor, setFloor] = useState(0);
   const [gauge, setGauge] = useState(100);
@@ -516,7 +518,7 @@ export const StairsGame: React.FC = () => {
   );
 
   const gameInput = (
-    <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isWrongNow ? "border-rose-500" : "border-zinc-700 focus:border-emerald-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? (isWrongNow ? "border-rose-500" : "border-zinc-900 focus:border-emerald-500") : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("다음 계단의 단어를 입력!") : t("준비가 되면 시작하세요")} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
+    <input data-typing-input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} disabled={gameState !== "playing"} className={`w-full text-center font-bold outline-hidden transition-all ${isMobilePlaying ? `h-12 px-4 text-lg bg-zinc-800 text-white rounded-xl border-2 placeholder:text-zinc-500 ${isWrongNow ? "border-rose-500" : "border-zinc-700 focus:border-emerald-500"}` : `h-14 md:h-20 px-5 md:px-8 text-xl md:text-4xl bg-white border-4 rounded-2xl md:rounded-2xl shadow-xl ${gameState === "playing" ? (isWrongNow ? "border-rose-500" : "border-zinc-900 focus:border-emerald-500") : "border-zinc-100 opacity-50"}`}`} placeholder={gameState === "playing" ? t("다음 계단의 단어를 입력!") : t("준비가 되면 시작하세요")} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
   );
 
   // 게임오버 팝업 (Portal)

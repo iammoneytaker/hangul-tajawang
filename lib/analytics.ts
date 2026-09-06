@@ -30,7 +30,23 @@ export type UsageEventName =
   | 'pilsa_complete'
   | 'journey_start'
   | 'journey_complete'
-  | 'journey_hint';
+  | 'journey_hint'
+  | 'practice_start'
+  | 'practice_complete'
+  | 'speed_test_start'
+  | 'speed_test_complete'
+  | 'tier_card_download'
+  | 'tier_card_share'
+  | 'daily_start'
+  | 'daily_complete'
+  | 'daily_hint'
+  | 'game_start'
+  | 'game_complete'
+  | 'activity_view'
+  | 'activity_input'
+  | 'activity_next';
+
+type AnalyticsWindow = Window & { dataLayer?: Record<string, unknown>[] };
 
 // 계측 실패가 사용자 경험을 해치지 않도록 항상 조용히 무시한다.
 export function track(
@@ -38,12 +54,22 @@ export function track(
   props: Record<string, string | number | boolean | null> = {}
 ): void {
   try {
-    (window as any).dataLayer?.push({
+    const analyticsWindow = window as AnalyticsWindow;
+    const dataLayer = analyticsWindow.dataLayer ?? (analyticsWindow.dataLayer = []);
+    const payload = {
       event,
       ...props,
       visitor_id: getVisitorId(),
       path: window.location.pathname,
-    });
+    };
+    dataLayer.push(payload);
+    if (event.endsWith('_start') || event.endsWith('_complete')) {
+      const mode = props.mode ?? (event.startsWith('pilsa_') ? props.source ?? 'library'
+        : event.startsWith('journey_') ? 'journey'
+        : event.startsWith('daily_') ? 'daily'
+        : event.startsWith('speed_test_') ? 'speed_test' : 'game');
+      dataLayer.push({ ...payload, mode, event: event.endsWith('_start') ? 'activity_start' : 'activity_complete' });
+    }
   } catch {
     /* noop */
   }

@@ -13,6 +13,7 @@ import { Footer } from "@/components/layout/Footer";
 import { PrivacyConsentModal } from "@/components/layout/PrivacyConsentModal";
 import { TopAdBanner } from "@/components/layout/TopAdBanner";
 import { AdSenseUnit } from "@/components/layout/AdSenseUnit";
+import { ActivityAnalytics } from "@/components/layout/ActivityAnalytics";
 
 const plusJakartaSans = Plus_Jakarta_Sans({ variable: "--font-plus-jakarta", subsets: ["latin"] });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -118,6 +119,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       `}>
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NCVLQG83" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} /></noscript>
         <PrivacyConsentModal />
+        <ActivityAnalytics />
         <Header />
         <TopAdBanner />
         <div className="flex w-full">

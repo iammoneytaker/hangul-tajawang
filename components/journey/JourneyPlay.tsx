@@ -432,7 +432,7 @@ export const JourneyPlay: React.FC<{ course: JourneyCourse }> = ({ course }) => 
 
   const journeyInput = (
     <input
-      ref={inputRef}
+      data-typing-input ref={inputRef}
       type="text"
       value={inputValue}
       onChange={handleInputChange} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); setInputValue(""); } }} 
