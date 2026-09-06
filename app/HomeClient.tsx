@@ -13,6 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SupabaseService } from '@/lib/supabase';
 import { KeyboardAdBanner } from '@/components/layout/KeyboardAdBanner';
+import { HomeStart } from '@/components/home/HomeStart';
 
 interface Props {
   initialPopular: any[];
@@ -286,43 +287,19 @@ export default function HomeClient({ initialPopular }: Props) {
 
 function HeroSection() {
   return (
-    <section className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-16 md:py-24 flex flex-col items-center text-center">
+    <section className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-8 md:py-14 flex flex-col items-center text-center">
       <div className="flex flex-col items-center w-full">
         {/* 커서 블링크 모티프 — 타자 제품의 정체성 */}
-        <h1 className="serif-display text-4xl md:text-5xl lg:text-6xl text-on-surface mb-6 md:mb-8 leading-[1.3] break-keep">
+        <h1 className="serif-display text-3xl md:text-5xl lg:text-6xl text-on-surface mb-4 md:mb-6 leading-[1.3] break-keep">
           한글 타자 연습, <br />
           타자 치는 <span className="text-primary underline decoration-[3px] decoration-primary/30 underline-offset-8">시간</span>을 가치 있게
           <span className="inline-block w-[3px] h-[0.9em] bg-primary align-[-0.12em] ml-1.5 animate-pulse" aria-hidden />
         </h1>
 
-        <p className="text-lg md:text-xl text-zinc-600 max-w-2xl mb-10 md:mb-14 leading-relaxed px-4 break-keep">
-          좋은 문장을 치면 생각이 남고, 좋은 지식을 치면 배움이 남고,{' '}
-          <br className="hidden sm:block" />
-          좋은 게임을 즐기면 실력이 남습니다.
+        <p className="text-base md:text-lg text-zinc-600 max-w-2xl mb-6 md:mb-8 leading-relaxed break-keep">
+          연습하고, 배우고, 마음에 남는 문장을 써보세요.
         </p>
-
-        <div className="flex flex-col items-center gap-6 w-full">
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full sm:w-auto px-4">
-            <Link prefetch={false}
-              href="/journey"
-              className="px-9 md:px-11 py-4 md:py-5 bg-primary text-white text-lg font-semibold rounded-xl transition-all hover:bg-blue-700 active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              지식타자 시작하기 <ChevronRight size={20} />
-            </Link>
-            <Link prefetch={false}
-              href="/game"
-              className="px-9 md:px-11 py-4 md:py-5 bg-surface-lowest text-on-surface text-lg font-semibold rounded-xl border border-outline-variant transition-all hover:border-zinc-400 active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              게임 즐기기
-            </Link>
-          </div>
-          <p className="text-xs text-zinc-500 tracking-wide">
-            좋은 문장을 함께 쓰고 싶다면{' '}
-            <Link prefetch={false} href="/challenge" className="text-primary font-semibold underline underline-offset-4 decoration-primary/30 hover:decoration-primary">
-              필사 챌린지 →
-            </Link>
-          </p>
-        </div>
+        <HomeStart />
       </div>
     </section>
   );

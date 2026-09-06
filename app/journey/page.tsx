@@ -59,6 +59,10 @@ export default function JourneyHubPage() {
       </div>
 
       {/* 코스 카드 */}
+      <Link href="/journey/daily" prefetch={false} className="flex items-center justify-between gap-4 bg-primary text-white p-6 rounded-2xl mb-6 hover:bg-blue-700">
+        <span><span className="block font-bold text-xl">오늘의 지식타자 5문제</span><span className="block text-sm mt-2 opacity-90">짧게 배우고, 헷갈린 문제는 내일 다시 복습해요.</span></span>
+        <ArrowRight className="shrink-0" size={24} />
+      </Link>
       <div className="hub-panel grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
         {orderedCourses.map((course) => {
           const stations = getCourseStations(course);
