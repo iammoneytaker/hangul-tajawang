@@ -283,14 +283,14 @@ export const StairsGame: React.FC = () => {
 
       // 착지 이펙트: 먼지 퍼프 + "+1층" 플로팅 + 실제 게이지 회복량 플로팅
       addFx({ kind: "dust", floor: newFloor, col: target.col }, 900);
-      addFx({ kind: "float", floor: newFloor, col: target.col, label: newCombo >= 5 ? `+1층 x${newCombo}콤보` : "+1층", strong: newCombo >= 5 }, 1000);
+      addFx({ kind: "float", floor: newFloor, col: target.col, label: isEn ? (newCombo >= 5 ? `+1 floor x${newCombo} combo` : '+1 floor') : (newCombo >= 5 ? `+1층 x${newCombo}콤보` : "+1층"), strong: newCombo >= 5 }, 1000);
       addFx({ kind: "recover", floor: newFloor, col: target.col, label: `+${Math.round(recover + comboBonus)}` }, 1000);
 
       // 50층 단위 마일스톤: 깃발 반짝이 + 돌파 배너
       if (target.type === "milestone") {
         addFx({ kind: "sparkle", floor: newFloor, col: target.col }, 1100);
         sound.milestone();
-        setBanner(`${newFloor}층 돌파!`);
+        setBanner(isEn ? `Floor ${newFloor} reached!` : `${newFloor}층 돌파!`);
         if (bannerTimer.current) clearTimeout(bannerTimer.current);
         bannerTimer.current = setTimeout(() => setBanner(null), 800);
       }
@@ -505,7 +505,7 @@ export const StairsGame: React.FC = () => {
       {/* 현재 층 표시(게이지 바 아래 좌측) */}
       {gameState !== "ready" && (
         <div className="absolute top-8 left-3 z-10 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-sm text-white font-bold text-sm md:text-base flex items-center gap-1.5">
-          <TrendingUp size={16} /> {floor}층
+          <TrendingUp size={16} /> {floor}{isEn ? ' floors' : '층'}
         </div>
       )}
     </div>

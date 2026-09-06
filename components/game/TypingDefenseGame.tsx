@@ -479,7 +479,7 @@ export const TypingDefenseGame: React.FC = () => {
               </p>
             </div>
             <button onClick={startGame} className="w-full py-3 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg sm:text-xl font-bold rounded-2xl transition-all shadow-xl shadow-blue-200 active:scale-95 shrink-0">
-              방어 시작
+              {t("방어 시작")}
             </button>
           </div>
         </div>
